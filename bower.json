@@ -1,0 +1,41 @@
+{
+  "name": "alt-importacao-csv",
+  "description": "Alterdata importação csv/xls",
+  "main": "gulpfile.js",
+  "authors": [
+    "dsn-nimbus <vhnogueira@outlook.com>"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "importação",
+    "csv",
+    "xls",
+    "planilha",
+    "angularjs",
+    "alterdata"
+  ],
+  "dependencies": {
+    "angular": ">=1.0.8",
+    "jquery": "~2.1.4",
+    "bootstrap": "~3.3.5",
+    "alt-modal-service": "^0.0.2",
+    "alt-select-service": "^0.0.6",
+    "alt-alerta-flutuante": "^0.0.15",
+    "lodash": "^4.17.10",
+    "moment": "^2.22.2",
+    "latinize": "^0.4.0",
+    "js-xlsx": "^0.13.0",
+    "alt-carregando-info": "^0.0.2"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "angular-mocks": "^1.7.0",
+    "angular-i18n": "^1.7.0"
+  }
+}
