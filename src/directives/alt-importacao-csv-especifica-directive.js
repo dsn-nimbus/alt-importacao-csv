@@ -449,8 +449,7 @@
           var _inicializarMapeamento = function() {
             self.importacao = new Importacao(self.campos);
 
-            var linhaTitulo = self.arquivo.linhas[0];
-            Object.keys(linhaTitulo).map((col, i) => {
+            self.arquivo.colunas.map((col, i) => {
               self.importacao.adicionarColuna(col, i);
             });
             self.importacao.validarMapa();

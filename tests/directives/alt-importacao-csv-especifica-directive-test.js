@@ -148,6 +148,18 @@ describe('altImportacaoCsvEspecifica', function() {
           "Categoria": "Receitas com vendas"
         }
       ],
+      "colunas": [
+        "Data da venda",
+        "Resumo de Operação",
+        "Descrição",
+        "Valor de Desconto (R$)",
+        "Taxa (%)",
+        "Tarifa (R$)",
+        "Data prevista de pagamento",
+        "Valor Líquido das Vendas",
+        "Pessoa",
+        "Categoria"
+      ],
       "extensao": "xlsx",
       "valido": true,
       "mensagem": ""

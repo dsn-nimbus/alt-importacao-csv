@@ -38,6 +38,24 @@
             }
           }
 
+          function obterColunas(sheet) {
+            var headers = [];
+            if (!sheet) {
+              return headers;
+            }
+            var range = XLSX.utils.decode_range(sheet['!ref']);
+            var C, R = range.s.r;
+            for (C = range.s.c; C <= range.e.c; ++C) {
+              var cell = sheet[XLSX.utils.encode_cell({c:C, r:R})];
+              var hdr = '';
+              if (cell && cell.t) {
+                hdr = XLSX.utils.format_cell(cell);
+              }
+              headers.push(hdr);
+            }
+            return headers;
+          }
+
           el.on('change', (changeEvent) => {
             carregandoService.exibe();
             var reader = new FileReader();
@@ -46,6 +64,7 @@
               var workbook = XLSX.read(bstr, {type:'binary'});
               var fileObject = workbookToJson(workbook);
               var linhas = fileObject[Object.keys(fileObject)[0]];
+              var colunas = obterColunas(workbook.Sheets[workbook.SheetNames[0]]);
               var path = $(el[0]).val();
               var nome = path ? path.split('\\')[2] : '';
               var extensao = nome.split('.')[1];
@@ -56,6 +75,7 @@
                 ngModel.$setViewValue({
                   nome: nome,
                   linhas: linhas,
+                  colunas: colunas,
                   extensao: extensao,
                   valido: valido,
                   mensagem: mensagem
