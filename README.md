@@ -2,11 +2,11 @@
 
 Componente alterdata para importação de planilhas carregadas pelo usuário. 
 
-- [x] **Csv, Xls, Xlsx** - Importação de planilhas excel.
+- [x] **Csv, Xls, Xlsx, Ods** - Importação de planilhas excel.
 
 - [x] **Importação genérica** - Personalização para leitura de objetos de qualquer entidade.
 
-- [x] **Validação interna** - Checagem automática dos tipos _Number, Decimal, String e Date_.
+- [x] **Validação interna** - Checagem automática dos tipos _Number, Decimal, String, Boolean e Date_.
 
 - [x] **Validação externa** - Configuração para validação personalizada com mensagens de erro e alertas.
 
@@ -134,7 +134,7 @@ let opcoesImportacao = new OpcoesImportacao({
 
 ¹ tipo - Tipos atualmente tratados são _Number_, _String_, _Date_, _Boolean_ e _Object_. Na ausência do parametro o campo é considerado _String_.
 
-² objetoAutoVinculo - Esta função por default aplica a regra de valor de campos de objeto, sem que o usuário precise selecionar objeto manualmente. Ou seja, regras do tipo "onde há valor 'x' use {nome: 'x', id: 1}" são aplicadas automáticamente, o componente traz a função padrão que aplica a regra quando o __valor__ do campo e a prpriedade __objetoReferencia__ do objeto forem "iguais" desconsiderando letras maiúsculas e minúsculas e acentos. Esse método pode ser personalizado por qualquer função que receba um valor (String) e retorne um objeto da lista (mesma lista fornecida em __objetoListagem__). Por exemplo, no caso de produto pode-se decidir por vincular automaticamente quando valor for igual também ao código de barras, etc.
+² objetoAutoVinculo - Esta função por default aplica a regra de valor de campos de objeto, sem que o usuário precise selecionar o objeto manualmente. Ou seja, regras do tipo "onde há valor 'x' use {nome: 'x', id: 1}" são aplicadas automaticamente, o componente traz a função padrão que aplica a regra quando o __valor__ do campo e a prpriedade __objetoReferencia__ do objeto forem "iguais" desconsiderando letras maiúsculas, minúsculas e acentos. Esse método pode ser personalizado por qualquer função que receba um valor (String) e retorne um objeto da lista (mesma lista fornecida em __objetoListagem__). Por exemplo, no caso de produto pode-se decidir por vincular automaticamente quando valor for igual também ao código de barras, etc.
 
 Mantendo entidade _Venda_ como exemplo:
 
