@@ -253,6 +253,7 @@
                               <th>Valor</th>
                               <th>Ocorrências</th>
                               <th>Regra</th>
+                              <th></th>
                             </tr>
                           </thead>
                           <tbody>
@@ -280,6 +281,13 @@
                                   ng-change="importacaoCsvCtrl.resumirRegrasDeValor()"
                                   ng-options="{{importacaoCsvCtrl.ngOptionsRegraDeCampo(campo)}}">
                                 </select>
+                              </td>
+                              <td class="alt-importacao-csv-rules-td-actions-field">
+                                <button type="button" class="btn btn-default pull-right" 
+                                  ng-disabled="!regra.objeto"
+                                  ng-click="importacaoCsvCtrl.limparRegra(campo, $index)">
+                                  Limpar
+                                </button>
                               </td>
                             </tr>
                           </tbody>
@@ -435,13 +443,14 @@
           '$scope',
           '$sce',
           '$timeout',
+          '$window',
           'AltModalService',
           'AltSelectService',
           'AltAlertaFlutuanteService',
           'AltImportacaoCsvCampoModel',
           'AltImportacaoCsvModel',
           'AltImportacaoCsvEvento',
-          function($rootScope, $scope, $sce, $timeout, modalService, selectService, alertaService, Campo, Importacao, evento) {
+          function($rootScope, $scope, $sce, $timeout, $window, modalService, selectService, alertaService, Campo, Importacao, evento) {
           var self = this;
 
           const ID_MODAL = '#alt-importacao-csv-modal';
@@ -453,7 +462,7 @@
           const CLASSE_BODY_WRAPPER = '.alt-importacao-csv-wrapper';
 
           var _ajustarJanela = function() {
-            var modalHeight = ($(window).height() - 60);
+            var modalHeight = ($($window).height() - 60);
             var bodyHeight = (modalHeight - 220);
             $(ID_MODAL).find('.modal-content').css('max-height', `${modalHeight}px`);
             $(ID_MODAL).find(CLASSE_BODY_WRAPPER).css('max-height', `${bodyHeight}px`);
@@ -470,8 +479,7 @@
           var _inicializarMapeamento = function() {
             self.importacao = new Importacao(self.campos);
 
-            var linhaTitulo = self.arquivo.linhas[0];
-            Object.keys(linhaTitulo).map((col, i) => {
+            self.arquivo.colunas.map((col, i) => {
               self.importacao.adicionarColuna(col, i);
             });
             self.importacao.validarMapa();
@@ -701,6 +709,19 @@
             }, 200);
           };
 
+          self.limparRegra = function(campo, indexRegra) {
+            var regra = campo.regrasDeValor[indexRegra];
+            regra.objeto = undefined;
+            var id = ID_COMUM_SELECTS_REGRAS + '-' + campo.chave + '-' + indexRegra;
+            if (!!campo.objetoCriarNovo) {
+              self.inicializarComboComOpcaoCriarNovo(id, campo.chave, indexRegra);
+            }
+            else {
+              selectService.inicializar(id);
+            }
+            self.resumirRegrasDeValor();
+          };
+
           self.inicializarComboComOpcaoCriarNovo = function(id, chaveCampo, indexRegra) {
             $timeout(() => {
               selectService.inicializarComOpcaoCriarNovo(id, {
@@ -796,6 +817,24 @@
             }
           }
 
+          function obterColunas(sheet) {
+            var headers = [];
+            if (!sheet) {
+              return headers;
+            }
+            var range = XLSX.utils.decode_range(sheet['!ref']);
+            var C, R = range.s.r;
+            for (C = range.s.c; C <= range.e.c; ++C) {
+              var cell = sheet[XLSX.utils.encode_cell({c:C, r:R})];
+              var hdr = '';
+              if (cell && cell.t) {
+                hdr = XLSX.utils.format_cell(cell);
+              }
+              headers.push(hdr);
+            }
+            return headers;
+          }
+
           el.on('change', (changeEvent) => {
             carregandoService.exibe();
             var reader = new FileReader();
@@ -804,6 +843,7 @@
               var workbook = XLSX.read(bstr, {type:'binary'});
               var fileObject = workbookToJson(workbook);
               var linhas = fileObject[Object.keys(fileObject)[0]];
+              var colunas = obterColunas(workbook.Sheets[workbook.SheetNames[0]]);
               var path = $(el[0]).val();
               var nome = path ? path.split('\\')[2] : '';
               var extensao = nome.split('.')[1];
@@ -814,6 +854,7 @@
                 ngModel.$setViewValue({
                   nome: nome,
                   linhas: linhas,
+                  colunas: colunas,
                   extensao: extensao,
                   valido: valido,
                   mensagem: mensagem
@@ -1002,6 +1043,9 @@
           this.valor = undefined;
           this.referencia = undefined;
           this.mensagens = [];
+          if (!this.dado) {
+            this.dado = '';
+          }
 
           switch (this.tipo) {
             case Object: this._validarObjeto(); break;

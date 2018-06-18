@@ -280,6 +280,9 @@
   width: 50px;
   text-align: right;
 }
+.alt-importacao-csv-rules-td-actions-field {
+  width: 50px;
+}
 
 .alt-importacao-csv-rules-title {
   font-size: 16px;

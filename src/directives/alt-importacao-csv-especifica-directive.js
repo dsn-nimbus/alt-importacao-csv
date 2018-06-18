@@ -231,6 +231,7 @@
                               <th>Valor</th>
                               <th>Ocorrências</th>
                               <th>Regra</th>
+                              <th></th>
                             </tr>
                           </thead>
                           <tbody>
@@ -258,6 +259,13 @@
                                   ng-change="importacaoCsvCtrl.resumirRegrasDeValor()"
                                   ng-options="{{importacaoCsvCtrl.ngOptionsRegraDeCampo(campo)}}">
                                 </select>
+                              </td>
+                              <td class="alt-importacao-csv-rules-td-actions-field">
+                                <button type="button" class="btn btn-default pull-right" 
+                                  ng-disabled="!regra.objeto"
+                                  ng-click="importacaoCsvCtrl.limparRegra(campo, $index)">
+                                  Limpar
+                                </button>
                               </td>
                             </tr>
                           </tbody>
@@ -677,6 +685,19 @@
                 });
               }
             }, 200);
+          };
+
+          self.limparRegra = function(campo, indexRegra) {
+            var regra = campo.regrasDeValor[indexRegra];
+            regra.objeto = undefined;
+            var id = ID_COMUM_SELECTS_REGRAS + '-' + campo.chave + '-' + indexRegra;
+            if (!!campo.objetoCriarNovo) {
+              self.inicializarComboComOpcaoCriarNovo(id, campo.chave, indexRegra);
+            }
+            else {
+              selectService.inicializar(id);
+            }
+            self.resumirRegrasDeValor();
           };
 
           self.inicializarComboComOpcaoCriarNovo = function(id, chaveCampo, indexRegra) {

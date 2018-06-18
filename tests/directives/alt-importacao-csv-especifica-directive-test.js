@@ -786,6 +786,61 @@ describe('altImportacaoCsvEspecifica', function() {
     });
   });
 
+  describe('limparRegra()', function() {
+    var opcoes;
+    beforeEach(function() {
+      _criarComponente();
+      opcoes = new _OpcoesImportacao({
+        labelTipo: 'vendas',
+        eventoCriacao: 'venda:lote_importacao_criado',
+        campos: _mockCampos,
+        validarLote: (lote) => {return new Promise((resolve) => {return resolve(lote)});},
+        gravarLote: () => {return new Promise((resolve) => {return {}});}
+      });
+      _importacaoEspecificaService.exibe(opcoes);
+      _ctrl.arquivo = _mockArquivo;
+      _ctrl.arquivoAlterado();
+      _directiveScope.$digest();
+
+      _ctrl.nextStep();
+      _ctrl.vincular('pessoa', 9);
+      _ctrl.vincular('categoria', 10);
+      _ctrl.vincular('dataEmissao', 1);
+      _ctrl.vincular('valor', 8);
+      _ctrl.vincular('observacao', 3);
+      _ctrl.nextStep();
+    });
+    describe('- campo com opção Criar Novo -', function() {
+      beforeEach(function() {
+        var regraJoaquim = _.find(_ctrl.importacao.campos[0].regrasDeValor, {valor: 'Joaquim Bryan Souza'});
+        regraJoaquim.objeto = _mockPessoas[0];
+        _ctrl.resumirRegrasDeValor();
+      });
+      it('deve atualizar o resumo das regras corretamente', function() {
+        expect(_ctrl.resumoRegrasDeValor.nulosInvalidos).toBe(0);
+        _ctrl.limparRegra(_ctrl.importacao.campos[0], _.findIndex(_ctrl.importacao.campos[0].regrasDeValor, {valor: 'Joaquim Bryan Souza'}));
+        expect(_ctrl.resumoRegrasDeValor.nulosInvalidos).toBe(1);
+      });
+      it('deve remover objeto da regra', function() {
+        _ctrl.limparRegra(_ctrl.importacao.campos[0], _.findIndex(_ctrl.importacao.campos[0].regrasDeValor, {valor: 'Joaquim Bryan Souza'}));
+        var regra = _.find(_ctrl.importacao.campos[0].regrasDeValor, {valor: 'Joaquim Bryan Souza'});
+        expect(regra.objeto).toBe(undefined);
+      });
+    });
+    describe('- campo sem opção Criar Novo -', function() {
+      it('deve atualizar o resumo das regras corretamente', function() {
+        expect(_ctrl.resumoRegrasDeValor.nulosInvalidos).toBe(1);
+        _ctrl.limparRegra(_ctrl.importacao.campos[1], _.findIndex(_ctrl.importacao.campos[1].regrasDeValor, {valor: 'Receitas com vendas'}));
+        expect(_ctrl.resumoRegrasDeValor.nulosInvalidos).toBe(2);
+      });
+      it('deve remover objeto da regra', function() {
+        _ctrl.limparRegra(_ctrl.importacao.campos[1], _.findIndex(_ctrl.importacao.campos[1].regrasDeValor, {valor: 'Receitas com vendas'}));
+        var regra = _.find(_ctrl.importacao.campos[1].regrasDeValor, {valor: 'Receitas com vendas'});
+        expect(regra.objeto).toBe(undefined);
+      });
+    });
+  });
+
   describe('criarNovoObjetoDeRegra()', function() {
     var opcoes;
     beforeEach(function(done) {
