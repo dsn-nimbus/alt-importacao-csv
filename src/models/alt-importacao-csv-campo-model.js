@@ -168,6 +168,9 @@
           this.valor = undefined;
           this.referencia = undefined;
           this.mensagens = [];
+          if (!this.dado) {
+            this.dado = '';
+          }
 
           switch (this.tipo) {
             case Object: this._validarObjeto(); break;

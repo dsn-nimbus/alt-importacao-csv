@@ -413,13 +413,14 @@
           '$scope',
           '$sce',
           '$timeout',
+          '$window',
           'AltModalService',
           'AltSelectService',
           'AltAlertaFlutuanteService',
           'AltImportacaoCsvCampoModel',
           'AltImportacaoCsvModel',
           'AltImportacaoCsvEvento',
-          function($rootScope, $scope, $sce, $timeout, modalService, selectService, alertaService, Campo, Importacao, evento) {
+          function($rootScope, $scope, $sce, $timeout, $window, modalService, selectService, alertaService, Campo, Importacao, evento) {
           var self = this;
 
           const ID_MODAL = '#alt-importacao-csv-modal';
@@ -431,7 +432,7 @@
           const CLASSE_BODY_WRAPPER = '.alt-importacao-csv-wrapper';
 
           var _ajustarJanela = function() {
-            var modalHeight = ($(window).height() - 60);
+            var modalHeight = ($($window).height() - 60);
             var bodyHeight = (modalHeight - 220);
             $(ID_MODAL).find('.modal-content').css('max-height', `${modalHeight}px`);
             $(ID_MODAL).find(CLASSE_BODY_WRAPPER).css('max-height', `${bodyHeight}px`);

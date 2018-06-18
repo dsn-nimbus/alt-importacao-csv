@@ -658,7 +658,6 @@ describe('CampoImportacao', function() {
         var bools = [
           '0',
           'false',
-          false,
           'NÃO',
           'n',
           'f',
