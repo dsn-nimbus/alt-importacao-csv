@@ -137,8 +137,8 @@
           };
         }
 
-        montarLote(linhas, loteAnterior) {
-          var lote = new LoteImportacao();
+        montarLote(linhas, nomeArquivo, loteAnterior) {
+          var lote = new LoteImportacao(nomeArquivo);
 
           linhas.forEach((r, i) => {
             var linha = i + 2;

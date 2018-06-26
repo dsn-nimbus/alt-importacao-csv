@@ -13,16 +13,21 @@ Componente alterdata para importação de planilhas carregadas pelo usuário.
 ***
 ## Funcionamento
 
-O usuário pode carregar um documento, mapear as colunas da planilha aos campos da entidade e validar os itens para importação, através de um passo a passo simplificado:
+Através de uma modal (alt-modal-service) o usuário pode carregar um arquivo do computador, mapear as colunas da planilha aos campos da entidade e validar os itens para importação, através de um passo a passo simplificado:
 
 1. **Seleção do arquivo**
 2. **Mapeamento** - Coluna ↔ Campo
 3. **Regras de valor** - Campos de objetos são vinculados à valores das respectivas colunas mapeadas formando "regras" do tipo: onde há valor 'x' use o objeto {nome: 'X', id: 1} do sistema.
-4. **Revisão** - Dados submetidos à validação são exibidos agrupados pelas linhas do arquivo com status, mensagens de erro, warnings e opção de "desconsiderar item".
+4. **Revisão** - Dados submetidos à validação são exibidos agrupados pelas linhas do arquivo com status, mensagens de erro, warnings e opção de "desconsiderar item". Estando tudo ok basta clicar em "Gravar" para salvar o lote para processamento.
 
-O passo a passo de importação é disponibilizado através de uma modal (alt-modal-service).
+* _Inicialmente o componente foi elaborado para atender importações **assíncronas**, ou seja, ao concluir o "gravar lote" a modal é fechada. A visualização do resultado da importação é disponivel em um outro evento de abertura da modal com novos parâmetros._
 
-### Validação interna
+5. **Visualização:** São listados os itens de lote mantendo o contrato de mensagens de erro, warning e status da etapa de "Revisão". 
+Podendo ser acrescidas mensagens de erro e alteração de status por erros ocorridos no processamento. É disponibilizado também, um botão para
+editar o item importado na modal de seu próprio CRUD.
+
+***
+## Validação
 
 Campo de texto - Aceitos valores com até 255 caracteres.
 
@@ -89,13 +94,16 @@ importacaoEspecificaService.exibe(opcoesImportacao); // opcoesImportacao - objet
 
 ### OpcoesImportacao - _AltImportacaoCsvOpcoesModel_ - parametros:
 
-| Parametro     | Tipo     | Obrigatório | Descrição                                                                                 |
-| ------------- | -------- | ----------- | ----------------------------------------------------------------------------------------- |
-| labelTipo     | String   | Sim         | label da entidade.                                                                        |
-| campos        | Array    | Sim         | Lista de campos da entidade.                                                              |
-| validarLote   | Function | Sim         | Submete lote as regras externas ao componente. Deve retornar _promise_ da funcionalidade. |
-| gravarLote    | Function | Sim         | Grava o lote de objetos. Deve retornar _promise_ da funcionalidade.                       |
-| eventoCriacao | String   | Sim         | Evento que será transmitido na conclusão com resposta da gravação.                        |
+| Parametro         | Tipo     | Obrigatório         | Descrição                                                                                 |
+| ----------------- | -------- | ------------------- | ----------------------------------------------------------------------------------------- |
+| labelTipo         | String   | Sim                 | Label da entidade no plural.                                                              |
+| campos            | Array    | Sim                 | Lista de campos da entidade.                                                              |
+| validarLote       | Function | Quando importação   | Submete lote as regras externas ao componente. Deve retornar _promise_ da funcionalidade. |
+| gravarLote        | Function | Quando importação   | Grava o lote de objetos. Deve retornar _promise_ da funcionalidade.                       |
+| eventoCriacao     | String   | Quando importação   | Evento que será transmitido na conclusão com resposta da gravação.                        |
+| visualizacao      | Boolean  | Não                 | Define se componente irá detalhar um lote já processado ou criar nova importação.          |
+| labelTipoSingular | String   | Quando visualização | Label da entidade no singular.                                                            |
+| loteProcessado    | Array    | Quando visualização | Lote de itens com resumo para detalhamento da importação.                                  |
 
 Usando como exemplo uma importação de _Vendas_:
 
@@ -107,6 +115,27 @@ let opcoesImportacao = new OpcoesImportacao({
   gravarLote: gravarLote,
   eventoCriacao: EVENTO_IMPORTACAO_CRIADA
 });
+
+importacaoEspecificaService.exibe(self.opcoesImportacao); // AltImportacaoCsvEspecificaService
+````
+Para detalhamento de documento já importado:
+````javascript
+/*
+  Dentro de cada item importado com sucesso devem ser inclusos os parametros para abrir modal do objeto.
+*/
+loteProcessado.itens.forEach((item) => {
+  item.editar = (idVenda, objeto) => {}; // Deve abrir modal. Recebe o "idObjeto" e o "objeto" do item de lote.
+  item.eventoEdicaoConcluida = IMPORTACAO_VENDA_EDICAO_CONCLUIDA; // Evento que será transmitido ao fechar a modal do objeto.
+});
+let opcoesImportacao = new OpcoesImportacao({
+  labelTipo: 'lançamentos',
+  labelTipoSingular: 'lançamento',
+  campos: campos,
+  visualizacao: true,
+  loteProcessado: loteProcessado
+});
+
+importacaoEspecificaService.exibe(self.opcoesImportacao); // AltImportacaoCsvEspecificaService
 ````
 
 ### CampoImportacao - _AltImportacaoCsvCampoModel_ - parametros:
@@ -224,14 +253,14 @@ const validarLote = (lote) => {
     resolve(lote);
   };
 };
-const gravarLote = (lote, nomeArquivo) => { // Função recebe lote de objetos e nome do documento de origem da importação.
+const gravarLote = (lote) => {
   return $q((resolve) => {
     let loteGenerico = {};
-    loteGenerico.nomeArquivo = nomeArquivo;
+    loteGenerico.nomeArquivo = lote.nomeArquivo;
     loteGenerico.itens = [];
     lote.itens.forEach((item) => {
       const venda = item.objeto;
-      const itemDeImportacao = {conteudo: venda, linha: item.linha};
+      const itemDeImportacao = {objeto: venda, linha: item.linha};
       /*
         Aqui vale a regra de contrato estabelecida com o back-end para gravação do lote.
       */

@@ -4,11 +4,12 @@
   ng.module('alt.importacao-csv')
     .factory('AltImportacaoCsvLoteModel', [function() {
       class LoteImportacao {
-        constructor() {
+        constructor(nomeArquivo) {
           this.itens = [];
           this.erros = 0;
           this.conflitos = 0;
           this.validos = 0;
+          this.nomeArquivo = nomeArquivo;
         }
 
         resumir() {
