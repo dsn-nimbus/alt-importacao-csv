@@ -527,7 +527,7 @@
             self.lote = new Lote(lote.nomeArquivo);
             self.lote.itens = lote.itens;
             self.lote.resumir();
-            self.dataProcessado = moment(self.lote.dataProcessado).format('LLL');
+            self.dataProcessado = moment(lote.dataProcessado).format('LLL');
           };
 
           var _inicializar = function(opcoes) {
@@ -764,7 +764,7 @@
             if (typeof item.editar === 'function') {
               modalService.close(ID_MODAL);
               item.editar(item.idObjeto, item.objeto);
-              $scope.$on(item.eventoEdicaoConcluida, function(evento, obj) {
+              $scope.$on(item.eventoEdicaoConcluida, () => {
                 modalService.open(ID_MODAL);
               });
             }

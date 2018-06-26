@@ -46,13 +46,14 @@ Dependências:
 - [alt-alerta-flutuante-service](https://github.com/dsn-nimbus/alt-alerta-flutuante)
 - [alt-carregando-info](https://github.com/dsn-nimbus/alt-carregando-info/blob/master/src/alt-carregando-info.js)
 - [js-xlsx](https://github.com/sheetjs/js-xlsx)
+- [select2](https://github.com/select2/select2)
 - [latinize](https://github.com/dundalek/latinize)
 - [lodash](https://github.com/lodash/lodash)
 - [moment](https://github.com/moment/moment)
 
 Instalação dependencias com bower:
 ````
-$ bower install alt-modal-service alt-select-service alt-alerta-flutuante alt-carregando-info js-xlsx latinize lodash moment
+$ bower install alt-modal-service alt-select-service alt-alerta-flutuante alt-carregando-info js-xlsx select2 latinize lodash moment
 ````
 Instalação com bower:
 ````

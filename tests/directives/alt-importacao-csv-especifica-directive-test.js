@@ -349,6 +349,192 @@ describe('altImportacaoCsvEspecifica', function() {
 
   });
 
+  describe('_visualizarProcessado()', function() {
+    var opcoes, mockLoteProcessado;
+    beforeEach(function() {
+      mockLoteProcessado = {
+        dataProcessado: new Date(),
+        itens: [
+          {
+            idObjeto: 85,
+            resumo: {
+              campos: [
+                {
+                  valido: true,
+                  chave: "pessoa",
+                  dado: "",
+                  referencia: "Joaquim do Teste Unitário",
+                  template: {
+                    width: 12,
+                    label: "Pessoa"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "categoria",
+                  dado: "",
+                  referencia: "Receitas com vendas",
+                  template: {
+                    width: 12,
+                    label: "Categoria"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "dataEmissao",
+                  dado: "18/04/18",
+                  referencia: "18/04/2018",
+                  template: {
+                    width: 4,
+                    label: "Data Emissão"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "valor",
+                  dado: "50.89",
+                  referencia: "R$ 50,89",
+                  template: {
+                    width: 4,
+                    label: "Valor Total"
+                  }
+                }
+              ]
+            },
+            possuiErro: false,
+            possuiConflito: false
+          },
+          {
+            resumo: {
+              campos: [
+                {
+                  valido: true,
+                  chave: "pessoa",
+                  dado: "",
+                  referencia: "Joaquim do Teste Unitário",
+                  template: {
+                    width: 12,
+                    label: "Pessoa"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "categoria",
+                  dado: "",
+                  referencia: "Receitas com vendas",
+                  template: {
+                    width: 12,
+                    label: "Categoria"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "dataEmissao",
+                  dado: "18/04/18",
+                  referencia: "18/04/2018",
+                  template: {
+                    width: 4,
+                    label: "Data Emissão"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "valor",
+                  dado: "50.89",
+                  referencia: "R$ 50,89",
+                  template: {
+                    width: 4,
+                    label: "Valor Total"
+                  }
+                }
+              ],
+              mensagens: [
+                {
+                  textoHtml: 'Teste <i>aviso</i> <b>texto</b> em <u>html</u>!'
+                }
+              ]
+            },
+            possuiErro: true,
+            possuiConflito: false
+          },
+          {
+            idObjeto: 85,
+            resumo: {
+              campos: [
+                {
+                  valido: true,
+                  chave: "pessoa",
+                  dado: "",
+                  referencia: "Joaquim do Teste Unitário",
+                  template: {
+                    width: 12,
+                    label: "Pessoa"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "categoria",
+                  dado: "",
+                  referencia: "Receitas com vendas",
+                  template: {
+                    width: 12,
+                    label: "Categoria"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "dataEmissao",
+                  dado: "18/04/18",
+                  referencia: "18/04/2018",
+                  template: {
+                    width: 4,
+                    label: "Data Emissão"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "valor",
+                  dado: "50.89",
+                  referencia: "R$ 50,89",
+                  template: {
+                    width: 4,
+                    label: "Valor Total"
+                  }
+                }
+              ],
+              mensagens: [
+                {
+                  texto: 'Teste aviso!'
+                }
+              ]
+            },
+            possuiErro: false,
+            possuiConflito: true
+          }
+        ]
+      };
+      _criarComponente();
+      opcoes = new _OpcoesImportacao({
+        labelTipo: 'vendas',
+        labelTipoSingular: 'venda',
+        campos: _mockCampos,
+        visualizacao: true,
+        loteProcessado: mockLoteProcessado
+      });
+
+      _importacaoEspecificaService.exibe(opcoes);
+    });
+    it('deve criar lote com os itens do processado', function() {
+      expect(_ctrl.lote).toBeDefined();
+      expect(_ctrl.lote.itens).toEqual(mockLoteProcessado.itens);
+    });
+    it('deve resumir corretamente o lote', function() {
+      expect(_ctrl.lote.erros).toBe(1);
+      expect(_ctrl.lote.validos).toBe(1);
+      expect(_ctrl.lote.conflitos).toBe(1);
+    });
+  });
+
   describe('arquivoAlterado()', function() {
     var opcoes, _mockArquivo2;
     beforeEach(function() {
@@ -675,6 +861,34 @@ describe('altImportacaoCsvEspecifica', function() {
     });
   });
 
+  describe('vincular()', function() {
+    var opcoes;
+    beforeEach(function() {
+      _criarComponente();
+      opcoes = new _OpcoesImportacao({
+        labelTipo: 'vendas',
+        eventoCriacao: 'venda:lote_importacao_criado',
+        campos: _mockCampos,
+        validarLote: (lote) => {return new Promise((resolve) => {return resolve(lote)});},
+        gravarLote: () => {return new Promise((resolve) => {return {}});}
+      });
+      _importacaoEspecificaService.exibe(opcoes);
+      _ctrl.arquivo = _mockArquivo;
+      _ctrl.arquivoAlterado();
+      _directiveScope.$digest();
+
+      _ctrl.resumoRegrasDeValor = null;
+      _ctrl.nextStep();
+      _ctrl.vincular('pessoa', 9);
+      _directiveScope.$digest();
+      _timeout.flush();
+    });
+    it('deve vincular corretamente a coluna ao campo', function() {
+      expect(_ctrl.importacao.campos[0].coluna).toBeDefined();
+      expect(_ctrl.importacao.campos[0].coluna.nome).toBe('Pessoa');
+    });
+  });
+
   describe('desvincular()', function() {
     var opcoes;
     beforeEach(function() {
@@ -842,7 +1056,7 @@ describe('altImportacaoCsvEspecifica', function() {
   });
 
   describe('criarNovoObjetoDeRegra()', function() {
-    var opcoes;
+    var opcoes, objetoCriado;
     beforeEach(function(done) {
       _criarComponente();
       opcoes = new _OpcoesImportacao({
@@ -865,7 +1079,14 @@ describe('altImportacaoCsvEspecifica', function() {
       _ctrl.vincular('observacao', 3);
       _ctrl.nextStep();
 
+      _ctrl.importacao.campos[0].objetoCriarNovo = {
+        funcao: () => {
+          _rootScope.$broadcast('importacao_test_unitario:objeto_criado', {teste: 'teste'});
+        },
+        eventoAtualizacao: 'importacao_test_unitario:objeto_criado'
+      };
       _ctrl.criarNovoObjetoDeRegra('pessoa', 0);
+      _timeout.flush();
       done();
     });
     it('deve fechar modal de importacao', function() {
@@ -954,8 +1175,198 @@ describe('altImportacaoCsvEspecifica', function() {
         setTimeout(() => { done(); }, 100);
       }, 100);
     });
-    it('deve alguma coisa', function() {
+    it('deve deve transmitir evento corretamente', function() {
       expect(_rootScope.$broadcast).toHaveBeenCalledWith('venda:lote_importacao_criado', 'lote salvo com sucesso');
+    });
+  });
+
+  describe('editarObjeto()', function() {
+    var opcoes, mockLoteProcessado, itemEditado;
+    beforeEach(function() {
+      mockLoteProcessado = {
+        dataProcessado: new Date(),
+        itens: [
+          {
+            idObjeto: 85,
+            resumo: {
+              campos: [
+                {
+                  valido: true,
+                  chave: "pessoa",
+                  dado: "",
+                  referencia: "Joaquim do Teste Unitário",
+                  template: {
+                    width: 12,
+                    label: "Pessoa"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "categoria",
+                  dado: "",
+                  referencia: "Receitas com vendas",
+                  template: {
+                    width: 12,
+                    label: "Categoria"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "dataEmissao",
+                  dado: "18/04/18",
+                  referencia: "18/04/2018",
+                  template: {
+                    width: 4,
+                    label: "Data Emissão"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "valor",
+                  dado: "50.89",
+                  referencia: "R$ 50,89",
+                  template: {
+                    width: 4,
+                    label: "Valor Total"
+                  }
+                }
+              ]
+            },
+            possuiErro: false,
+            possuiConflito: false,
+            editar: () => {
+              itemEditado = true;
+              _rootScope.$broadcast('teste_importacao_edicao_concluida');
+            },
+            eventoEdicaoConcluida: 'teste_importacao_edicao_concluida'
+          },
+          {
+            resumo: {
+              campos: [
+                {
+                  valido: true,
+                  chave: "pessoa",
+                  dado: "",
+                  referencia: "Joaquim do Teste Unitário",
+                  template: {
+                    width: 12,
+                    label: "Pessoa"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "categoria",
+                  dado: "",
+                  referencia: "Receitas com vendas",
+                  template: {
+                    width: 12,
+                    label: "Categoria"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "dataEmissao",
+                  dado: "18/04/18",
+                  referencia: "18/04/2018",
+                  template: {
+                    width: 4,
+                    label: "Data Emissão"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "valor",
+                  dado: "50.89",
+                  referencia: "R$ 50,89",
+                  template: {
+                    width: 4,
+                    label: "Valor Total"
+                  }
+                }
+              ],
+              mensagens: [
+                {
+                  textoHtml: 'Teste <i>aviso</i> <b>texto</b> em <u>html</u>!'
+                }
+              ]
+            },
+            possuiErro: true,
+            possuiConflito: false
+          },
+          {
+            idObjeto: 85,
+            resumo: {
+              campos: [
+                {
+                  valido: true,
+                  chave: "pessoa",
+                  dado: "",
+                  referencia: "Joaquim do Teste Unitário",
+                  template: {
+                    width: 12,
+                    label: "Pessoa"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "categoria",
+                  dado: "",
+                  referencia: "Receitas com vendas",
+                  template: {
+                    width: 12,
+                    label: "Categoria"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "dataEmissao",
+                  dado: "18/04/18",
+                  referencia: "18/04/2018",
+                  template: {
+                    width: 4,
+                    label: "Data Emissão"
+                  }
+                },
+                {
+                  valido: true,
+                  chave: "valor",
+                  dado: "50.89",
+                  referencia: "R$ 50,89",
+                  template: {
+                    width: 4,
+                    label: "Valor Total"
+                  }
+                }
+              ],
+              mensagens: [
+                {
+                  texto: 'Teste aviso!'
+                }
+              ]
+            },
+            possuiErro: false,
+            possuiConflito: true
+          }
+        ]
+      };
+      _criarComponente();
+      opcoes = new _OpcoesImportacao({
+        labelTipo: 'vendas',
+        labelTipoSingular: 'venda',
+        campos: _mockCampos,
+        visualizacao: true,
+        loteProcessado: mockLoteProcessado
+      });
+
+      _importacaoEspecificaService.exibe(opcoes);
+      _rootScope.$digest();
+      _ctrl.editarObjeto(_ctrl.lote.itens[0]);
+      _timeout.flush();
+      _rootScope.$digest();
+    });
+    it('deve fechar a modal do lote', function() {
+      expect(_modalService.close).toHaveBeenCalledWith('#alt-importacao-csv-modal');
+      expect(itemEditado).toBe(true);
     });
   });
 

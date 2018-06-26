@@ -21,6 +21,7 @@ var _karma = function(config)
       'bower_components/angular-i18n/angular-locale_pt-br.js',
       'bower_components/angular-mocks/angular-mocks.js',
       'bower_components/jquery/dist/jquery.js',
+      'bower_components/select2/dist/js/select2.js',
       'bower_components/bootstrap/dist/js/bootstrap.js',
       'bower_components/alt-select-service/dist/alt-select-service.js',
       'bower_components/alt-modal-service/dist/alt-modal-service.js',

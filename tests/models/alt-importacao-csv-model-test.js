@@ -501,7 +501,7 @@ describe('Importacao', function() {
         spyOn(campo, 'validar');
       });
       it('não deve validar o campo', function() {
-        importacao.montarLote(mockLinhas);
+        importacao.montarLote(mockLinhas, 'arquivoTest.xlsx');
         expect(campo.validar).not.toHaveBeenCalled();
       });
     });
@@ -517,17 +517,17 @@ describe('Importacao', function() {
       });
       it('deve validar o campo', function() {
         spyOn(campo, 'validar');
-        lote = importacao.montarLote(mockLinhas);
+        lote = importacao.montarLote(mockLinhas, 'arquivo-teste.xlsx');
 
         expect(campo.validar).toHaveBeenCalled();
       });
       it('deve atribuir o dado da linha no item', function() {
-        lote = importacao.montarLote(mockLinhas);
+        lote = importacao.montarLote(mockLinhas, 'arquivo-teste.xlsx');
 
         expect(mockLinhas[2]['Ps']).toBe(lote.itens[2]['objeto']['observacoes']);
       });
       it('deve atribuir status corretamente', function() {
-        lote = importacao.montarLote(mockLinhas);
+        lote = importacao.montarLote(mockLinhas, 'arquivo-teste.xlsx');
 
         expect(lote.itens[2].possuiErro).toBe(false);
         expect(lote.itens[2].possuiConflito).toBe(false);
@@ -545,12 +545,12 @@ describe('Importacao', function() {
       });
       it('deve validar o campo', function() {
         spyOn(campo, 'validar');
-        lote = importacao.montarLote(mockLinhas);
+        lote = importacao.montarLote(mockLinhas, 'arquivo-teste.xlsx');
 
         expect(campo.validar).toHaveBeenCalled();
       });
       it('deve atribuir status corretamente', function() {
-        lote = importacao.montarLote(mockLinhas);
+        lote = importacao.montarLote(mockLinhas, 'arquivo-teste.xlsx');
 
         expect(lote.itens[2].possuiErro).toBe(true);
         expect(lote.itens[2].possuiConflito).toBe(false);
@@ -572,7 +572,7 @@ describe('Importacao', function() {
           'Product': 'Notebook ABC Dell',
           'Date': '11/67/2018',
           'Price': '2299.99'
-        }]);
+        }], 'arquivo-teste.xlsx');
 
         expect(campo.validar).toHaveBeenCalled();
       });
@@ -581,7 +581,7 @@ describe('Importacao', function() {
           'Product': 'Notebook ABC Dell',
           'Date': '11/67/2018',
           'Price': '2299.99'
-        }]);
+        }], 'arquivo-teste.xlsx');
 
         expect(lote.itens[0].possuiErro).toBe(true);
         expect(lote.itens[0].possuiConflito).toBe(false);
@@ -603,7 +603,7 @@ describe('Importacao', function() {
           'Product': 'Notebook ABC Dell',
           'Date': '11/07/2018',
           'Price': '2299.99'
-        }]);
+        }], 'arquivo-teste.xlsx');
 
         expect(campo.validar).toHaveBeenCalled();
       });
@@ -612,7 +612,7 @@ describe('Importacao', function() {
           'Product': 'Notebook ABC Dell',
           'Date': '11/07/2018',
           'Price': '2299.99'
-        }]);
+        }], 'arquivo-teste.xlsx');
 
         expect(lote.itens[0].possuiErro).toBe(false);
         expect(lote.itens[0].possuiConflito).toBe(false);
@@ -635,7 +635,7 @@ describe('Importacao', function() {
           'Product': 'Notebook ABC Dell',
           'Date': '11/67/2018',
           'Price': '2299.99'
-        }]);
+        }], 'arquivo-teste.xlsx');
 
         expect(campo.validar).toHaveBeenCalled();
       });
@@ -644,7 +644,7 @@ describe('Importacao', function() {
           'Product': 'Notebook ABC Dell',
           'Date': '11/67/2018',
           'Price': '2299.99'
-        }]);
+        }], 'arquivo-teste.xlsx');
 
         expect(lote.itens[0].possuiErro).toBe(false);
         expect(lote.itens[0].possuiConflito).toBe(true);
@@ -671,7 +671,7 @@ describe('Importacao', function() {
           'Date': '11/67/2018',
           'Price': '2299:99',
           'Ps': 'teste'
-        }]);
+        }], 'arquivo-teste.xlsx');
 
         expect(lote.itens[0].possuiErro).toBe(true);
         expect(lote.itens[0].possuiConflito).toBe(false); // Item possui conflito, mas, como tembém possui erro, o status de erro prevalece.
@@ -693,7 +693,7 @@ describe('Importacao', function() {
           'Product': 'Notebook ABC Dell',
           'Date': '11/67/2018',
           'Price': '2299.99'
-        }], loteAnterior);
+        }], 'arquivo-teste.xlsx', loteAnterior);
       });
       it('deve atribuir status corretamente', function() {
         expect(lote.itens[0].possuiErro).toBe(true);
