@@ -208,8 +208,6 @@ describe('altImportacaoCsvEspecifica', function() {
 
       _importacaoEspecificaService.exibe(opcoes);
 
-      expect(_ctrl.campoSelecionado).toBe(null);
-      expect(_ctrl.colunaSelecionada).toBe(null);
       expect(_ctrl.arquivoAnterior).toBe(null);
       expect(_ctrl.arquivo).toBe(null);
       expect(_ctrl.lote).toBe(null);
@@ -303,8 +301,7 @@ describe('altImportacaoCsvEspecifica', function() {
       _ctrl.nextStep();
     });
     it('deve manter vinculo dos campos', function() {
-      expect(_ctrl.importacao.campos[0].coluna).toBeDefined();
-      expect(_ctrl.importacao.campos[0].coluna.numero).toBe(9);
+      expect(_ctrl.importacao.campos[0].coluna).toBe(9);
     });
   });
 
@@ -884,8 +881,7 @@ describe('altImportacaoCsvEspecifica', function() {
       _timeout.flush();
     });
     it('deve vincular corretamente a coluna ao campo', function() {
-      expect(_ctrl.importacao.campos[0].coluna).toBeDefined();
-      expect(_ctrl.importacao.campos[0].coluna.nome).toBe('Pessoa');
+      expect(_ctrl.importacao.campos[0].coluna).toBe(9);
     });
   });
 

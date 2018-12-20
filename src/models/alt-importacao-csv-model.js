@@ -37,23 +37,30 @@
           this.colunas.push({
             nome: nome,
             numero: index + 1,
-            titulo: 'Coluna ' + (index + 1) + ' – ' + nome
+            titulo: 'Coluna ' + (index + 1) + ' – ' + nome,
+            campos: []
           });
         }
 
-        vincular(campo, coluna) {
-          var campoObj = _.find(this.campos, {chave: campo});
-          if (!!campoObj) {
-            campoObj.coluna = _.find(this.colunas, {numero: coluna});
+        vincular(chaveCampo, numeroColuna) {
+          var campo = _.find(this.campos, {chave: chaveCampo});
+          var coluna = _.find(this.colunas, {numero: numeroColuna});
+          if (!!campo && !!coluna) {
+            campo.coluna = numeroColuna;
+            coluna.campos.push(campo);
             this.validarMapa();
           }
         }
 
-        desvincular(campo) {
-          var campoObj = _.find(this.campos, {chave: campo});
-          campoObj.coluna = undefined;
-          campoObj.regrasDeValor = undefined;
-          this.validarMapa();
+        desvincular(chaveCampo) {
+          var campo = _.find(this.campos, {chave: chaveCampo});
+          var coluna = _.find(this.colunas, {numero: campo.coluna});
+          if (!!campo && !!coluna) {
+            _.remove(coluna.campos, {chave: campo.chave});
+            campo.coluna = undefined;
+            campo.regrasDeValor = undefined;
+            this.validarMapa();
+          }
         }
 
         aplicarRegrasDeValor(linhas) {
@@ -62,7 +69,8 @@
               return;
             }
             if (!!campo.coluna) {
-              var distinct = _.groupBy(linhas, (r) => { return r[campo.coluna.nome]; });
+              var coluna = _.find(this.colunas, {numero: campo.coluna});
+              var distinct = _.groupBy(linhas, (r) => { return r[coluna.nome]; });
               campo.regrasDeValor = Object.keys(distinct).map((key) => {
                 return {
                   valor: key,
@@ -149,7 +157,11 @@
                 return;
               }
 
-              campo.dado = campo.coluna ? r[campo.coluna.nome] : undefined;
+              campo.dado = undefined;
+              if (!!campo.coluna) {
+                var coluna = _.find(this.colunas, {numero: campo.coluna});
+                campo.dado = r[coluna.nome];
+              }
 
               campo.validar();
 

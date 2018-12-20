@@ -152,8 +152,8 @@ describe('Importacao', function() {
       beforeEach(function() {
         importacao.vincular('dataVenda', 77);
       });
-      it('deve invalidar mapa', function() {
-        expect(importacao.mapaInvalido).toBe(true);
+      it('não deve vincular', function() {
+        expect(_.find(importacao.campos, {chave: 'dataVenda'}).coluna).toBeUndefined();
       });
     });
     describe('- campo válido (não Object), coluna valida -', function() {

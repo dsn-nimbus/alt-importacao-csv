@@ -74,6 +74,7 @@
 
 .alt-importacao-csv-wrapper {
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .alt-importacao-csv-wrapper .text-success {
@@ -329,4 +330,57 @@
 
 .alt-importacao-csv-lbl-processado {
   padding-top: 8px;
+}
+
+.alt-importacao-csv-planilha-mapeamento {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  height: 237px;
+}
+
+.alt-importacao-csv-planilha-mapeamento thead tr th .select2 {
+  width: 100% !important;
+}
+
+.alt-importacao-csv-planilha-mapeamento thead tr th,
+.alt-importacao-csv-planilha-mapeamento tbody tr td {
+  border: 1px solid #ddd;
+  white-space: nowrap;
+  vertical-align: top;
+}
+.alt-importacao-csv-planilha-mapeamento tbody tr:hover {
+  background-color: transparent !important;
+}
+
+.alt-importacao-csv-planilha-mapeamento tbody.cabecalho-planilha tr td {
+  /* background-color: rgb(96, 29, 108); */
+  /* background-color: rgb(90, 152, 102); */
+  background-color: rgb(78, 141, 150);
+  color: #fff;
+  font-weight: 700;
+}
+
+.alt-importacao-csv-lb-campo-mapeado {
+  position: relative;
+  color: #333;
+}
+.alt-importacao-csv-lb-campo-mapeado:hover span{
+  display: block;
+}
+.alt-importacao-csv-lb-campo-mapeado span {
+  position: absolute;
+  right: 0;
+  top: -2px;
+  font-size: 15px;
+  background-color: #d8d8d8;
+  width: 20px;
+  height: 20px;
+  line-height: 19px;
+  text-align: center;
+  border-radius: 10px;
+  display: none;
+}
+.alt-importacao-csv-lb-campo-mapeado span:hover {
+  cursor: pointer;
+  color: #222;
 }
