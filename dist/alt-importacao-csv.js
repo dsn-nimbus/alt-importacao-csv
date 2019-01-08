@@ -94,17 +94,17 @@
               <form name="importacaoCsvCtrl.formStepOne">
                 <div class="row">
                   <div class="col-xs-12">
-                    <div class="alt-importacao-csv-wizard-title">Selecione o arquivo</div>
+                    <div class="alt-importacao-csv-wizard-title">Importar dados</div>
                     <p class="alt-importacao-csv-wizard-obs alt-espacamento-top">
-                      <i class="fa fa-info-circle text-secondary"></i>&nbsp; São aceitos documentos de extensão xls, xlsx, ods ou csv.
+                      Selecione o arquivo para importação com extensão xls, xlsx, ods ou csv.
                     <p>
-                    <div class="alt-espacamento-top">
-                        <div class="anexos-input-file-escondido-container">
-                          <button type="button" class="col-xs-12 col-sm-3 btn btn-default alt-espacamento-bottom alt-espacamento-top anexos-input-file-fake">
-                            <i class="fa fa-file-excel-o"></i>&nbsp; Selecionar arquivo
+                    <div class="alt-espacamento-top clearfix">
+                        <div class="col-xs-12 col-sm-4 col-sm-offset-4 anexos-input-file-escondido-container text-center">
+                          <button type="button" class="btn btn-block btn-default alt-espacamento-bottom alt-espacamento-top anexos-input-file-fake">
+                            Selecionar arquivo
                           </button>
 
-                          <input type="file" class="anexos-input-file-real alt-hand col-xs-12 col-sm-3 ng-isolate-scope" 
+                          <input type="file" class="anexos-input-file-real alt-hand ng-isolate-scope" 
                             ng-model="importacaoCsvCtrl.arquivo" 
                             id="alt-importacao-csv-input-file-step1"
                             accept=".xls,.xlsx,.csv,.ods"
@@ -112,6 +112,8 @@
                             ng-change="importacaoCsvCtrl.arquivoAlterado(0)"
                             required>
                         </div>
+                    </div>
+                    <div class="text-center">
                         <span ng-show="importacaoCsvCtrl.arquivo.valido" class="text-success alt-importacao-csv-input-ckeck">
                           <i class="fa fa-check-circle"></i>&nbsp; {{importacaoCsvCtrl.arquivo.nome}}
                         </span>
@@ -130,7 +132,8 @@
             <div class="modal-body">
               <div class="row">
                 <div class="col-xs-12">
-                  <div class="alt-importacao-csv-wizard-title">Mapeie os campos com as colunas do arquivo</div>
+                  <div class="alt-importacao-csv-wizard-title">Configurar colunas</div>
+                  <div class="alt-espacamento-bottom">Selecione o(s) campo(s) do ERP4ME correspondente(s) a cada coluna do arquivo para realizar a importação</div>
                 </div>
               </div>
  
@@ -198,11 +201,13 @@
           <div ng-show="importacaoCsvCtrl.steps[2].active"
             class="alt-importacao-csv-wizard-step alt-espacamento-bottom">
             <div class="modal-body">
-              <div class="row">
+              <div class="row alt-espacamento-bottom">
                 <div class="col-xs-12">
-                  <div class="alt-importacao-csv-wizard-title">Configure as regras de valor para os campos de cadastros</div>
+                  <div class="alt-importacao-csv-wizard-title">Configurar dados</div>
+                  <div class="alt-espacamento-bottom">Configure os dados a importar vinculando os valores do arquivo aos valores correspondentes no cadastro do ERP4ME</div>
                 </div>
               </div>
+              <!--
               <div class="row alt-espacamento-bottom">
                 <div class="col-md-12 alt-espacamento-bottom">
                   <div class="btn-group" data-toggle="buttons" id="alt-importacao-csv-btn-group-rules">
@@ -231,6 +236,7 @@
                   </div>
                 </div>
               </div>
+              -->
               <div class="row alt-espacamento-top">
                 <div class="col-xs-12 alt-importacao-csv-rules-field" 
                   ng-repeat="campo in importacaoCsvCtrl.importacao.campos track by campo.chave" 
@@ -254,9 +260,9 @@
                         <thead>
                           <tr>
                             <th class="status"></th>
-                            <th>Valor</th>
+                            <th>Valor arquivo</th>
                             <th>Ocorrências</th>
-                            <th>Regra</th>
+                            <th>Valor ERP4ME</th>
                             <th></th>
                           </tr>
                         </thead>
@@ -305,9 +311,10 @@
           <div ng-show="importacaoCsvCtrl.steps[3].active"
             class="alt-importacao-csv-wizard-step alt-espacamento-bottom">
             <div class="modal-body">
-              <div class="row">
+              <div class="row alt-espacamento-bottom">
                 <div class="col-xs-12">
-                  <div class="alt-importacao-csv-wizard-title" ng-if="!importacaoCsvCtrl.visualizacao">Confira o relatório de {{importacaoCsvCtrl.labelTipo.toLowerCase()}}</div>
+                  <div class="alt-importacao-csv-wizard-title" ng-if="!importacaoCsvCtrl.visualizacao">Revisão: importação de {{importacaoCsvCtrl.labelTipo.toLowerCase()}}</div>
+                  <div class="alt-espacamento-bottom">Verifique os registros que serão importados, caso não queira importar um determinado registro clique no botão <em>Não importar</em></div>
                 </div>
               </div>
               <div class="row alt-espacamento-bottom">
@@ -341,7 +348,7 @@
                       ng-show="importacaoCsvCtrl.lote.desconsiderados > 0"
                       ng-click="importacaoCsvCtrl.lote.exibir = 'desconsiderados';">
                       <input type="radio" name="toggleLoteMenu" id="menuLote4" autocomplete="off">
-                      <i class="fa fa-info-circle text-secondary"></i>&nbsp; {{importacaoCsvCtrl.lote.desconsiderados}} desconsideradas
+                      <i class="fa fa-info-circle text-secondary"></i>&nbsp; {{importacaoCsvCtrl.lote.desconsiderados}} não importado(s)
                     </label>
                   </div>
                 </div>
@@ -349,7 +356,7 @@
               <div class="row alt-espacamento-top">
                 <div class="col-xs-12">
                   <div class="row"
-                    ng-repeat="item in importacaoCsvCtrl.lote.itens"
+                    ng-repeat="item in importacaoCsvCtrl.lote.itens | filter: importacaoCsvCtrl.localizarRegistro"
                     ng-hide="
                       ((item.possuiErro || item.possuiConflito || item.desconsiderado) && importacaoCsvCtrl.lote.exibir === 'validos') || 
                       ((!item.possuiErro || item.desconsiderado) && importacaoCsvCtrl.lote.exibir === 'erros') || 
@@ -364,8 +371,8 @@
                         <div class="row">
                           <div class="col-md-12 alt-importacao-csv-report-row-head">
                             <span ng-class="{'text-success': !item.possuiErro, 'text-danger': item.possuiErro}">Linha {{item.resumo.linha}}</span>
-                            <button class="btn btn-default pull-right" ng-show="!importacaoCsvCtrl.visualizacao && !item.desconsiderado" ng-click="importacaoCsvCtrl.lote.desconsiderarItem($index)">Desconsiderar</button>
-                            <button class="btn btn-default pull-right" ng-show="!importacaoCsvCtrl.visualizacao && item.desconsiderado" ng-click="importacaoCsvCtrl.lote.considerarItem($index)">Habilitar</button>
+                            <button class="btn btn-default pull-right" ng-show="!importacaoCsvCtrl.visualizacao && !item.desconsiderado" ng-click="importacaoCsvCtrl.lote.desconsiderarItem($index)">Não importar</button>
+                            <button class="btn btn-default pull-right" ng-show="!importacaoCsvCtrl.visualizacao && item.desconsiderado" ng-click="importacaoCsvCtrl.lote.considerarItem($index)">Importar</button>
                             <button class="btn btn-default pull-right" ng-show="importacaoCsvCtrl.visualizacao && !!item.idObjeto && !!item.editar" ng-click="importacaoCsvCtrl.editarObjeto(item)">Editar {{importacaoCsvCtrl.labelTipoSingular}}</button>
                           </div>
                         </div>
@@ -415,16 +422,16 @@
                 required>
           </div>
           <button type="button" class="btn btn-primary"
-            ng-hide="importacaoCsvCtrl.steps[3].active"
+            ng-hide="importacaoCsvCtrl.steps[2].active"
             ng-disabled="importacaoCsvCtrl.invalidStep()"
             ng-click="importacaoCsvCtrl.nextStep()">
             Próximo &nbsp;<i class="fa fa-long-arrow-right"></i>
           </button>
           <button type="button" class="btn btn-primary"
-            ng-show="importacaoCsvCtrl.steps[3].active"
+            ng-show="importacaoCsvCtrl.steps[2].active"
             ng-disabled="importacaoCsvCtrl.invalidStep()"
             ng-click="importacaoCsvCtrl.salvarImportacao()">
-            Gravar
+            Importar
           </button>
           <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
         </div>
@@ -564,25 +571,25 @@
 
           self.steps = [
             {
-              name: 'Arquivo',
+              name: 'Passo 1',
               number: 1,
               active: true,
               progress: 12.6
             },
             {
-              name: 'Mapeamento',
+              name: 'Passo 2',
               number: 2,
               progress: 37.5,
               init: _inicializarMapeamento
             },
             {
-              name: 'Regras',
+              name: 'Passo 3',
               number: 3,
               progress: 62.5,
               init: _inicializarRegras
             },
             {
-              name: 'Revisão',
+              name: 'Concluído',
               init: _inicializarRevisao,
               number: 4,
               progress: 87.7
@@ -759,14 +766,23 @@
         };
 
         self.salvarImportacao = function() {
-          var lotePersistencia = ng.copy(self.lote);
-          _.remove(lotePersistencia.itens, (item) => {return item.desconsiderado;});
+          // Chamado neste ponto pois Passo 4 foi retirado do fluxo
+          // _inicializarRevisao();
+          var loteProvisorio = self.importacao.montarLote(self.arquivo.linhas, self.arquivo.nome, self.lote);
 
-          self.gravarLote(lotePersistencia).then((resp) => {
-            modalService.close(ID_MODAL);
-            $rootScope.$broadcast(self.eventoCriacao, resp);
+          self.validarLote(loteProvisorio).then((lote) => {
+            self.lote = lote;
+            self.lote.exibir = 'todos';
+
+            var lotePersistencia = ng.copy(self.lote);
+            // _.remove(lotePersistencia.itens, (item) => {return item.desconsiderado;});
+
+            self.gravarLote(lotePersistencia).then((resp) => {
+              modalService.close(ID_MODAL);
+              $rootScope.$broadcast(self.eventoCriacao, resp);
+            });
+            return true;
           });
-          return true;
         };
 
         self.editarObjeto = function(item) {
