@@ -43,5 +43,8 @@
   "license": "ISC",
   "dependencies": {
     "gulp-ignore": "^2.0.2"
+  },
+  "engines": {
+    "node": ">=0.12.0"
   }
 }

@@ -135,18 +135,20 @@ module.exports = {
     "wrap-regex": 0
   },
   "globals": {
-    "angular": 1,
-    "$": 1,
-    "X2JS": 1,
-    "moment": 1,
-    "_": 1,
-    "XLS": 1,
-    "XLSX": 1,
-    "latinize": 1,
-    "Highcharts": 1,
-    "altAmbienteUrl": 1,
-    "FileReader": 1,
-    "chrome": 1
+    "angular": true,
+    "$": true,
+    "X2JS": true,
+    "moment": true,
+    "_": true,
+    "XLS": true,
+    "XLSX": true,
+    "latinize": true,
+    "Highcharts": true,
+    "altAmbienteUrl": true,
+    "FileReader": true,
+    "chrome": true,
+    "require": true,
+    "__dirname": true
   },
   "parserOptions": {
     "ecmaVersion": 6
