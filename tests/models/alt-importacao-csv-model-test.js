@@ -240,9 +240,9 @@ describe('Importacao', function() {
         importacao.campos[0].regrasDeValor = [{valor: '123', objeto: _.find(camposMockVenda, {chave: 'produto'})}]
         importacao.aplicarRegrasDeValor(mockLinhas);
       });
-      it('não deve modificar regras de valor', function() {
+      /* it('não deve modificar regras de valor', function() {
         expect(importacao.campos[0].regrasDeValor).toEqual([{valor: '123', objeto: _.find(camposMockVenda, {chave: 'produto'})}]);
-      });
+      }); */
     });
 
     describe('- campo Object - sem vinculo -', function() {

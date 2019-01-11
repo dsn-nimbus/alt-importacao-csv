@@ -73,6 +73,7 @@
 }
 
 .alt-importacao-csv-wrapper {
+  height: calc(100% - 160px);
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -152,9 +153,9 @@
   cursor: pointer;
 }
 
-.alt-importacao-csv-wizard-menu {
+/* .alt-importacao-csv-wizard-menu {
   border-bottom: 1px solid #e5e5e5;
-}
+} */
 
 .alt-importacao-csv-table-wrapper,
 .alt-importacao-csv-wizard-menu {
@@ -163,7 +164,7 @@
 }
 
 .alt-importacao-csv-wizard-menu .modal-body {
-  padding: 7px 15px;
+  padding: 7px 15px 0 15px;
 }
 
 .alt-importacao-csv-wizard-step{
@@ -187,9 +188,8 @@
   margin-bottom: 12px;
 }
 
-.alt-importacao-csv-map-warnings {
-  margin-top: 10px;
-  padding: 10px;
+.alt-importacao-csv-map-warnings p:first-child {
+  margin-top: 15px;
 }
 .alt-importacao-csv-map-warnings i {
   color: rgb(202, 149, 26);
@@ -248,9 +248,9 @@
   margin-right: 3px;
 }
 
-.alt-importacao-csv-rules-field {
+/* .alt-importacao-csv-rules-field {
   margin-bottom: 20px;
-}
+} */
 
 .alt-importacao-csv-rule-general .alt-importacao-csv-rule-general-col-status {
   float: left;
@@ -299,7 +299,7 @@
   color: purple;
   font-weight: 600;
 }
-.alt-importacao-csv-rules-title:hover {
+.alt-importacao-csv-rules-title:not(.no-alt-hand):hover {
   cursor: pointer;
 }
 .alt-importacao-csv-rules-title i {
@@ -342,7 +342,7 @@
 .alt-importacao-csv-planilha-mapeamento {
   overflow-x: scroll;
   overflow-y: hidden;
-  height: 237px;
+  height: 217px;
 }
 
 .alt-importacao-csv-planilha-mapeamento thead tr th .select2 {
@@ -362,32 +362,46 @@
 .alt-importacao-csv-planilha-mapeamento tbody.cabecalho-planilha tr td {
   /* background-color: rgb(96, 29, 108); */
   /* background-color: rgb(90, 152, 102); */
-  background-color: rgb(78, 141, 150);
+  /* background-color: rgb(78, 141, 150); */
+  background-color: #6ebed6;
   color: #fff;
   font-weight: 700;
 }
 
+.alt-importacao-csv-coluna-possui-campo-mapeado {
+  background-color: rgba(103, 189, 212, 0.2);
+}
+
 .alt-importacao-csv-lb-campo-mapeado {
   position: relative;
-  color: #333;
+  display: inline-block;
+  background-color: #eeeeee;
+  border: 1px solid #dddddd;
+  border-left: 5px solid #00E676;
+  color: #777777;
+  padding: 0px 23px 0px 4px;
+  margin-right: 5px;
 }
-.alt-importacao-csv-lb-campo-mapeado:hover span{
+/* .alt-importacao-csv-lb-campo-mapeado:hover span{
   display: block;
-}
+} */
 .alt-importacao-csv-lb-campo-mapeado span {
   position: absolute;
   right: 0;
   top: -2px;
-  font-size: 15px;
-  background-color: #d8d8d8;
+  font-size: 14px;
   width: 20px;
   height: 20px;
   line-height: 19px;
   text-align: center;
-  border-radius: 10px;
-  display: none;
 }
 .alt-importacao-csv-lb-campo-mapeado span:hover {
   cursor: pointer;
   color: #222;
+}
+
+@media all and (min-width: 1280px) {
+  .modal-xl-custom {
+    width: 1080px;
+  }
 }

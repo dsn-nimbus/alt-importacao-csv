@@ -305,7 +305,7 @@ describe('altImportacaoCsvEspecifica', function() {
     });
   });
 
-  describe('_inicializarRevisao()', function() {
+  /* describe('_inicializarRevisao()', function() {
     var opcoes;
     beforeEach(function() {
       _criarComponente();
@@ -344,7 +344,7 @@ describe('altImportacaoCsvEspecifica', function() {
       }, 100);
     });
 
-  });
+  }); */
 
   describe('_visualizarProcessado()', function() {
     var opcoes, mockLoteProcessado;
@@ -637,7 +637,7 @@ describe('altImportacaoCsvEspecifica', function() {
       });
     });
 
-    describe('- etapaRevisao, arquivo mesmo nome -', function() {
+    /* describe('- etapaRevisao, arquivo mesmo nome -', function() {
       beforeEach(function(done) {
         _ctrl.arquivo = _mockArquivo;
         _ctrl.arquivoAlterado();
@@ -726,7 +726,7 @@ describe('altImportacaoCsvEspecifica', function() {
           done();
         }, 100);
       });
-    });
+    }); */
 
   });
 
@@ -824,7 +824,7 @@ describe('altImportacaoCsvEspecifica', function() {
       });
     });
 
-    describe('- etapa 4', function() {
+    /* describe('- etapa 4', function() {
       beforeEach(function(done) {
         _ctrl.arquivo = _mockArquivo;
         _ctrl.arquivoAlterado();
@@ -855,7 +855,7 @@ describe('altImportacaoCsvEspecifica', function() {
           expect(_ctrl.invalidStep()).toBe(false);
         });
       });
-    });
+    }); */
   });
 
   describe('vincular()', function() {
@@ -1162,7 +1162,7 @@ describe('altImportacaoCsvEspecifica', function() {
       var regraJoaquim = _.find(_ctrl.importacao.campos[0].regrasDeValor, {valor: 'Joaquim Bryan Souza'});
       regraJoaquim.objeto = _mockPessoas[0];
       _ctrl.resumirRegrasDeValor();
-      _ctrl.nextStep();
+      // _ctrl.nextStep();
 
       setTimeout(() => {
         spyOn(_rootScope, '$broadcast').and.callFake(angular.noop);

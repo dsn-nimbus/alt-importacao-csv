@@ -7,7 +7,7 @@
     role="dialog"
     aria-hidden="true">
 
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-xl-custom">
       <div class="modal-content">
 
         <div class="modal-header alt-cor-principal">
@@ -51,11 +51,15 @@
                 </uib-progressbar>
               </div>
             </div>
+            
+            <!--
             <div class="row">
               <div class="col-xs-12 alt-espacamento-top text-center alt-importacao-csv-file-label">
                 <span ng-show="!!importacaoCsvCtrl.arquivo">{{importacaoCsvCtrl.arquivo.nome}}</span>
               </div>
             </div>
+            -->
+
           </div>
           <div class="modal-body" ng-show="importacaoCsvCtrl.visualizacao">
             <div class="row">
@@ -67,15 +71,13 @@
         </div>
         <div class="alt-importacao-csv-wrapper">
           <div ng-show="importacaoCsvCtrl.steps[0].active"
-            class="alt-importacao-csv-wizard-step alt-espacamento-bottom">
+            class="alt-importacao-csv-wizard-step">
             <div class="modal-body">
               <form name="importacaoCsvCtrl.formStepOne">
                 <div class="row">
                   <div class="col-xs-12">
-                    <div class="alt-importacao-csv-wizard-title">Importar dados</div>
-                    <p class="alt-importacao-csv-wizard-obs alt-espacamento-top">
-                      Selecione o arquivo para importação com extensão xls, xlsx, ods ou csv.
-                    <p>
+                    <div class="alt-importacao-csv-wizard-title" ng-bind="importacaoCsvCtrl.getTitle()"></div>
+                    <p class="alt-importacao-csv-wizard-obs alt-espacamento-top" ng-bind-html="importacaoCsvCtrl.getMessage()"><p>
                     <div class="alt-espacamento-top clearfix">
                         <div class="col-xs-12 col-sm-4 col-sm-offset-4 anexos-input-file-escondido-container text-center">
                           <button type="button" class="btn btn-block btn-default alt-espacamento-bottom alt-espacamento-top anexos-input-file-fake">
@@ -87,7 +89,8 @@
                             id="alt-importacao-csv-input-file-step1"
                             accept=".xls,.xlsx,.csv,.ods"
                             alt-importacao-csv-leitor
-                            ng-change="importacaoCsvCtrl.arquivoAlterado(0)"
+                            data-opts="importacaoCsvCtrl.arquivoOpcoes"
+                            ng-change="importacaoCsvCtrl.arquivoAlterado()"
                             required>
                         </div>
                     </div>
@@ -95,7 +98,7 @@
                         <span ng-show="importacaoCsvCtrl.arquivo.valido" class="text-success alt-importacao-csv-input-ckeck">
                           <i class="fa fa-check-circle"></i>&nbsp; {{importacaoCsvCtrl.arquivo.nome}}
                         </span>
-                        <span ng-show="importacaoCsvCtrl.formStepOne.file.$valid && !importacaoCsvCtrl.arquivo.valido" 
+                        <span ng-show="!!importacaoCsvCtrl.arquivo && !importacaoCsvCtrl.arquivo.valido" 
                           class="text-danger alt-importacao-csv-input-ckeck">
                           <i class="fa fa-times-circle"></i>&nbsp; {{importacaoCsvCtrl.arquivo.mensagem}}
                         </span>
@@ -106,12 +109,12 @@
             </div>
           </div>
           <div ng-show="importacaoCsvCtrl.steps[1].active"
-            class="alt-importacao-csv-wizard-step alt-espacamento-bottom">
+            class="alt-importacao-csv-wizard-step">
             <div class="modal-body">
               <div class="row">
                 <div class="col-xs-12">
-                  <div class="alt-importacao-csv-wizard-title">Configurar colunas</div>
-                  <div class="alt-espacamento-bottom">Selecione o(s) campo(s) do ERP4ME correspondente(s) a cada coluna do arquivo para realizar a importação</div>
+                  <div class="alt-importacao-csv-wizard-title" ng-bind="importacaoCsvCtrl.getTitle()"></div>
+                  <div class="alt-espacamento-bottom" ng-bind-html="importacaoCsvCtrl.getMessage()"></div>
                 </div>
               </div>
  
@@ -121,32 +124,34 @@
                     <table class="table">
                       <thead>
                         <tr>
-                          <th ng-repeat="coluna in importacaoCsvCtrl.importacao.colunas">
+                          <th ng-repeat="coluna in importacaoCsvCtrl.importacao.colunas" ng-class="{'alt-importacao-csv-coluna-possui-campo-mapeado': !!coluna.campos && coluna.campos.length}">
                             <select class="alt-importacao-csv-select-field"
                               name="field"
+                              data-placeholder="Selecione"
                               ng-model="coluna.campoSelecionado"
                               ng-change="importacaoCsvCtrl.vincular(coluna.campoSelecionado, coluna.numero)"
                               ng-options="campo.chave as campo.nome for campo in importacaoCsvCtrl.importacao.campos | filter: importacaoCsvCtrl.campoNaoMapeado track by campo.chave">
+                              <option value=""></option>
                             </select>
                           </th>
                         </tr>
                       </thead>
                       <thead>
                         <tr>
-                          <th ng-repeat="coluna in importacaoCsvCtrl.importacao.colunas">
-                            <i ng-show="coluna.campos.length == 0">Nenhum campo mapeado</i>
+                          <th ng-repeat="coluna in importacaoCsvCtrl.importacao.colunas" ng-class="{'alt-importacao-csv-coluna-possui-campo-mapeado': !!coluna.campos && coluna.campos.length}">
+                            <span class="small"><i ng-show="coluna.campos.length == 0">Nenhum campo selecionado</i></span>
 
-                            <p ng-repeat="c in coluna.campos" class="alt-importacao-csv-lb-campo-mapeado">
-                              <i class="fa fa-check text-success"></i> <b>{{c.nome}}</b>
+                            <div ng-repeat="c in coluna.campos" class="alt-importacao-csv-lb-campo-mapeado">
+                              <b>{{c.nome}}</b>
                               <span ng-click="importacaoCsvCtrl.desvincular(c.chave)" title="Desvincular">
                                 <i class="fa fa-times"></i>
                               </span>
-                            </p>
+                            </div>
 
                           </th>
                         </tr>
                       </thead>
-                      <tbody class="cabecalho-planilha">
+                      <tbody class="cabecalho-planilha" ng-show="importacaoCsvCtrl.arquivoOpcoes.colunasPossuemTitulos">
                         <tr>
                           <td ng-repeat="coluna in importacaoCsvCtrl.importacao.colunas">
                             {{coluna.nome}}
@@ -155,7 +160,7 @@
                       </tbody>
                       <tbody>
                         <tr ng-repeat="linha in importacaoCsvCtrl.arquivo.linhas">
-                          <td ng-repeat="coluna in importacaoCsvCtrl.arquivo.colunas">
+                          <td ng-repeat="coluna in importacaoCsvCtrl.arquivo.colunas" ng-class="{'alt-importacao-csv-coluna-possui-campo-mapeado': !!importacaoCsvCtrl.importacao.colunas[$index].campos && importacaoCsvCtrl.importacao.colunas[$index].campos.length}">
                             {{linha[coluna]}}
                           </td>
                         </tr>
@@ -166,10 +171,20 @@
               </div>
 
               <div class="row">
+                <div class="col-xs-12 alt-espacamento-bottom">
+                  <label class="alt-hand alt-espacamento-top">
+                    <input type="checkbox"
+                        ng-model="importacaoCsvCtrl.arquivoOpcoes.colunasPossuemTitulos"/>
+                    <span class="alt-checkbox"></span> <span class="alt-checkbox-label">Primeira linha do arquivo são títulos das colunas</span>
+                  </label>
+                </div> 
+              </div>
+
+              <div class="row">
                 <div class="col-xs-12 alt-importacao-csv-map-warnings">
                   <p ng-repeat="campo in importacaoCsvCtrl.importacao.campos" ng-if="campo.vinculoRequisitado">
                     <i class="fa fa-exclamation-triangle"></i> 
-                    <span>O campo <b>{{campo.nome}}</b> deve ser vinculado a uma coluna do documento.</span>
+                    <span>O campo <b>{{campo.nome}}</b> do ERP4ME deve ser vinculado a uma coluna do arquivo.</span>
                   </p>
                 </div>
               </div>
@@ -177,12 +192,12 @@
             </div>
           </div>
           <div ng-show="importacaoCsvCtrl.steps[2].active"
-            class="alt-importacao-csv-wizard-step alt-espacamento-bottom">
+            class="alt-importacao-csv-wizard-step">
             <div class="modal-body">
-              <div class="row alt-espacamento-bottom">
+              <div class="row">
                 <div class="col-xs-12">
-                  <div class="alt-importacao-csv-wizard-title">Configurar dados</div>
-                  <div class="alt-espacamento-bottom">Configure os dados a importar vinculando os valores do arquivo aos valores correspondentes no cadastro do ERP4ME</div>
+                  <div class="alt-importacao-csv-wizard-title" ng-bind="importacaoCsvCtrl.getTitle()"></div>
+                  <div class="alt-espacamento-bottom" ng-bind-html="importacaoCsvCtrl.getMessage()"></div>
                 </div>
               </div>
               <!--
@@ -225,10 +240,14 @@
                     (importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'nulosValidos' && campo.resumoRegrasDeValor.nulosValidos === 0)">
                   <div class="row alt-espacamento-top">
                     <div class="col-xs-12">
-                      <label class="alt-importacao-csv-rules-title" data-toggle="collapse" data-target="#alt-importacao-csv-rules-field-{{campo.chave}}">
+                      <label ng-show="importacaoCsvCtrl.obterQtdCamposRegras(importacaoCsvCtrl.importacao.campos) > 1" class="alt-importacao-csv-rules-title" data-toggle="collapse" data-target="#alt-importacao-csv-rules-field-{{campo.chave}}">
                         <i class="fa fa-angle-down"></i>
                         {{campo.nome}} 
-                        <span ng-show="!!campo.coluna">(coluna {{importacaoCsvCtrl.nomeColuna(campo.coluna)}})</span>
+                        <span ng-show="!!campo.coluna && importacaoCsvCtrl.arquivoOpcoes.colunasPossuemTitulos">(coluna {{importacaoCsvCtrl.nomeColuna(campo.coluna)}})</span>
+                      </label>
+                      <label ng-hide="importacaoCsvCtrl.obterQtdCamposRegras(importacaoCsvCtrl.importacao.campos) > 1"  class="alt-importacao-csv-rules-title no-alt-hand">
+                        {{campo.nome}} 
+                        <span ng-show="!!campo.coluna && importacaoCsvCtrl.arquivoOpcoes.colunasPossuemTitulos">(coluna {{importacaoCsvCtrl.nomeColuna(campo.coluna)}})</span>
                       </label>
                     </div>
                   </div>
@@ -238,9 +257,9 @@
                         <thead>
                           <tr>
                             <th class="status"></th>
-                            <th>Valor arquivo</th>
+                            <th>Informação arquivo</th>
                             <th>Ocorrências</th>
-                            <th>Valor ERP4ME</th>
+                            <th>Informação ERP4ME</th>
                             <th></th>
                           </tr>
                         </thead>
@@ -291,8 +310,8 @@
             <div class="modal-body">
               <div class="row alt-espacamento-bottom">
                 <div class="col-xs-12">
-                  <div class="alt-importacao-csv-wizard-title" ng-if="!importacaoCsvCtrl.visualizacao">Revisão: importação de {{importacaoCsvCtrl.labelTipo.toLowerCase()}}</div>
-                  <div class="alt-espacamento-bottom">Verifique os registros que serão importados, caso não queira importar um determinado registro clique no botão <em>Não importar</em></div>
+                  <div class="alt-importacao-csv-wizard-title" ng-if="!importacaoCsvCtrl.visualizacao" ng-bind="importacaoCsvCtrl.getTitle()"></div>
+                  <div class="alt-espacamento-bottom"  ng-bind-html="importacaoCsvCtrl.getMessage()"></div>
                 </div>
               </div>
               <div class="row alt-espacamento-bottom">
@@ -387,6 +406,8 @@
             ng-hide="importacaoCsvCtrl.steps[0].active">
             <i class="fa fa-long-arrow-left"></i>&nbsp; Anterior
           </button>
+          
+          <!--
           <div class="anexos-input-file-escondido-container anexos-input-file-escondido-container-inline" ng-show="importacaoCsvCtrl.permiteAlteracaoArquivo()">
             <button type="button" class="col-xs-12 btn btn-default anexos-input-file-fake">
               <span><i class="fa fa-refresh"></i>&nbsp; Recarregar arquivo</span>
@@ -399,6 +420,8 @@
                 ng-change="importacaoCsvCtrl.arquivoAlterado()"
                 required>
           </div>
+          -->
+
           <button type="button" class="btn btn-primary"
             ng-hide="importacaoCsvCtrl.steps[2].active"
             ng-disabled="importacaoCsvCtrl.invalidStep()"
@@ -449,18 +472,18 @@
         var self = this;
 
         const ID_MODAL = '#alt-importacao-csv-modal';
-        const ID_SELECT_COLUNAS = '#alt-importacao-csv-select-column';
+        // const ID_SELECT_COLUNAS = '#alt-importacao-csv-select-column';
         const ID_COMUM_SELECTS_REGRAS = '#alt-importacao-csv-rules-select';
         const ID_MENU_REGRAS_DE_VALOR = '#alt-importacao-csv-btn-group-rules';
-        const ID_MENU_REVISAO = '#alt-importacao-csv-btn-group-review';
-        const CLASS_BODY_WRAPPER = '.alt-importacao-csv-wrapper';
+        // const ID_MENU_REVISAO = '#alt-importacao-csv-btn-group-review';
+        // const CLASS_BODY_WRAPPER = '.alt-importacao-csv-wrapper';
         const CLASS_SELECT_CAMPOS = '.alt-importacao-csv-select-field';
 
         var _ajustarJanela = function() {
-          var modalHeight = ($($window).height() - 60);
+          /* var modalHeight = ($($window).height() - 60);
           var bodyHeight = (modalHeight - 220);
           $(ID_MODAL).find('.modal-content').css('max-height', `${modalHeight}px`);
-          $(ID_MODAL).find(CLASS_BODY_WRAPPER).css('max-height', `${bodyHeight}px`);
+          $(ID_MODAL).find(CLASS_BODY_WRAPPER).css('max-height', `${bodyHeight}px`); */
         };
 
         var _ativarEstacaoMenu = function(idMenu, posicao) {
@@ -472,15 +495,26 @@
         };
 
         var _inicializarMapeamento = function() {
-          self.importacao = new Importacao(self.campos);
+          if (!!self.importacao) {
+            // roda quando o valor de arquivoOpcoes.colunasPossuemTitulos é alternado
+            // atualizando apenas o nome do titulo da coluna e mantendo todo o restante dos dados
+            self.arquivo.colunas.map((col, i) => {
+              self.importacao.colunas[i].nome = col;
+            });
 
-          self.arquivo.colunas.map((col, i) => {
-            self.importacao.adicionarColuna(col, i);
-          });
+            self.arquivoAnterior = ng.copy(self.arquivo);
+          } else {
+            self.importacao = new Importacao(self.campos);
+
+            self.arquivo.colunas.map((col, i) => {
+              self.importacao.adicionarColuna(col, i);
+            });
+          }
+
           self.importacao.validarMapa();
 
           selectService.inicializar(CLASS_SELECT_CAMPOS);
-          selectService.inicializar(ID_SELECT_COLUNAS);
+          // selectService.inicializar(ID_SELECT_COLUNAS);
         };
 
         var _inicializarRegras = function() {
@@ -504,14 +538,14 @@
           _ativarEstacaoMenu(ID_MENU_REGRAS_DE_VALOR, 0);
         };
 
-        var _inicializarRevisao = function() {
+        /* var _inicializarRevisao = function() {
           var loteProvisorio = self.importacao.montarLote(self.arquivo.linhas, self.arquivo.nome, self.lote);
           self.validarLote(loteProvisorio).then((lote) => {
             self.lote = lote;
             self.lote.exibir = 'todos';
             _ativarEstacaoMenu(ID_MENU_REVISAO, 0);
           });
-        };
+        }; */
 
         var _visualizarProcessado = function(lote) {
           self.visualizacao = true;
@@ -552,27 +586,40 @@
               name: 'Passo 1',
               number: 1,
               active: true,
-              progress: 12.6
+              progress: 12.6,
+              init: null,
+              title: 'Importar dados',
+              message: $sce.trustAsHtml('Selecione o arquivo para importação com extensão xls, xlsx, ods ou csv')
             },
             {
               name: 'Passo 2',
               number: 2,
+              active: false,
               progress: 37.5,
-              init: _inicializarMapeamento
+              init: _inicializarMapeamento,
+              title: 'Configurar importação',
+              message: $sce.trustAsHtml('Selecione o(s) campo(s) do ERP4ME correspondente(s) a cada coluna do arquivo para realizar a importação')
             },
             {
               name: 'Passo 3',
               number: 3,
+              active: false,
               progress: 62.5,
-              init: _inicializarRegras
+              init: _inicializarRegras,
+              title: 'Configurar Tipo de pessoa',
+              message: $sce.trustAsHtml('Vincule a informação do arquivo ao <em>Tipo de pessoa</em> correspondente no cadastro do ERP4ME')
             },
             {
-              name: 'Concluído',
-              init: _inicializarRevisao,
+              name: 'Passo 4',
               number: 4,
-              progress: 87.7
+              active: false,
+              progress: 87.7,
+              init: null, // _inicializarRevisao,
+              title: 'Revisão: importação de ' + self.labelTipo.toLowerCase(),
+              message: $sce.trustAsHtml('Verifique os registros que serão importados, caso não queira importar um determinado registro clique no botão <em>Não importar</em>')
             }
           ];
+
           self.progress = self.steps[0].progress;
 
           _ajustarJanela();
@@ -580,6 +627,26 @@
           if (!!opcoes.visualizacao) {
             _visualizarProcessado(opcoes.loteProcessado);
           }
+        };
+
+        self.getTitle = function () {
+          if (!self.steps || !self.steps.length) {
+            return '';
+          }
+
+          return self.steps.find((item) => { return item.active === true; }).title;
+        };
+
+        self.getMessage = function () {
+          if (!self.steps || !self.steps.length) {
+            return '';
+          }
+
+          return self.steps.find((item) => { return item.active === true; }).message;
+        };
+
+        self.arquivoOpcoes = {
+          colunasPossuemTitulos: false
         };
 
         self.nextStep = function() {
@@ -673,6 +740,7 @@
         self.arquivoAlterado = function() {
           var index = _.findIndex(self.steps, {active: true});
           var etapaInicial = index === 0;
+          var etapaMapa = index === 1;
           var etapaRegras = index === 2;
           var etapaRevisao = index === 3;
 
@@ -680,14 +748,26 @@
             self.arquivo = ng.copy(self.arquivoAnterior);
             return alertaService.exibe({msg: 'O nome do documento deve coincidir com o do arquivo da importação.'});
           }
+
+          if (!!self.arquivoAnterior && self.arquivoAnterior.nome !== self.arquivo.nome) {
+            self.importacao = undefined;
+          }
+
           if (etapaInicial && (self.arquivoAnterior ? self.arquivoAnterior.nome !== self.arquivo.nome : false)) {
             self.campos = ng.copy(self.camposConfigurados); // reinicializa campos p/ limpar colunas vinculadas.
           }
+
+          if (etapaMapa) {
+            _inicializarMapeamento();
+            return;
+          }
+
           if (etapaRegras) {
             self.campos.forEach((campo) => {
               campo.regrasDeValor = undefined; // limpa regras para não serem reaproveitadas, já não se pode garantir a equivalência dos dados.
             });
           }
+
           if (etapaRevisao) {
             self.lote = undefined; // limpa lote para que não seja reaproveitada informação de linhas desconsideradas.
           }
@@ -746,6 +826,7 @@
         self.salvarImportacao = function() {
           // Chamado neste ponto pois Passo 4 foi retirado do fluxo
           // _inicializarRevisao();
+          // Trouxe o codigo do metodo _inicializarRevisao, pois preciso executar o restande no retorno da Promise
           var loteProvisorio = self.importacao.montarLote(self.arquivo.linhas, self.arquivo.nome, self.lote);
 
           self.validarLote(loteProvisorio).then((lote) => {
@@ -793,6 +874,12 @@
           }
 
           return `${select} ${groupBy} ${from} ${orderBy} ${trackBy}`;
+        };
+
+        self.obterQtdCamposRegras = function (campos) {
+          return campos.filter((campo) => {
+            return campo.tipo.name === 'Object';
+          }).length;
         };
 
         $scope.$on(evento.modal.ABRE_MODAL_IMPORTACAO_ESPECIFICA, (ev, opcoes) => {

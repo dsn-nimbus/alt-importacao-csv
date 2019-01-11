@@ -65,7 +65,8 @@
 
         aplicarRegrasDeValor(linhas) {
           this.campos.forEach((campo) => {
-            if (campo.tipo !== Object || !!campo.regrasDeValor) {
+            // if (campo.tipo !== Object || !!campo.regrasDeValor) {
+            if (campo.tipo !== Object) {
               return;
             }
             if (!!campo.coluna) {
