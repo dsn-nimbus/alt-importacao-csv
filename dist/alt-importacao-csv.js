@@ -182,7 +182,7 @@
                       </tbody>
                       <tbody>
                         <tr ng-repeat="linha in importacaoCsvCtrl.arquivo.linhas">
-                          <td ng-repeat="coluna in importacaoCsvCtrl.arquivo.colunas" ng-class="{'alt-importacao-csv-coluna-possui-campo-mapeado': !!importacaoCsvCtrl.importacao.colunas[$index].campos && importacaoCsvCtrl.importacao.colunas[$index].campos.length}">
+                          <td ng-repeat="coluna in importacaoCsvCtrl.arquivo.colunas track by $index" ng-class="{'alt-importacao-csv-coluna-possui-campo-mapeado': !!importacaoCsvCtrl.importacao.colunas[$index].campos && importacaoCsvCtrl.importacao.colunas[$index].campos.length}">
                             {{linha[coluna]}}
                           </td>
                         </tr>
