@@ -147,7 +147,11 @@
         }
 
         montarLote(linhas, nomeArquivo, loteAnterior) {
-          var lote = new LoteImportacao(nomeArquivo);
+          var lote = {
+            nomeArquivo: nomeArquivo
+          };
+
+          lote = new LoteImportacao(lote);
 
           linhas.forEach((r, i) => {
             var linha = i + 2;

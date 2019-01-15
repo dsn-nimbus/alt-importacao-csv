@@ -28,6 +28,8 @@
           this.objetoCriarNovo = undefined;
           this.objetoOpcoesListagem = {};
           this.mensagens = [];
+          this.tplProp = '';
+          this.exibirNaVisualizacaoListaPosicao = 0; // 0 = não exibir
 
           ng.extend(this, e);
 

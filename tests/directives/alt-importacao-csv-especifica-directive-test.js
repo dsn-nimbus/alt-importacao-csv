@@ -1366,4 +1366,26 @@ describe('altImportacaoCsvEspecifica', function() {
     });
   });
 
+  describe('obterValorCampoProp', function() {
+    it('deve fechar modal de importacao', function() {
+      var html = '<div alt-importacao-csv-especifica></div>';
+      
+      _element = angular.element(html);
+      _compile(_element)(_scope);
+      
+      _directiveScope = _element.isolateScope();
+      _ctrl = _directiveScope.importacaoCsvCtrl;
+
+      var obj = {
+        nome: 'teste',
+        endereco: {
+          logradouro: 'teste_objeto_complexo'
+        }
+      };
+
+      expect(_ctrl.obterValorCampoProp(obj, 'nome')).toEqual('teste');
+      expect(_ctrl.obterValorCampoProp(obj, 'endereco.logradouro')).toEqual('teste_objeto_complexo');
+    });
+  });
+
 });
