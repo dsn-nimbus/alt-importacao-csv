@@ -256,7 +256,6 @@
 .alt-importacao-csv-report-row-detalhes {
   padding: 15px;
   background-color: #eeeeee;
-  margin-top: 12px;
   margin-bottom: 12px;
   border-top: 2px solid #ccc;
 }
@@ -371,6 +370,13 @@
 }
 .alt-importacao-csv-report-row-head span {
   font-weight: 600;
+}
+.alt-importacao-csv-report-row-head > .alt-importacao-csv-report-row-head-title {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.alt-importacao-csv-report-row-head > .alert {
+  margin-bottom: 0px;
 }
 
 .alt-importacao-csv-file-label {

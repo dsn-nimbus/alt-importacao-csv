@@ -51,26 +51,7 @@
                 </uib-progressbar>
               </div>
             </div>
-            
-            <!--
-            <div class="row">
-              <div class="col-xs-12 alt-espacamento-top text-center alt-importacao-csv-file-label">
-                <span ng-show="!!importacaoCsvCtrl.arquivo">{{importacaoCsvCtrl.arquivo.nome}}</span>
-              </div>
-            </div>
-            -->
-
           </div>
-          
-          <!--
-          <div class="modal-body" ng-show="importacaoCsvCtrl.visualizacao">
-            <div class="row">
-              <div class="col-xs-12">
-                {{importacaoCsvCtrl.lote.nomeArquivo}} - {{importacaoCsvCtrl.lote.itens.length - importacaoCsvCtrl.lote.erros}} de {{importacaoCsvCtrl.lote.itens.length}} linha(s) importada(s)
-              </div>
-            </div>
-          </div>
-          -->
 
         </div>
         <div class="alt-importacao-csv-wrapper">
@@ -164,8 +145,9 @@
                       </tbody>
                       <tbody>
                         <tr ng-repeat="linha in importacaoCsvCtrl.arquivo.linhas">
-                          <td ng-repeat="coluna in importacaoCsvCtrl.arquivo.colunas track by $index" ng-class="{'alt-importacao-csv-coluna-possui-campo-mapeado': !!importacaoCsvCtrl.importacao.colunas[$index].campos && importacaoCsvCtrl.importacao.colunas[$index].campos.length}">
-                            {{linha[coluna]}}
+                          <td ng-repeat="coluna in importacaoCsvCtrl.arquivo.colunas track by $index" 
+                            ng-class="{'alt-importacao-csv-coluna-possui-campo-mapeado': !!importacaoCsvCtrl.importacao.colunas[$index].campos && importacaoCsvCtrl.importacao.colunas[$index].campos.length}">
+                            {{ linha[coluna] }}
                           </td>
                         </tr>
                       </tbody>
@@ -204,36 +186,7 @@
                   <div class="alt-espacamento-bottom" ng-bind-html="importacaoCsvCtrl.getMessage()"></div>
                 </div>
               </div>
-              <!--
-              <div class="row alt-espacamento-bottom">
-                <div class="col-md-12 alt-espacamento-bottom">
-                  <div class="btn-group" data-toggle="buttons" id="alt-importacao-csv-btn-group-rules">
-                    <label class="btn btn-default text-secondary" ng-click="importacaoCsvCtrl.resumoRegrasDeValor.exibir = 'todos';" >
-                      <input type="radio" name="toggleRulesMenu" autocomplete="off">
-                      {{importacaoCsvCtrl.resumoRegrasDeValor.valores}} valores
-                    </label>
-                    <label class="btn btn-default text-success" 
-                      ng-show="importacaoCsvCtrl.resumoRegrasDeValor.vinculados > 0"
-                      ng-click="importacaoCsvCtrl.resumoRegrasDeValor.exibir = 'regras';">
-                      <input type="radio" name="toggleRulesMenu" id="menu1" autocomplete="off">
-                      <i class="fa fa-check-circle"></i>&nbsp; {{importacaoCsvCtrl.resumoRegrasDeValor.vinculados}} regras
-                    </label>
-                    <label class="btn btn-default text-warning" 
-                      ng-show="importacaoCsvCtrl.resumoRegrasDeValor.nulosInvalidos > 0"
-                      ng-click="importacaoCsvCtrl.resumoRegrasDeValor.exibir = 'nulosInvalidos';" >
-                      <input type="radio" name="toggleRulesMenu" id="menu2" autocomplete="off">
-                      <i class="fa fa-exclamation-circle"></i>&nbsp; {{importacaoCsvCtrl.resumoRegrasDeValor.nulosInvalidos}} valores obrigatórios sem regra
-                    </label>
-                    <label class="btn btn-default" 
-                      ng-show="importacaoCsvCtrl.resumoRegrasDeValor.nulosValidos > 0"
-                      ng-click="importacaoCsvCtrl.resumoRegrasDeValor.exibir = 'nulosValidos';">
-                      <input type="radio" name="toggleRulesMenu" id="menu3" autocomplete="off">
-                      <i class="fa fa-info-circle text-secondary"></i>&nbsp; {{importacaoCsvCtrl.resumoRegrasDeValor.nulosValidos}} valores opcionais sem regra
-                    </label>
-                  </div>
-                </div>
-              </div>
-              -->
+              
               <div class="row alt-espacamento-top">
                 <div class="col-xs-12 alt-importacao-csv-rules-field" 
                   ng-repeat="campo in importacaoCsvCtrl.importacao.campos track by campo.chave" 
@@ -309,6 +262,7 @@
               </div>
             </div>
           </div>
+
           <div ng-show="importacaoCsvCtrl.steps[3].active"
             class="alt-importacao-csv-wizard-step alt-espacamento-bottom">
             <div class="modal-body">
@@ -320,136 +274,60 @@
               </div>
               <div class="row alt-espacamento-bottom">
                 <div class="col-md-12 alt-espacamento-bottom">
-                  <div class="btn-group" data-toggle="buttons" id="alt-importacao-csv-btn-group-review">
-                    <label class="btn btn-default text-secondary" ng-click="importacaoCsvCtrl.lote.exibir = 'todos';" >
-                      <input type="radio" name="toggleRulesMenu" autocomplete="off">
-                      {{importacaoCsvCtrl.lote.itens.length}} linhas
-                    </label>
-                    <label class="btn btn-default text-success"
-                      ng-show="importacaoCsvCtrl.lote.validos > 0"
-                      ng-click="importacaoCsvCtrl.lote.exibir = 'validos';">
-                      <input type="radio" name="toggleLoteMenu" id="menuLote1" autocomplete="off">
-                      <span ng-hide="importacaoCsvCtrl.visualizacao"><i class="fa fa-check-circle"></i>&nbsp; {{importacaoCsvCtrl.lote.validos}} válidas</span>
-                      <span ng-show="importacaoCsvCtrl.visualizacao"><i class="fa fa-check-circle"></i>&nbsp; {{importacaoCsvCtrl.lote.validos}} importadas com sucesso</span>
-                    </label>
-                    <label class="btn btn-default" 
-                      ng-show="importacaoCsvCtrl.lote.conflitos > 0"
-                      ng-click="importacaoCsvCtrl.lote.exibir = 'conflitos';">
-                      <input type="radio" name="toggleLoteMenu" id="menuLote3" autocomplete="off">
-                      <span ng-hide="importacaoCsvCtrl.visualizacao"><i class="fa fa-exclamation-circle text-secondary"></i>&nbsp; {{importacaoCsvCtrl.lote.conflitos}} com aviso</span>
-                      <span ng-show="importacaoCsvCtrl.visualizacao"><i class="fa fa-check-circle text-secondary"></i>&nbsp; {{importacaoCsvCtrl.lote.conflitos}} importadas com aviso</span>
-                    </label>
-                    <label class="btn btn-default text-danger" 
-                      ng-show="importacaoCsvCtrl.lote.erros > 0"
-                      ng-click="importacaoCsvCtrl.lote.exibir = 'erros';" >
-                      <input type="radio" name="toggleLoteMenu" id="menuLote2" autocomplete="off">
-                      <i class="fa fa-times-circle"></i>&nbsp; {{importacaoCsvCtrl.lote.erros}} com erro
-                    </label>
-                    <label class="btn btn-default" 
-                      ng-show="importacaoCsvCtrl.lote.desconsiderados > 0"
-                      ng-click="importacaoCsvCtrl.lote.exibir = 'desconsiderados';">
-                      <input type="radio" name="toggleLoteMenu" id="menuLote4" autocomplete="off">
-                      <i class="fa fa-info-circle text-secondary"></i>&nbsp; {{importacaoCsvCtrl.lote.desconsiderados}} não importado(s)
-                    </label>
-                  </div>
+                  <div class=""><span class="small text-muted">Total de registros: </span> {{ importacaoCsvCtrl.lote.itens.length }}</div>
+                  <div class=""><span class="small text-muted">Registros importados: </span> {{ importacaoCsvCtrl.lote.validos }}</div>
+                  <div class=""><span class="small text-muted">Registros não importados: </span> <span class="text-danger">{{ importacaoCsvCtrl.lote.erros }}</span></div>
                 </div>
               </div>
 
+              <div class="alt-importacao-csv-wizard-title">Registros não importados</div>
               <div class="alt-sombra-secundaria">
-                <div class=""
-                  ng-repeat="item in importacaoCsvCtrl.lote.itens | filter: importacaoCsvCtrl.localizarRegistro"
-                  ng-hide="
-                    ((item.possuiErro || item.possuiConflito || item.desconsiderado) && importacaoCsvCtrl.lote.exibir === 'validos') || 
-                    ((!item.possuiErro || item.desconsiderado) && importacaoCsvCtrl.lote.exibir === 'erros') || 
-                    ((!item.possuiConflito || item.desconsiderado) && importacaoCsvCtrl.lote.exibir === 'conflitos') ||
-                    (item.desconsiderado !== true && importacaoCsvCtrl.lote.exibir === 'desconsiderados')">
-                  
-                  <div class="">
-                    
-                    <div class="alt-importacao-csv-report"
-                      ng-class="{
-                        'alt-importacao-csv-report--error': item.possuiErro,
-                        'alt-importacao-csv-report--warning': item.possuiConflito,
-                        'alt-importacao-csv-report--disabled': item.desconsiderado}">
-                      
-                      <!--
+                <div class="" ng-repeat="item in importacaoCsvCtrl.itensNaoImportados">
+
+                  <div class="alt-importacao-csv-report">
+                    <div class="alt-importacao-csv-report-row-body row-body-{{ $index % 2 === 0 ? 'par' : 'impar' }}">
+                      <div class="row" ng-if="$first">
+                        <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-title">{{ campo.nome }}</div>
+                        <div class="col-md-1 alt-importacao-csv-report-title text-center">Status</div>
+                        <div class="col-md-1 alt-importacao-csv-report-title">&nbsp;</div>
+                      </div>
+
                       <div class="row">
-                        <div class="col-md-12 alt-importacao-csv-report-row-head">
-                          <span ng-class="{'text-success': !item.possuiErro, 'text-danger': item.possuiErro}">Registro {{item.linha}}</span>
-                          <button class="btn btn-default pull-right" ng-show="!importacaoCsvCtrl.visualizacao && !item.desconsiderado" ng-click="importacaoCsvCtrl.lote.desconsiderarItem($index)">Não importar</button>
-                          <button class="btn btn-default pull-right" ng-show="!importacaoCsvCtrl.visualizacao && item.desconsiderado" ng-click="importacaoCsvCtrl.lote.considerarItem($index)">Importar</button>
-                          <button class="btn btn-default pull-right" ng-show="true || importacaoCsvCtrl.visualizacao && !!item.idObjeto && !!item.editar" ng-click="importacaoCsvCtrl.editarObjeto(item)">Editar {{importacaoCsvCtrl.labelTipoSingular}}</button>
+                        <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row">{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}</div>
+                        <div class="col-md-1 alt-importacao-csv-report-row text-center" ng-switch="item.status">
+                          <i ng-switch-default class="fa fa-clock-o" aria-hidden="true"></i>
+                          <i ng-switch-when="1" class="fa fa-check-circle text-success" aria-hidden="true"></i>
+                          <i ng-switch-when="2" class="fa fa-times-circle text-danger" aria-hidden="true"></i>
+                        </div>
+                        <div class="col-md-1 alt-importacao-csv-report-row" ng-init="item.collapse = true">
+                          <button class="btn btn-sm btn-default pull-right" ng-click="item.collapse = !item.collapse">
+                            <i ng-class="{'fa fa-angle-down': item.collapse, 'fa fa-angle-up': !item.collapse }"></i>
+                          </button>
                         </div>
                       </div>
-                      -->
-
-                      <div class="alt-importacao-csv-report-row-body row-body-{{ $index % 2 === 0 ? 'par' : 'impar' }}">
-                        
-                        <!-- 
-                        <div ng-repeat="campo in item.resumo.campos" class="col-md-{{campo.template.width}}">
-                          <label ng-bind="campo.template.label"></label>
-                            <span ng-show="campo.valido" ng-bind="campo.referencia"></span>
-                            <span ng-hide="campo.valido">
-                              {{campo.dado}} <i class="fa fa-times-circle text-danger"></i>
-                            </span>
-                        </div> 
-                        -->
-
-                        <div class="row" ng-if="$first">
-                          <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-title">{{ campo.nome }}</div>
-                          <div class="col-md-1 alt-importacao-csv-report-title text-center">Status</div>
-                          <div class="col-md-1 alt-importacao-csv-report-title">&nbsp;</div>
-                        </div>
-
+                      
+                      <div ng-show="!item.collapse" class="alt-importacao-csv-report-row-detalhes">
+                      
                         <div class="row">
-                          <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row">{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}</div>
-                          <div class="col-md-1 alt-importacao-csv-report-row text-center" ng-switch="item.processado">
-                            <i ng-switch-default class="fa fa-clock-o" aria-hidden="true"></i>
-                            <i ng-switch-when="1" class="fa fa-check-circle text-success" aria-hidden="true"></i>
-                            <i ng-switch-when="2" class="fa fa-times-circle text-danger" aria-hidden="true"></i>
+                          <div class="col-md-12 alt-importacao-csv-report-row-head">
+                            <div class="alt-importacao-csv-report-row-head-title text-muted">Registro {{item.linha}}</div>
+                            <div class="alert alert-sm alert-danger" ng-bind-html="importacaoCsvCtrl.obterMensagemErro(item.mensagemErro)"></div>
                           </div>
-                          <div class="col-md-1 alt-importacao-csv-report-row" ng-init="item.collapse = true"><button class="btn btn-sm btn-default pull-right" ng-click="item.collapse = !item.collapse"><i ng-class="{'fa fa-angle-down': item.collapse, 'fa fa-angle-up': !item.collapse }"></i></button></div>
-                        </div>
-                        
-                        <div ng-show="!item.collapse" class="alt-importacao-csv-report-row-detalhes">
-                        
-                          <div class="row">
-                            <div class="col-md-12 alt-importacao-csv-report-row-head">
-                              <span ng-class="{'text-success': !item.possuiErro, 'text-danger': item.possuiErro}">Registro {{item.linha}}</span>
-                              <button class="btn btn-default pull-right" ng-show="importacaoCsvCtrl.visualizacao && !!item.idObjeto && !!item.editar" ng-click="importacaoCsvCtrl.editarObjeto(item)">Editar</button>
-                              <!-- <button class="btn btn-default pull-right" ng-click="item.collapse = !item.collapse"><span aria-hidden="true">×</span></button> -->
-                            </div>
-                          </div>
-
-                          <hr>
-              
-                          <div class="row">
-                            <div class="col-xs-12" ng-repeat="campo in importacaoCsvCtrl.campos" >
-                              <strong>{{ campo.nome }}: </strong><span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}</span>
-                            </div>
-                          </div>
-
                         </div>
 
-                      </div>
-                      <div class="row" ng-show="item.resumo.mensagens.length > 0">
-                        <div class="col-md-12 alt-importacao-csv-report-row-footer">
-                          <div class="alt-importacao-csv-report-message" ng-repeat="msg in item.resumo.mensagens">
-                            <i class="fa fa-exclamation-triangle text-warning"></i>&nbsp;
-                            <span ng-show="!!msg.erroImportacao"><b>Erro ao importar:</b></span>
-                            <span ng-bind-html="msg.textoHtml" ng-show="!!msg.textoHtml"></span>
-                            <span ng-bind="msg.texto" ng-show="!msg.textoHtml"></span>
+                        <hr>
+            
+                        <div class="row">
+                          <div class="col-sm-6" ng-repeat="campo in importacaoCsvCtrl.campos" >
+                            <strong>{{ campo.nome }}: </strong><span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}</span>
                           </div>
                         </div>
                       </div>
-                    
+
                     </div>
-
                   </div>
-
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -459,21 +337,6 @@
             ng-hide="importacaoCsvCtrl.steps[0].active">
             <i class="fa fa-long-arrow-left"></i>&nbsp; Anterior
           </button>
-          
-          <!--
-          <div class="anexos-input-file-escondido-container anexos-input-file-escondido-container-inline" ng-show="importacaoCsvCtrl.permiteAlteracaoArquivo()">
-            <button type="button" class="col-xs-12 btn btn-default anexos-input-file-fake">
-              <span><i class="fa fa-refresh"></i>&nbsp; Recarregar arquivo</span>
-            </button>
-            <input type="file" class="anexos-input-file-real alt-hand col-xs-12 ng-isolate-scope" 
-                ng-model="importacaoCsvCtrl.arquivo"
-                accept=".xls,.xlsx,.csv,.ods"
-                name="file"
-                alt-importacao-csv-leitor
-                ng-change="importacaoCsvCtrl.arquivoAlterado()"
-                required>
-          </div>
-          -->
 
           <button type="button" class="btn btn-primary"
             ng-hide="importacaoCsvCtrl.steps[2].active"
@@ -523,11 +386,8 @@
         var self = this;
 
         const ID_MODAL = '#alt-importacao-csv-modal';
-        // const ID_SELECT_COLUNAS = '#alt-importacao-csv-select-column';
         const ID_COMUM_SELECTS_REGRAS = '#alt-importacao-csv-rules-select';
         const ID_MENU_REGRAS_DE_VALOR = '#alt-importacao-csv-btn-group-rules';
-        // const ID_MENU_REVISAO = '#alt-importacao-csv-btn-group-review';
-        // const CLASS_BODY_WRAPPER = '.alt-importacao-csv-wrapper';
         const CLASS_SELECT_CAMPOS = '.alt-importacao-csv-select-field';
 
         var _ativarEstacaoMenu = function(idMenu, posicao) {
@@ -558,7 +418,6 @@
           self.importacao.validarMapa();
 
           selectService.inicializar(CLASS_SELECT_CAMPOS);
-          // selectService.inicializar(ID_SELECT_COLUNAS);
         };
 
         var _inicializarRegras = function() {
@@ -597,6 +456,10 @@
           self.steps[3].active = true;
 
           lote.itens.forEach((item) => {
+            if (item.status === 2) {
+              self.itensNaoImportados.push(item);
+            }
+
             if (!!item.resumo && item.resumo.mensagens) {
               item.resumo.mensagens.forEach((msg) => {
                 if (msg.textoHtml) {
@@ -614,10 +477,10 @@
           let texto = `
             <div class="row">
               <div class="col-md-6">
-                <span class="small text-muted">arquivo: </span> ${self.lote.nomeArquivo}
+                <span class="small text-muted">Arquivo: </span> ${self.lote.nomeArquivo}
               </div>
               <div class="col-md-6">
-              <span class="small text-muted">status: </span> ${(self.lote.status > 0 ? textoDataProcessado : 'processando')}
+              <span class="small text-muted">Status: </span> ${(self.lote.status > 0 ? textoDataProcessado : 'processando')}
               </div>
             </div>
             <hr style="margin-top: 15px; margin-bottom: 10px;">
@@ -645,6 +508,7 @@
           self.visualizacao = false;
           self.importacao = undefined;
           self.resumoRegrasDeValor = undefined;
+          self.itensNaoImportados = [];
 
           self.steps = [
             {
@@ -680,8 +544,8 @@
               active: false,
               progress: 87.7,
               init: null, // _inicializarRevisao,
-              title: '', // 'Importação de ' + self.labelTipo.toLowerCase(),
-              message: $sce.trustAsHtml('')
+              title: 'Resumo', // 'Importação de ' + self.labelTipo.toLowerCase(),
+              message: $sce.trustAsHtml('Existem registros não importados para o sistema, verifique as mensagens')
             }
           ];
 
@@ -762,20 +626,6 @@
           self.importacao.desvincular(campo);
           selectService.inicializar(CLASS_SELECT_CAMPOS);
         };
-
-        /* self.deParaDefault = function() {
-          self.vincular('cpfCnpj', 1);
-          self.vincular('nome', 4);
-          self.vincular('nomeFantasia', 7);
-          self.vincular('tipo', 8);
-          self.vincular('endereco_cep', 10);
-          self.vincular('endereco_logradouro', 11);
-          self.vincular('endereco_numero', 12);
-          self.vincular('endereco_complemento', 13);
-          self.vincular('endereco_bairro', 14);
-          self.vincular('endereco_cidade', 15);
-          self.vincular('endereco_uf', 16);
-        }; */
 
         self.campoNaoMapeado = function(campo) {
           return ng.isUndefined(campo.coluna);
@@ -886,7 +736,6 @@
 
         self.salvarImportacao = function() {
           // Chamado neste ponto pois Passo 4 foi retirado do fluxo
-          // _inicializarRevisao();
           // Trouxe o codigo do metodo _inicializarRevisao, pois preciso executar o restande no retorno da Promise
           var loteProvisorio = self.importacao.montarLote(self.arquivo.linhas, self.arquivo.nome, self.lote);
 
@@ -965,6 +814,10 @@
           }
 
           return obj[prop];
+        };
+
+        self.obterMensagemErro = function (msg) {
+          return $sce.trustAsHtml(msg);
         };
 
         $scope.$on(evento.modal.ABRE_MODAL_IMPORTACAO_ESPECIFICA, (ev, opcoes) => {

@@ -399,7 +399,8 @@ describe('altImportacaoCsvEspecifica', function() {
               ]
             },
             possuiErro: false,
-            possuiConflito: false
+            possuiConflito: false,
+            status: 1
           },
           {
             resumo: {
@@ -452,7 +453,8 @@ describe('altImportacaoCsvEspecifica', function() {
               ]
             },
             possuiErro: true,
-            possuiConflito: false
+            possuiConflito: false,
+            status: 2
           },
           {
             idObjeto: 85,
@@ -506,7 +508,8 @@ describe('altImportacaoCsvEspecifica', function() {
               ]
             },
             possuiErro: false,
-            possuiConflito: true
+            possuiConflito: true,
+            status: 1
           }
         ]
       };
@@ -527,8 +530,7 @@ describe('altImportacaoCsvEspecifica', function() {
     });
     it('deve resumir corretamente o lote', function() {
       expect(_ctrl.lote.erros).toBe(1);
-      expect(_ctrl.lote.validos).toBe(1);
-      expect(_ctrl.lote.conflitos).toBe(1);
+      expect(_ctrl.lote.validos).toBe(2);
     });
   });
 
