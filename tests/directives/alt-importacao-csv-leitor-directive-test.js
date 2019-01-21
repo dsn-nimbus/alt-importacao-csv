@@ -52,7 +52,7 @@ describe('altImportacaoCsvLeitor', function() {
       it('deve configurar arquivo como inválido!', function(done) {
         setTimeout(() => {
           expect(_scope.arquivo.valido).toBe(false);
-          expect(_scope.arquivo.mensagem).toBe('Tipo de arquivo inválido.');
+          expect(_scope.arquivo.mensagem).toBe('Selecione um arquivo válido, tipos permitidos: XLS, XLSX, CSV e ODS');
           done();
         }, 100);
       });

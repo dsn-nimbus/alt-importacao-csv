@@ -11,6 +11,11 @@
         require: 'ngModel',
         scope: {opts: '='},
         link: (scope, el, attrs, ngModel) => {
+          // var MAX_SIZE = 2097152;
+          // var MAX_SIZE_TEXT = '2MB';
+          // var MAX_REGS = 3000;
+          // var MAX_REGS_TEXT = '3.000';
+
           scope.dadosArquivo = null;
           scope.file = null;
           scope.path = null;
@@ -24,6 +29,10 @@
               }
             });
             return result;
+          }
+
+          function obterExtensao (name) {
+            return name.substring(name.lastIndexOf('.') + 1, name.length).toLowerCase();
           }
 
           function extensaoValida(extensao) {
@@ -86,20 +95,50 @@
             carregandoService.exibe();
 
             reader.onload = function (e) {
-              var bstr = e.target.result;
-              var workbook = XLSX.read(bstr, {type:'binary'});
-              var colunas = obterColunas(workbook.Sheets[workbook.SheetNames[0]]);
-              var linhas = obterLinhas(workbook, colunas);
+              var bstr = undefined;
+              var workbook = undefined;
+              var colunas = [];
+              var linhas = [];
 
-              scope.path = !!scope.path ? scope.path : ng.element(el[0]).val();
+              scope.path = scope.path ? scope.path : ng.element(el[0]).val();
+
               var nome = scope.path ? scope.path.split('\\')[2] : '';
-              var extensao = nome.split('.')[1];
-              var valido = extensaoValida(extensao);
-              var mensagem = valido ? '' : 'Tipo de arquivo inválido.';
+              var extensao = obterExtensao(nome);
+              // var size = file.size;
+
+              var valido = true;
+              var mensagem = '';
+
+              // valida extensao
+              if (!extensaoValida(extensao)) {
+                valido = false;
+                mensagem = 'Selecione um arquivo válido, tipos permitidos: XLS, XLSX, CSV e ODS';
+              }
+
+              // valida tamanho do arquivo
+              /* else if (size > MAX_SIZE) {
+                valido = false;
+                mensagem = 'O tamanho máximo de arquivo permitido é de ' + MAX_SIZE_TEXT;
+              } */
+
+              else {
+                // le o arquivo e monta colunas e linhas
+                bstr = e.target.result;
+                workbook = XLSX.read(bstr, {type:'binary'});
+                colunas = obterColunas(workbook.Sheets[workbook.SheetNames[0]]);
+                linhas = obterLinhas(workbook, colunas);
+              }
+
+              // valida quantidade de registros
+              /* if (linhas.length > MAX_REGS) {
+                valido = false;
+                mensagem = 'Quantidade máxima de registros permitida é de ' + MAX_REGS_TEXT;
+              } */
 
               scope.dadosArquivo = {
                 colunas: colunas,
                 linhas: linhas,
+                dezPrimeirasLinhas: linhas.slice(0, 10),
                 nome: nome,
                 extensao: extensao,
                 valido: valido,
@@ -134,48 +173,11 @@
           scope.$watch('opts.colunasPossuemTitulos', (newValue, oldValue) => {
             if ((!!newValue || !!oldValue) && !!scope.file) {
               fileReaderHandler(scope.file);
+            } else {
+              scope.dadosArquivo = undefined;
+              ng.element(el).val('');
             }
           });
-
-          /* el.on('change', (changeEvent) => {
-            var reader = new FileReader();
-
-            scope.file = changeEvent.target.files[0];
-
-            carregandoService.exibe();
-
-            reader.onload = function (e) {
-              var bstr = e.target.result;
-              var workbook = XLSX.read(bstr, {type:'binary'});
-              var colunas = obterColunas(workbook.Sheets[workbook.SheetNames[0]]);
-              var linhas = obterLinhas(workbook, colunas);
-
-              var path = ng.element(el[0]).val();
-              var nome = path ? path.split('\\')[2] : '';
-              var extensao = nome.split('.')[1];
-              var valido = extensaoValida(extensao);
-              var mensagem = valido ? '' : 'Tipo de arquivo inválido.';
-
-              scope.dadosArquivo = {
-                colunas: colunas,
-                linhas: linhas,
-                nome: nome,
-                extensao: extensao,
-                valido: valido,
-                mensagem: mensagem
-              };
-
-              scope.$apply(() => {
-                ngModel.$setViewValue(scope.dadosArquivo);
-                ngModel.$render();
-                ng.element(el).val('');
-
-                carregandoService.esconde();
-              });
-            };
-
-            reader.readAsBinaryString(scope.file);
-          }); */
         }
       };
     }

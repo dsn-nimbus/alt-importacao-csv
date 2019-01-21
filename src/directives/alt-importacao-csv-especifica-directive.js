@@ -68,6 +68,7 @@
                           <button type="button" class="btn btn-block btn-default alt-espacamento-bottom alt-espacamento-top anexos-input-file-fake">
                             Selecionar arquivo
                           </button>
+                          <span class="small microcopy text-muted">Arquivos permitidos: XLS, XLSX, CSV e ODS<br>Tamanho máximo: 2MB ou 3.000 registros</span>
 
                           <input type="file" class="anexos-input-file-real alt-hand ng-isolate-scope" 
                             ng-model="importacaoCsvCtrl.arquivo" 
@@ -144,7 +145,7 @@
                         </tr>
                       </tbody>
                       <tbody>
-                        <tr ng-repeat="linha in importacaoCsvCtrl.arquivo.linhas">
+                        <tr ng-repeat="linha in importacaoCsvCtrl.arquivo.dezPrimeirasLinhas">
                           <td ng-repeat="coluna in importacaoCsvCtrl.arquivo.colunas track by $index" 
                             ng-class="{'alt-importacao-csv-coluna-possui-campo-mapeado': !!importacaoCsvCtrl.importacao.colunas[$index].campos && importacaoCsvCtrl.importacao.colunas[$index].campos.length}">
                             {{ linha[coluna] }}
@@ -382,7 +383,8 @@
         'AltImportacaoCsvLoteModel',
         'AltImportacaoCsvModel',
         'AltImportacaoCsvEvento',
-        function($rootScope, $scope, $sce, $timeout, modalService, selectService, alertaService, Campo, Lote, Importacao, evento) {
+        'AltCarregandoInfoService',
+        function($rootScope, $scope, $sce, $timeout, modalService, selectService, alertaService, Campo, Lote, Importacao, evento, AltCarregandoInfoService) {
         var self = this;
 
         const ID_MODAL = '#alt-importacao-csv-modal';
@@ -399,6 +401,8 @@
         };
 
         var _inicializarMapeamento = function() {
+
+
           if (!!self.importacao) {
             // roda quando o valor de arquivoOpcoes.colunasPossuemTitulos é alternado
             // atualizando apenas o nome do titulo da coluna e mantendo todo o restante dos dados
@@ -460,13 +464,13 @@
               self.itensNaoImportados.push(item);
             }
 
-            if (!!item.resumo && item.resumo.mensagens) {
+            /* if (!!item.resumo && item.resumo.mensagens) {
               item.resumo.mensagens.forEach((msg) => {
                 if (msg.textoHtml) {
                   msg.textoHtml = $sce.trustAsHtml(msg.textoHtml);
                 }
               });
-            }
+            } */
           });
 
           self.lote = new Lote(lote);
@@ -575,15 +579,21 @@
         };
 
         self.nextStep = function() {
-          var current = _.findIndex(self.steps, {active: true});
-          var currentStep = self.steps[current];
-          var nextStep = self.steps[current + 1];
+          AltCarregandoInfoService.exibe();
 
-          currentStep.active = false;
-          currentStep.completed = true;
-          nextStep.active = true;
-          self.progress = nextStep.progress;
-          nextStep.init();
+          $timeout(() => {
+            var current = _.findIndex(self.steps, {active: true});
+            var currentStep = self.steps[current];
+            var nextStep = self.steps[current + 1];
+
+            currentStep.active = false;
+            currentStep.completed = true;
+            nextStep.active = true;
+            self.progress = nextStep.progress;
+            nextStep.init();
+
+            AltCarregandoInfoService.esconde();
+          }, 200);
         };
 
         self.prevStep = function() {
@@ -737,23 +747,29 @@
         self.salvarImportacao = function() {
           // Chamado neste ponto pois Passo 4 foi retirado do fluxo
           // Trouxe o codigo do metodo _inicializarRevisao, pois preciso executar o restande no retorno da Promise
-          var loteProvisorio = self.importacao.montarLote(self.arquivo.linhas, self.arquivo.nome, self.lote);
+          AltCarregandoInfoService.exibe();
 
-          self.validarLote(loteProvisorio).then((lote) => {
-            self.lote = lote;
-            self.lote.exibir = 'todos';
+          $timeout(() => {
+            var loteProvisorio = self.importacao.montarLote(self.arquivo.linhas, self.arquivo.nome, self.lote);
 
-            var lotePersistencia = ng.copy(self.lote);
-            // _.remove(lotePersistencia.itens, (item) => {return item.desconsiderado;});
+            self.validarLote(loteProvisorio).then((lote) => {
+              self.lote = lote;
+              self.lote.exibir = 'todos';
 
-            self.gravarLote(lotePersistencia).then((resp) => {
-              self.arquivo = null;
+              var lotePersistencia = ng.copy(self.lote);
+              // _.remove(lotePersistencia.itens, (item) => {return item.desconsiderado;});
 
-              modalService.close(ID_MODAL);
-              $rootScope.$broadcast(self.eventoCriacao, resp);
+              self.gravarLote(lotePersistencia).then((resp) => {
+                self.arquivo = null;
+                angular.element(".anexos-input-file-real").val('');
+                angular.element(".anexos-input-file-real")[0] = null;
+
+                modalService.close(ID_MODAL);
+                $rootScope.$broadcast(self.eventoCriacao, resp);
+              });
+              return true;
             });
-            return true;
-          });
+          }, 200);
         };
 
         self.editarObjeto = function(item) {
