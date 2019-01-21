@@ -11,10 +11,10 @@
         require: 'ngModel',
         scope: {opts: '='},
         link: (scope, el, attrs, ngModel) => {
-          // var MAX_SIZE = 2097152;
-          // var MAX_SIZE_TEXT = '2MB';
-          // var MAX_REGS = 3000;
-          // var MAX_REGS_TEXT = '3.000';
+          var MAX_SIZE = 2097152;
+          var MAX_SIZE_TEXT = '2MB';
+          var MAX_REGS = 3000;
+          var MAX_REGS_TEXT = '3.000';
 
           scope.dadosArquivo = null;
           scope.file = null;
@@ -104,7 +104,7 @@
 
               var nome = scope.path ? scope.path.split('\\')[2] : '';
               var extensao = obterExtensao(nome);
-              // var size = file.size;
+              var size = file.size;
 
               var valido = true;
               var mensagem = '';
@@ -116,10 +116,10 @@
               }
 
               // valida tamanho do arquivo
-              /* else if (size > MAX_SIZE) {
+              else if (size > MAX_SIZE) {
                 valido = false;
                 mensagem = 'O tamanho máximo de arquivo permitido é de ' + MAX_SIZE_TEXT;
-              } */
+              }
 
               else {
                 // le o arquivo e monta colunas e linhas
@@ -130,10 +130,10 @@
               }
 
               // valida quantidade de registros
-              /* if (linhas.length > MAX_REGS) {
+              if (linhas.length > MAX_REGS) {
                 valido = false;
                 mensagem = 'Quantidade máxima de registros permitida é de ' + MAX_REGS_TEXT;
-              } */
+              }
 
               scope.dadosArquivo = {
                 colunas: colunas,
