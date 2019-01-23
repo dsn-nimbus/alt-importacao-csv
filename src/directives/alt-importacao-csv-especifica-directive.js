@@ -22,7 +22,9 @@
         <div class="alt-importacao-csv-wizard-menu">
           <div class="modal-body" ng-hide="importacaoCsvCtrl.visualizacao">
             <div class="row">
-              <div ng-repeat="step in importacaoCsvCtrl.steps" class="col-xs-3 text-center alt-importacao-csv-step-title-wrap" ng-hide="step.menuHidden">
+              <div ng-repeat="step in importacaoCsvCtrl.steps" 
+                      class="col-xs-4 text-center alt-importacao-csv-step-title-wrap" 
+                      ng-hide="step.menuHidden">
                 <div class="row">
                   <div class="col-xs-12">
                     <button type="button" class="alt-importacao-csv-step-title" 
@@ -68,7 +70,7 @@
                           <button type="button" class="btn btn-block btn-default alt-espacamento-bottom alt-espacamento-top anexos-input-file-fake">
                             Selecionar arquivo
                           </button>
-                          <span class="small microcopy text-muted">Arquivos permitidos: XLS, XLSX, CSV e ODS<br>Tamanho máximo: 2MB ou 3.000 registros</span>
+                          <span class="small microcopy text-muted">Tamanho máximo: 2MB ou 3.000 registros</span>
 
                           <input type="file" class="anexos-input-file-real alt-hand ng-isolate-scope" 
                             ng-model="importacaoCsvCtrl.arquivo" 
@@ -519,7 +521,7 @@
               name: 'Passo 1',
               number: 1,
               active: true,
-              progress: 12.6,
+              progress: 16.65,
               init: null,
               title: 'Importar dados',
               message: $sce.trustAsHtml('Selecione o arquivo para importação com extensão xls, xlsx, ods ou csv')
@@ -528,7 +530,7 @@
               name: 'Passo 2',
               number: 2,
               active: false,
-              progress: 37.5,
+              progress: 49.95,
               init: _inicializarMapeamento,
               title: 'Configurar importação',
               message: $sce.trustAsHtml('Selecione o(s) campo(s) do ERP4ME correspondente(s) a cada coluna do arquivo para realizar a importação')
@@ -537,19 +539,20 @@
               name: 'Passo 3',
               number: 3,
               active: false,
-              progress: 62.5,
+              progress: 83.28,
               init: _inicializarRegras,
               title: 'Configurar Tipo de pessoa',
               message: $sce.trustAsHtml('Vincule a informação do arquivo ao <em>Tipo de pessoa</em> correspondente no cadastro do ERP4ME')
             },
             {
-              name: 'Passo 4',
+              name: 'Visualização',
               number: 4,
               active: false,
-              progress: 87.7,
+              progress: 100,
               init: null, // _inicializarRevisao,
-              title: 'Resumo', // 'Importação de ' + self.labelTipo.toLowerCase(),
-              message: $sce.trustAsHtml('Existem registros não importados para o sistema, verifique as mensagens')
+              title: '', // 'Importação de ' + self.labelTipo.toLowerCase(),
+              message: $sce.trustAsHtml('Existem registros não importados para o sistema, verifique as mensagens'),
+              menuHidden: true
             }
           ];
 
