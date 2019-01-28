@@ -382,8 +382,8 @@
                               <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 
                               <i ng-switch-default class="fa fa-clock-o" aria-hidden="true"></i>
                               <i ng-switch-when="1" class="fa fa-check-circle text-success" aria-hidden="true"></i>
-                              <i ng-switch-when="3" class="fa fa-times-circle text-danger" aria-hidden="true"></i>
-                              <i ng-switch-when="2" class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i>
+                              <i ng-switch-when="2" class="fa fa-times-circle text-danger" aria-hidden="true"></i>
+                              <i ng-switch-when="3" class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i>
                               <span ng-switch-when="2" class="visible-xs-inline-block visible-sm-inline-block"> não importado</span>
                               <span ng-switch-when="3" class="visible-xs-inline-block visible-sm-inline-block"> importado com observação</span>
                             </div>
