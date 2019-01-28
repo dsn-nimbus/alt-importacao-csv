@@ -5,9 +5,10 @@
     .factory('AltImportacaoCsvCampoModel', [
       '$sce',
       '$filter',
+      '$log',
       'moment',
       'latinize',
-      function($sce, $filter, moment, latinize) {
+      function($sce, $filter, $log, moment, latinize) {
       class CampoImportacao {
         constructor(e) {
           this.nome = '';
@@ -111,9 +112,10 @@
               if (geral && geral.objeto) {
                 this.valor = geral.objeto;
                 this.referencia = geral.objeto[this.objetoReferencia];
-              }
-              else {
-                this._incluirMensagemValidacao(this.obrigatorio ? 'é obrigatório' : 'não possui regra');
+              } else {
+                var msg = this.obrigatorio ? 'é obrigatório' : 'não possui regra';
+                this._incluirMensagemValidacao(msg);
+                $log.error(msg);
               }
             }
           }
@@ -124,19 +126,25 @@
           if (m.isValid()) {
             this.valor = m.toDate();
             this.referencia = m.format('DD/MM/YYYY');
-          }
-          else {
-            this._incluirMensagemValidacao('não é uma data válida');
+          } else {
+            var msg = 'não é uma data válida';
+            this._incluirMensagemValidacao(msg);
+            $log.error(msg);
           }
         }
 
         _validarTexto() {
+          if (this.tipo === String && typeof this.dado !== "string") {
+            this.dado = this.dado.toString();
+          }
+
           if (typeof this.dado === "string" && this.dado.length <= 255) {
             this.valor = this.dado;
             this.referencia = this.valor;
-          }
-          else {
-            this._incluirMensagemValidacao('não é um texto válido');
+          } else {
+            var msg = 'não é um texto válido';
+            this._incluirMensagemValidacao(msg);
+            $log.error(msg);
           }
         }
 
@@ -145,9 +153,10 @@
           if ($.isNumeric(this.dado)) {
             this.valor = parseFloat(this.dado);
             this.referencia = this.monetario ? $filter('currency')(this.valor, 'R$ ') : this.valor;
-          }
-          else {
-            this._incluirMensagemValidacao('não é um número válido');
+          } else {
+            var msg = 'não é um número válido';
+            this._incluirMensagemValidacao(msg);
+            $log.error(msg);
           }
         }
 
@@ -156,13 +165,13 @@
           if (dado === '0' || dado === 'false' || dado === 'nao' || dado === 'n' || dado === 'f') {
             this.valor = false;
             this.referencia = 'Não';
-          }
-          else if (dado === '1' || dado === 'true' || dado === 'sim' || dado === 's' || dado === 'v') {
+          } else if (dado === '1' || dado === 'true' || dado === 'sim' || dado === 's' || dado === 'v') {
             this.valor = true;
             this.referencia = 'Sim';
-          }
-          else {
-            this._incluirMensagemValidacao('não é um "verdadeiro ou falso" válido');
+          } else {
+            var msg = 'não é um "verdadeiro ou falso" válido';
+            this._incluirMensagemValidacao(msg);
+            $log.error(msg);
           }
         }
 

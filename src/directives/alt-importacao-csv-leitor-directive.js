@@ -79,7 +79,9 @@
           }
 
           function obterLinhas (workbook, colunas) {
-            let sheetToJsonOptions = {};
+            let sheetToJsonOptions = {
+              raw: true
+            };
 
             if (!!scope.opts && !scope.opts.colunasPossuemTitulos && !!colunas && colunas.length) {
               sheetToJsonOptions.header = colunas;
@@ -124,7 +126,7 @@
               else {
                 // le o arquivo e monta colunas e linhas
                 bstr = e.target.result;
-                workbook = XLSX.read(bstr, {type:'binary'});
+                workbook = XLSX.read(bstr, {type: 'binary', cellDates: true});
                 colunas = obterColunas(workbook.Sheets[workbook.SheetNames[0]]);
                 linhas = obterLinhas(workbook, colunas);
               }

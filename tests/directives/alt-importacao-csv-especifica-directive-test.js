@@ -3,7 +3,7 @@
 describe('altImportacaoCsvEspecifica', function() {
   var _compile, _rootScope, _scope, _directiveScope, _element, _ctrl,
   _importacaoEspecificaService, _evento, _modalService, _OpcoesImportacao, _mockPessoas, 
-  _mockCategorias, _mockCampos, _mockArquivo, _CampoImportacao, _timeout, _alertaService;
+  _mockCategorias, _mockCampos, _mockArquivo, _CampoImportacao, _timeout, _alertaService, _moment;
 
   beforeEach(module('alt.importacao-csv'));
 
@@ -18,6 +18,7 @@ describe('altImportacaoCsvEspecifica', function() {
     _OpcoesImportacao = $injector.get('AltImportacaoCsvOpcoesModel');
     _CampoImportacao = $injector.get('AltImportacaoCsvCampoModel');
     _alertaService = $injector.get('AltAlertaFlutuanteService');
+    _moment = $injector.get('moment');
 
     spyOn(_modalService, 'open').and.callFake(angular.noop);
     spyOn(_modalService, 'close').and.callFake(angular.noop);
@@ -1427,6 +1428,36 @@ describe('altImportacaoCsvEspecifica', function() {
 
       expect(_ctrl.obterValorCampoProp(obj, 'nome')).toEqual('teste');
       expect(_ctrl.obterValorCampoProp(obj, 'endereco.logradouro')).toEqual('teste_objeto_complexo');
+    });
+  });
+
+  describe('formatarLinhaValor', function() {
+    it('deve retornar o valor original - não é instancia de Date', function() {
+      var html = '<div alt-importacao-csv-especifica></div>';
+      
+      _element = angular.element(html);
+      _compile(_element)(_scope);
+      
+      _directiveScope = _element.isolateScope();
+      _ctrl = _directiveScope.importacaoCsvCtrl;
+
+      var valor = '01/01/2001';
+
+      expect(_ctrl.formatarLinhaValor(valor)).toEqual(valor);
+    });
+
+    it('deve retornar valor tratado - é instancia de Date', function() {
+      var html = '<div alt-importacao-csv-especifica></div>';
+      
+      _element = angular.element(html);
+      _compile(_element)(_scope);
+      
+      _directiveScope = _element.isolateScope();
+      _ctrl = _directiveScope.importacaoCsvCtrl;
+
+      var valor = new Date();
+
+      expect(_ctrl.formatarLinhaValor(valor)).toEqual(_moment(valor).add(1, 'days').format('DD/MM/YYYY'));
     });
   });
 

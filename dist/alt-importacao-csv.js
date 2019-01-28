@@ -172,7 +172,7 @@
                         <tr ng-repeat="linha in importacaoCsvCtrl.arquivo.dezPrimeirasLinhas">
                           <td ng-repeat="coluna in importacaoCsvCtrl.arquivo.colunas track by $index" 
                             ng-class="{'alt-importacao-csv-coluna-possui-campo-mapeado': !!importacaoCsvCtrl.importacao.colunas[$index].campos && importacaoCsvCtrl.importacao.colunas[$index].campos.length}">
-                            {{ linha[coluna] }}
+                            {{ importacaoCsvCtrl.formatarLinhaValor(linha[coluna]) }}
                           </td>
                         </tr>
                       </tbody>
@@ -497,7 +497,8 @@
         'AltImportacaoCsvModel',
         'AltImportacaoCsvEvento',
         'AltCarregandoInfoService',
-        function($rootScope, $scope, $sce, $timeout, modalService, selectService, alertaService, Campo, Lote, Importacao, evento, AltCarregandoInfoService) {
+        'moment',
+        function($rootScope, $scope, $sce, $timeout, modalService, selectService, alertaService, Campo, Lote, Importacao, evento, AltCarregandoInfoService, moment) {
         var self = this;
 
         const ID_MODAL = '#alt-importacao-csv-modal';
@@ -933,6 +934,15 @@
           return $sce.trustAsHtml(msg);
         };
 
+        self.formatarLinhaValor = function (valor) {
+          if (valor instanceof Date) {
+            let m = moment(valor).add(1, 'days').format('DD/MM/YYYY');
+            return m;
+          }
+
+          return valor;
+        };
+
         $scope.$on(evento.modal.ABRE_MODAL_IMPORTACAO_ESPECIFICA, (ev, opcoes) => {
           _inicializar(opcoes);
           modalService.open(ID_MODAL);
@@ -1032,7 +1042,9 @@
           }
 
           function obterLinhas (workbook, colunas) {
-            let sheetToJsonOptions = {};
+            let sheetToJsonOptions = {
+              raw: true
+            };
 
             if (!!scope.opts && !scope.opts.colunasPossuemTitulos && !!colunas && colunas.length) {
               sheetToJsonOptions.header = colunas;
@@ -1077,7 +1089,7 @@
               else {
                 // le o arquivo e monta colunas e linhas
                 bstr = e.target.result;
-                workbook = XLSX.read(bstr, {type:'binary'});
+                workbook = XLSX.read(bstr, {type: 'binary', cellDates: true});
                 colunas = obterColunas(workbook.Sheets[workbook.SheetNames[0]]);
                 linhas = obterLinhas(workbook, colunas);
               }
@@ -1148,9 +1160,10 @@
     .factory('AltImportacaoCsvCampoModel', [
       '$sce',
       '$filter',
+      '$log',
       'moment',
       'latinize',
-      function($sce, $filter, moment, latinize) {
+      function($sce, $filter, $log, moment, latinize) {
       class CampoImportacao {
         constructor(e) {
           this.nome = '';
@@ -1254,9 +1267,10 @@
               if (geral && geral.objeto) {
                 this.valor = geral.objeto;
                 this.referencia = geral.objeto[this.objetoReferencia];
-              }
-              else {
-                this._incluirMensagemValidacao(this.obrigatorio ? 'é obrigatório' : 'não possui regra');
+              } else {
+                var msg = this.obrigatorio ? 'é obrigatório' : 'não possui regra';
+                this._incluirMensagemValidacao(msg);
+                $log.error(msg);
               }
             }
           }
@@ -1267,19 +1281,25 @@
           if (m.isValid()) {
             this.valor = m.toDate();
             this.referencia = m.format('DD/MM/YYYY');
-          }
-          else {
-            this._incluirMensagemValidacao('não é uma data válida');
+          } else {
+            var msg = 'não é uma data válida';
+            this._incluirMensagemValidacao(msg);
+            $log.error(msg);
           }
         }
 
         _validarTexto() {
+          if (this.tipo === String && typeof this.dado !== "string") {
+            this.dado = this.dado.toString();
+          }
+
           if (typeof this.dado === "string" && this.dado.length <= 255) {
             this.valor = this.dado;
             this.referencia = this.valor;
-          }
-          else {
-            this._incluirMensagemValidacao('não é um texto válido');
+          } else {
+            var msg = 'não é um texto válido';
+            this._incluirMensagemValidacao(msg);
+            $log.error(msg);
           }
         }
 
@@ -1288,9 +1308,10 @@
           if ($.isNumeric(this.dado)) {
             this.valor = parseFloat(this.dado);
             this.referencia = this.monetario ? $filter('currency')(this.valor, 'R$ ') : this.valor;
-          }
-          else {
-            this._incluirMensagemValidacao('não é um número válido');
+          } else {
+            var msg = 'não é um número válido';
+            this._incluirMensagemValidacao(msg);
+            $log.error(msg);
           }
         }
 
@@ -1299,13 +1320,13 @@
           if (dado === '0' || dado === 'false' || dado === 'nao' || dado === 'n' || dado === 'f') {
             this.valor = false;
             this.referencia = 'Não';
-          }
-          else if (dado === '1' || dado === 'true' || dado === 'sim' || dado === 's' || dado === 'v') {
+          } else if (dado === '1' || dado === 'true' || dado === 'sim' || dado === 's' || dado === 'v') {
             this.valor = true;
             this.referencia = 'Sim';
-          }
-          else {
-            this._incluirMensagemValidacao('não é um "verdadeiro ou falso" válido');
+          } else {
+            var msg = 'não é um "verdadeiro ou falso" válido';
+            this._incluirMensagemValidacao(msg);
+            $log.error(msg);
           }
         }
 

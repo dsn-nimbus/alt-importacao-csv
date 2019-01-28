@@ -150,7 +150,7 @@
                         <tr ng-repeat="linha in importacaoCsvCtrl.arquivo.dezPrimeirasLinhas">
                           <td ng-repeat="coluna in importacaoCsvCtrl.arquivo.colunas track by $index" 
                             ng-class="{'alt-importacao-csv-coluna-possui-campo-mapeado': !!importacaoCsvCtrl.importacao.colunas[$index].campos && importacaoCsvCtrl.importacao.colunas[$index].campos.length}">
-                            {{ linha[coluna] }}
+                            {{ importacaoCsvCtrl.formatarLinhaValor(linha[coluna]) }}
                           </td>
                         </tr>
                       </tbody>
@@ -475,7 +475,8 @@
         'AltImportacaoCsvModel',
         'AltImportacaoCsvEvento',
         'AltCarregandoInfoService',
-        function($rootScope, $scope, $sce, $timeout, modalService, selectService, alertaService, Campo, Lote, Importacao, evento, AltCarregandoInfoService) {
+        'moment',
+        function($rootScope, $scope, $sce, $timeout, modalService, selectService, alertaService, Campo, Lote, Importacao, evento, AltCarregandoInfoService, moment) {
         var self = this;
 
         const ID_MODAL = '#alt-importacao-csv-modal';
@@ -909,6 +910,15 @@
 
         self.obterMensagemErro = function (msg) {
           return $sce.trustAsHtml(msg);
+        };
+
+        self.formatarLinhaValor = function (valor) {
+          if (valor instanceof Date) {
+            let m = moment(valor).add(1, 'days').format('DD/MM/YYYY');
+            return m;
+          }
+
+          return valor;
         };
 
         $scope.$on(evento.modal.ABRE_MODAL_IMPORTACAO_ESPECIFICA, (ev, opcoes) => {
