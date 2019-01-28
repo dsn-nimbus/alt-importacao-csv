@@ -171,11 +171,15 @@
           el.on('change', onChangeHandler);
 
           scope.$watch('opts.colunasPossuemTitulos', (newValue, oldValue) => {
-            if ((!!newValue || !!oldValue) && !!scope.file) {
+            if ((!!newValue || !!oldValue) && newValue !== undefined && !!scope.file) {
               fileReaderHandler(scope.file);
             } else {
               scope.dadosArquivo = undefined;
               ng.element(el).val('');
+            }
+
+            if (newValue === undefined) {
+              scope.file = null;
             }
           });
         }

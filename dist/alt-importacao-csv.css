@@ -266,6 +266,10 @@
   margin-bottom: 15px;
 }
 
+.alt-importacao-csv-report-row-status {
+  text-align: center;
+}
+
 .alt-importacao-csv-report label {
   margin-right: 3px;
   font-weight: 700;
@@ -291,7 +295,6 @@
 /* .alt-importacao-csv-rules-field {
   margin-bottom: 20px;
 } */
-
 .alt-importacao-csv-rule-general .alt-importacao-csv-rule-general-col-status {
   float: left;
   position: relative;
@@ -446,6 +449,55 @@
 .alt-importacao-csv-lb-campo-mapeado span:hover {
   cursor: pointer;
   color: #222;
+}
+
+.alt-importacao-nav-tabs {
+  margin-bottom: 20px;
+}
+
+.alt-importacao-registros-total,
+.alt-importacao-registros-sucesso,
+.alt-importacao-registros-erro,
+.alt-importacao-registros-conflito {
+  padding-left: 5px;
+  border-left: 3px solid #777777;
+  margin-bottom: 2px;
+  line-height: 16px;
+}
+
+.alt-importacao-registros-sucesso {
+  border-color: #25834f;
+}
+
+.alt-importacao-registros-erro {
+  border-color: #a94442;
+}
+
+.alt-importacao-registros-conflito {
+  border-color: #c5820e;
+}
+
+@media all and (min-width: 1px) and (max-width: 767px) {
+  .alt-importacao-csv-report-row {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    line-height: normal;
+    vertical-align: middle;
+    font-size: 13px;
+  }
+
+  .alt-importacao-csv-report-row-button {
+    position: relative;
+    top: -14px;
+  }
+  
+  .alt-importacao-csv-report-row-status {
+    text-align: left;
+  }
+
+  .alt-importacao-csv-rule-table-overflow {
+    overflow-x: auto;
+  }
 }
 
 @media all and (min-width: 1280px) {
