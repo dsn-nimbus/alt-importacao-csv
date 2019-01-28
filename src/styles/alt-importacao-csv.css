@@ -498,6 +498,14 @@
   .alt-importacao-csv-rule-table-overflow {
     overflow-x: auto;
   }
+
+  .alt-importacao-nav-tabs > li {
+    max-width: 145px;
+  }
+
+  .alt-importacao-nav-tabs > li > a {
+    height: 85px;
+  }
 }
 
 @media all and (min-width: 1280px) {
