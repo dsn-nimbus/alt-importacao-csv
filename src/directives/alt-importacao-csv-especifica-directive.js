@@ -317,8 +317,8 @@
                           </div>
 
                           <div class="row">
-                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row">
-                              <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span> {{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}
+                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}">
+                              <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span> <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) | LimitadorTexto:campo.template.textLimit"></span>
                             </div>
                             <div class="col-xs-9 col-sm-9 col-md-1 alt-importacao-csv-report-row alt-importacao-csv-report-row-status" ng-switch="item.status">
                               <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 
@@ -375,8 +375,8 @@
                           </div>
 
                           <div class="row">
-                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row">
-                              <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span> {{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}
+                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}">
+                              <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span>  <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) | LimitadorTexto:campo.template.textLimit"></span>
                             </div>
                             <div class="col-xs-9 col-sm-9 col-md-1 alt-importacao-csv-report-row alt-importacao-csv-report-row-status" ng-switch="item.status">
                               <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 

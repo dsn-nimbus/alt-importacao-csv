@@ -339,8 +339,8 @@
                           </div>
 
                           <div class="row">
-                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row">
-                              <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span> {{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}
+                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}">
+                              <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span> <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) | LimitadorTexto:campo.template.textLimit"></span>
                             </div>
                             <div class="col-xs-9 col-sm-9 col-md-1 alt-importacao-csv-report-row alt-importacao-csv-report-row-status" ng-switch="item.status">
                               <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 
@@ -397,8 +397,8 @@
                           </div>
 
                           <div class="row">
-                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row">
-                              <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span> {{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}
+                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}">
+                              <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span>  <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) | LimitadorTexto:campo.template.textLimit"></span>
                             </div>
                             <div class="col-xs-9 col-sm-9 col-md-1 alt-importacao-csv-report-row alt-importacao-csv-report-row-status" ng-switch="item.status">
                               <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 
@@ -1154,6 +1154,43 @@
 }(angular));
 
 ;(function(ng) {
+    'use strict';
+
+    ng.module('alt.importacao-csv')
+    /**
+    * @description Filtro que retorna o texto limitado
+    * @class alt.importacao-csv.LimitadorTexto
+    * @memberof alt.importacao-csv
+    */
+    .filter('LimitadorTexto', ['_', function (_) {
+      /**
+       * @description Retorna o texto limitado
+       * @memberof alt.importacao-csv.LimitadorTexto
+       * @function limitadorTexto
+       * @param {string} o texto a ser filtrado
+       * @param {number} o número do limite
+       * @returns {string} retorna a string limitada
+       * @inner
+       */
+      return function (input, val) {
+          if (!input) {
+              return;
+          }
+
+          var _tamanho = val || 53;
+
+          if (input.length > _tamanho) {
+              input = _.truncate(input, {
+                  length: _tamanho
+              });
+          }
+
+          return input.trim();
+      };
+    }]);
+}(angular));
+
+;(function(ng) {
   "use strict";
 
   ng.module('alt.importacao-csv')
@@ -1245,7 +1282,8 @@
         _parseTemplate() {
           this.template = {
             width: typeof this.template.width === "number" ? this.template.width : 12,
-            label: this.template.label ? this.template.label : this.nome
+            label: this.template.label ? this.template.label : this.nome,
+            textLimit: this.template.textLimit ? this.template.textLimit : 53
           };
         }
 

@@ -90,7 +90,8 @@
         _parseTemplate() {
           this.template = {
             width: typeof this.template.width === "number" ? this.template.width : 12,
-            label: this.template.label ? this.template.label : this.nome
+            label: this.template.label ? this.template.label : this.nome,
+            textLimit: this.template.textLimit ? this.template.textLimit : 53
           };
         }
 
