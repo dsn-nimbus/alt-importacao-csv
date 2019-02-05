@@ -33,7 +33,7 @@
       <div class="modal-content">
 
         <div class="modal-header alt-cor-principal">
-          <button type="button" class="close" data-dismiss="modal">
+          <button type="button" class="close" ng-click="importacaoCsvCtrl.limparImportacao()">
             <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
           </button>
 
@@ -87,7 +87,7 @@
                   <div class="col-xs-12">
                     <div class="alt-importacao-csv-wizard-title" ng-bind="importacaoCsvCtrl.getTitle()"></div>
                     <p class="alt-importacao-csv-wizard-obs alt-espacamento-top" ng-bind-html="importacaoCsvCtrl.getMessage()"><p>
-                    <div class="alt-espacamento-top clearfix">
+                    <div class="alt-espacamento-top alt-espacamento-bottom clearfix">
                         <div class="col-xs-12 col-sm-4 col-sm-offset-4 anexos-input-file-escondido-container text-center">
                           <button type="button" class="btn btn-block btn-default alt-espacamento-bottom alt-espacamento-top anexos-input-file-fake">
                             Selecionar arquivo
@@ -104,15 +104,35 @@
                             required>
                         </div>
                     </div>
-                    <div class="text-center">
-                        <span ng-show="importacaoCsvCtrl.arquivo.valido" class="text-success alt-importacao-csv-input-ckeck">
-                          <i class="fa fa-check-circle"></i>&nbsp; {{importacaoCsvCtrl.arquivo.nome}}
-                        </span>
-                        <span ng-show="!!importacaoCsvCtrl.arquivo && !importacaoCsvCtrl.arquivo.valido" 
-                          class="text-danger alt-importacao-csv-input-ckeck">
-                          <i class="fa fa-times-circle"></i>&nbsp; {{importacaoCsvCtrl.arquivo.mensagem}}
-                        </span>
+                    <div class="text-center" ng-show="!!importacaoCsvCtrl.arquivo && importacaoCsvCtrl.arquivo.valido">
+                      <span class="text-success alt-importacao-csv-input-ckeck">
+                        <i class="fa fa-check-circle"></i> {{importacaoCsvCtrl.arquivo.nome}}
+                      </span>
                     </div>
+
+                    <div class="text-center" ng-show="!!importacaoCsvCtrl.arquivo && !importacaoCsvCtrl.arquivo.valido">
+                      <span class="text-muted alt-importacao-csv-input-ckeck" ng-hide="importacaoCsvCtrl.exibirMensagemErro">
+                        <i class="fa fa-check-circle"></i> {{importacaoCsvCtrl.arquivo.nome}}
+                      </span>
+                    </div>
+
+                    <div class="alert alert-danger alert-dismissible alt-espacamento-bottom" role="alert" ng-show="importacaoCsvCtrl.exibirMensagemErro">
+                      <button type="button" ng-click="importacaoCsvCtrl.removerMensagemErro()" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      
+                      <div class="" ng-show="!!importacaoCsvCtrl.arquivo && !importacaoCsvCtrl.arquivo.valido">
+                        <span class="text-danger alt-importacao-csv-input-ckeck">
+                          <i class="fa fa-exclamation-triangle"></i> {{importacaoCsvCtrl.arquivo.mensagem}}
+                        </span>
+                      </div>
+                      <div class="" ng-show="!importacaoCsvCtrl.arquivo && importacaoCsvCtrl.exibirMensagemErro">
+                        <span class="alt-importacao-csv-input-ckeck">
+                          <i class="fa fa-exclamation-triangle"></i> Selecione um arquivo para prosseguir
+                        </span>
+                      </div>
+
+                    </div>
+
+
                   </div>
                 </div>
               </form>
@@ -193,10 +213,13 @@
 
               <div class="row">
                 <div class="col-xs-12 alt-importacao-csv-map-warnings">
-                  <p ng-repeat="campo in importacaoCsvCtrl.importacao.campos" ng-if="campo.vinculoRequisitado">
-                    <i class="fa fa-exclamation-triangle"></i> 
-                    <span>O campo <b>{{campo.nome}}</b> do ERP4ME deve ser vinculado a uma coluna do arquivo.</span>
-                  </p>
+                  <div class="alert alert-danger alert-dismissible alt-espacamento-bottom" role="alert" ng-show="importacaoCsvCtrl.exibirMensagemErro">
+                    <button type="button" ng-click="importacaoCsvCtrl.removerMensagemErro()" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <p ng-repeat="campo in importacaoCsvCtrl.importacao.campos" ng-if="campo.vinculoRequisitado && importacaoCsvCtrl.exibirMensagemErro">
+                      <i class="fa fa-exclamation-triangle"></i> 
+                      <span>O campo <b>{{campo.nome}}</b> do ERP4ME deve ser vinculado a uma coluna do arquivo</span>
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -234,57 +257,65 @@
                     </div>
                   </div>
                   <div class="alt-importacao-csv-rule-table-overflow">
-                  <div class="row alt-espacamento-bottom collapse in" id="alt-importacao-csv-rules-field-{{campo.chave}}">
-                    <div class="col-xs-12 alt-importacao-csv-rule-table">
-                      <table class="table table-responsive table-condensed table-striped">
-                        <thead>
-                          <tr>
-                            <th class="status"></th>
-                            <th>Informação arquivo</th>
-                            <th>Ocorrências</th>
-                            <th>Informação ERP4ME</th>
-                            <th></th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr ng-repeat="regra in campo.regrasDeValor"
-                            ng-class="{
-                              'rule-success': regra.objeto,
-                              'rule-warning': !regra.objeto && !campo.obrigatorio,
-                              'rule-error': !regra.objeto && campo.obrigatorio}"
-                            ng-hide="
-                              (!regra.objeto && importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'regras') ||
-                              ((!regra.objeto && campo.obrigatorio || regra.objeto) && importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'nulosValidos') ||
-                              ((!regra.objeto && !campo.obrigatorio || regra.objeto) && importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'nulosInvalidos')">
-                            <td class="status">
-                              <i class="fa fa-exclamation-triangle text-warning" ng-show="!regra.objeto && campo.obrigatorio"></i>
-                              <i class="fa fa-check text-success" ng-show="regra.objeto"></i>
-                            </td>
-                            <td ng-hide="regra.geral">{{regra.valor}}</td>
-                            <td ng-show="regra.geral"><i class="text-secondary">Todas as ocorrências</i></td>
-                            <td class="alt-importacao-csv-rules-td-count-field">{{regra.quantidade}}</td>
-                            <td class="alt-importacao-csv-rules-td-select-field"
-                              style="min-width: 180px;">
-                              <select id="alt-importacao-csv-rules-select-{{campo.chave}}-{{$index}}"
-                                class="alt-importacao-csv-rules-select"
-                                style="width: 100%;"
-                                ng-model="regra.objeto"
-                                ng-change="importacaoCsvCtrl.resumirRegrasDeValor()"
-                                ng-options="{{importacaoCsvCtrl.ngOptionsRegraDeCampo(campo)}}">
-                              </select>
-                            </td>
-                            <td class="alt-importacao-csv-rules-td-actions-field">
-                              <button type="button" class="btn btn-default pull-right" 
-                                ng-disabled="!regra.objeto"
-                                ng-click="importacaoCsvCtrl.limparRegra(campo, $index)">
-                                Limpar
-                              </button>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
+                    <div class="row alt-espacamento-bottom collapse in" id="alt-importacao-csv-rules-field-{{campo.chave}}">
+                      <div class="col-xs-12 alt-importacao-csv-rule-table alt-espacamento-bottom">
+                        <table class="table table-responsive table-condensed table-striped">
+                          <thead>
+                            <tr>
+                              <th class="status"></th>
+                              <th>Informação arquivo</th>
+                              <th>Ocorrências</th>
+                              <th>Informação ERP4ME</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr ng-repeat="regra in campo.regrasDeValor"
+                              ng-class="{
+                                'rule-success': regra.objeto,
+                                'rule-warning': !regra.objeto && !campo.obrigatorio,
+                                'rule-error': !regra.objeto && campo.obrigatorio}"
+                              ng-hide="
+                                (!regra.objeto && importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'regras') ||
+                                ((!regra.objeto && campo.obrigatorio || regra.objeto) && importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'nulosValidos') ||
+                                ((!regra.objeto && !campo.obrigatorio || regra.objeto) && importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'nulosInvalidos')">
+                              <td class="status">
+                                <i class="fa fa-exclamation-triangle text-warning" ng-show="!regra.objeto && campo.obrigatorio"></i>
+                                <i class="fa fa-check text-success" ng-show="regra.objeto"></i>
+                              </td>
+                              <td ng-hide="regra.geral">{{regra.valor}}</td>
+                              <td ng-show="regra.geral"><i class="text-secondary">Todas as ocorrências</i></td>
+                              <td class="alt-importacao-csv-rules-td-count-field">{{regra.quantidade}}</td>
+                              <td class="alt-importacao-csv-rules-td-select-field"
+                                style="min-width: 180px;">
+                                <select id="alt-importacao-csv-rules-select-{{campo.chave}}-{{$index}}"
+                                  class="alt-importacao-csv-rules-select"
+                                  style="width: 100%;"
+                                  ng-model="regra.objeto"
+                                  ng-change="importacaoCsvCtrl.resumirRegrasDeValor()"
+                                  ng-options="{{importacaoCsvCtrl.ngOptionsRegraDeCampo(campo)}}">
+                                </select>
+                              </td>
+                              <td class="alt-importacao-csv-rules-td-actions-field">
+                                <button type="button" class="btn btn-default pull-right" 
+                                  ng-disabled="!regra.objeto"
+                                  ng-click="importacaoCsvCtrl.limparRegra(campo, $index)">
+                                  Limpar
+                                </button>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                  </div>
+
+                    <div class="alert alert-danger alert-dismissible alt-espacamento-bottom" role="alert" ng-show="importacaoCsvCtrl.resumoRegrasDeValor.nulosInvalidos > 0 && importacaoCsvCtrl.exibirMensagemErro">
+                      <button type="button" ng-click="importacaoCsvCtrl.removerMensagemErro()" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <span ng-show="importacaoCsvCtrl.exibirMensagemErro" class="alt-importacao-csv-input-ckeck">
+                        <i class="fa fa-exclamation-triangle"></i> Vincule todas as informações para prosseguir com a importação
+                      </span>
+                    </div>
+
                   </div>
                 </div>
               </div>
@@ -449,25 +480,25 @@
           <button type="button" class="btn btn-default pull-left" 
             ng-click="importacaoCsvCtrl.prevStep()"
             ng-hide="importacaoCsvCtrl.steps[0].active">
-            <i class="fa fa-long-arrow-left"></i>&nbsp; Anterior
+            <i class="fa fa-long-arrow-left"></i> Anterior
           </button>
 
           <button type="button" class="btn btn-primary"
             ng-hide="importacaoCsvCtrl.steps[2].active"
-            ng-disabled="importacaoCsvCtrl.invalidStep()"
-            ng-click="importacaoCsvCtrl.nextStep()">
+            ng-click="importacaoCsvCtrl.invalidStep(importacaoCsvCtrl.nextStep)">
             Próximo &nbsp;<i class="fa fa-long-arrow-right"></i>
           </button>
+
           <button type="button" class="btn btn-primary"
             ng-show="importacaoCsvCtrl.steps[2].active"
-            ng-disabled="importacaoCsvCtrl.invalidStep()"
-            ng-click="importacaoCsvCtrl.salvarImportacao()">
+            ng-click="importacaoCsvCtrl.invalidStep(importacaoCsvCtrl.salvarImportacao)">
             Importar
           </button>
-          <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+
+          <button type="button" class="btn btn-default" ng-click="importacaoCsvCtrl.limparImportacao()">Cancelar</button>
         </div>
         <div class="modal-footer" ng-show="importacaoCsvCtrl.visualizacao">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-default" ng-click="importacaoCsvCtrl.limparImportacao()">Fechar</button>
         </div>
       </div>
     </div>
@@ -496,9 +527,10 @@
         'AltImportacaoCsvLoteModel',
         'AltImportacaoCsvModel',
         'AltImportacaoCsvEvento',
+        'AltImportacaoCsvOpcoesTituloMensagemModel',
         'AltCarregandoInfoService',
         'moment',
-        function($rootScope, $scope, $sce, $timeout, modalService, selectService, alertaService, Campo, Lote, Importacao, evento, AltCarregandoInfoService, moment) {
+        function($rootScope, $scope, $sce, $timeout, modalService, selectService, alertaService, Campo, Lote, Importacao, evento, OpcoesImportacaoTituloMensagemModel, AltCarregandoInfoService, moment) {
         var self = this;
 
         const ID_MODAL = '#alt-importacao-csv-modal';
@@ -608,6 +640,17 @@
           self.resumoRegrasDeValor = undefined;
           self.itensNaoImportados = [];
           self.itensImportadosComObservacao = [];
+          self.exibirMensagemErro = false;
+
+          let _step1 = null;
+          let _step2 = null;
+          let _step3 = null;
+
+          if (!!opcoes.titulosMensagensCustomizadas && opcoes.titulosMensagensCustomizadas.length) {
+            _step1 = opcoes.obterTitulosMensagensPorStep(1);
+            _step2 = opcoes.obterTitulosMensagensPorStep(2);
+            _step3 = opcoes.obterTitulosMensagensPorStep(3);
+          }
 
           self.steps = [
             {
@@ -616,8 +659,8 @@
               active: true,
               progress: 16.65,
               init: null,
-              title: 'Importar dados',
-              message: $sce.trustAsHtml('Selecione o arquivo para importação com extensão xls, xlsx, ods ou csv')
+              title: _step1 ? _step1.title : 'Importar dados',
+              message: _step1 ? $sce.trustAsHtml(_step1.message) : $sce.trustAsHtml('Selecione o arquivo para importação com extensão xls, xlsx, ods ou csv')
             },
             {
               name: 'Passo 2',
@@ -625,8 +668,8 @@
               active: false,
               progress: 49.95,
               init: _inicializarMapeamento,
-              title: 'Configurar importação',
-              message: $sce.trustAsHtml('Selecione o(s) campo(s) do ERP4ME correspondente(s) a cada coluna do arquivo para realizar a importação')
+              title:  _step2 ? _step2.title : 'Configurar importação',
+              message: _step2 ? $sce.trustAsHtml(_step2.message) : $sce.trustAsHtml('Selecione o(s) campo(s) do ERP4ME correspondente(s) a cada coluna do arquivo para realizar a importação')
             },
             {
               name: 'Passo 3',
@@ -634,8 +677,8 @@
               active: false,
               progress: 83.28,
               init: _inicializarRegras,
-              title: 'Configurar Tipo de pessoa',
-              message: $sce.trustAsHtml('Vincule a informação do arquivo ao <em>Tipo de pessoa</em> correspondente no cadastro do ERP4ME')
+              title:  _step3 ? _step3.title : 'Configurar vinculos',
+              message: _step3 ? $sce.trustAsHtml(_step3.message) : $sce.trustAsHtml('Vincule a informação do arquivo ao <em>Campo</em> correspondente no cadastro do ERP4ME')
             },
             {
               name: 'Visualização',
@@ -643,8 +686,8 @@
               active: false,
               progress: 100,
               init: null, // _inicializarRevisao,
-              title: '', // 'Importação de ' + self.labelTipo.toLowerCase(),
-              message: $sce.trustAsHtml('Existem registros não importados para o sistema, verifique as mensagens'),
+              title: '',
+              message: $sce.trustAsHtml(''),
               menuHidden: true
             }
           ];
@@ -675,6 +718,8 @@
         };
 
         self.nextStep = function() {
+          self.removerMensagemErro();
+
           AltCarregandoInfoService.exibe();
 
           $timeout(() => {
@@ -693,6 +738,8 @@
         };
 
         self.prevStep = function() {
+          self.removerMensagemErro();
+
           var current = _.findIndex(self.steps, {active: true});
           self.steps[current].active = false;
           self.steps[current].completed = false;
@@ -707,28 +754,44 @@
           }
         };
 
-        self.invalidStep = function() {
+        self.invalidStep = function(fn) {
           var index = _.findIndex(self.steps, {active: true});
+          var invalid = false;
+
           switch (index) {
             case 0:
-              return !self.arquivo || !self.arquivo.valido;
+              invalid = (!self.arquivo || !self.arquivo.valido);
+              break;
             case 1:
-              return self.importacao.mapaInvalido;
+              invalid = self.importacao.mapaInvalido;
+              break;
             case 2:
-              return self.resumoRegrasDeValor.nulosInvalidos > 0;
+              invalid = self.resumoRegrasDeValor.nulosInvalidos > 0;
+              break;
             case 3:
-              return self.lote && self.lote.erros !== 0;
-            default:
-              return false;
+              invalid = (self.lote && self.lote.erros !== 0);
+              break;
           }
+
+          if (invalid) {
+            self.exibirMensagemErro = true;
+            return invalid;
+          }
+
+          fn();
+          return invalid;
         };
 
         self.vincular = function(campo, coluna) {
+          self.removerMensagemErro();
+
           self.importacao.vincular(campo, coluna);
           selectService.inicializar(CLASS_SELECT_CAMPOS);
         };
 
         self.desvincular = function(campo) {
+          self.removerMensagemErro();
+
           self.importacao.desvincular(campo);
           selectService.inicializar(CLASS_SELECT_CAMPOS);
         };
@@ -738,6 +801,8 @@
         };
 
         self.resumirRegrasDeValor = function() {
+          self.removerMensagemErro();
+
           ng.extend(self.resumoRegrasDeValor, self.importacao.resumirRegrasDeValor());
           if (self.resumoRegrasDeValor.exibir === 'nulosValidos' && self.resumoRegrasDeValor.nulosValidos === 0) {
             self.resumoRegrasDeValor.exibir = 'todos';
@@ -755,6 +820,8 @@
         };
 
         self.arquivoAlterado = function() {
+          self.removerMensagemErro();
+
           var index = _.findIndex(self.steps, {active: true});
           var etapaInicial = index === 0;
           var etapaMapa = index === 1;
@@ -856,13 +923,8 @@
               // _.remove(lotePersistencia.itens, (item) => {return item.desconsiderado;});
 
               self.gravarLote(lotePersistencia).then((resp) => {
-                self.arquivo = null;
-                self.arquivoOpcoes.colunasPossuemTitulos = undefined;
+                self.limparImportacao();
 
-                ng.element(".anexos-input-file-real").val('');
-                ng.element(".anexos-input-file-real")[0] = null;
-
-                modalService.close(ID_MODAL);
                 $rootScope.$broadcast(self.eventoCriacao, resp);
               });
               return true;
@@ -941,6 +1003,20 @@
           }
 
           return valor;
+        };
+
+        self.removerMensagemErro = function () {
+          self.exibirMensagemErro = false;
+        };
+
+        self.limparImportacao = function () {
+          self.arquivo = null;
+          self.arquivoOpcoes.colunasPossuemTitulos = undefined;
+
+          ng.element('.anexos-input-file-real').val('');
+          ng.element('.anexos-input-file-real')[0] = null;
+
+          modalService.close(ID_MODAL);
         };
 
         $scope.$on(evento.modal.ABRE_MODAL_IMPORTACAO_ESPECIFICA, (ev, opcoes) => {
@@ -1083,7 +1159,7 @@
               // valida tamanho do arquivo
               else if (size > MAX_SIZE) {
                 valido = false;
-                mensagem = 'O tamanho máximo de arquivo permitido é de ' + MAX_SIZE_TEXT;
+                mensagem = 'Selecione um arquivo válido, o tamanho máximo de arquivo permitido é de ' + MAX_SIZE_TEXT;
               }
 
               else {
@@ -1097,7 +1173,7 @@
               // valida quantidade de registros
               if (linhas.length > MAX_REGS) {
                 valido = false;
-                mensagem = 'Quantidade máxima de registros permitida é de ' + MAX_REGS_TEXT;
+                mensagem = 'Selecione um arquivo válido, a quantidade máxima permitida para importação é de ' + MAX_REGS_TEXT + ' registros';
               }
 
               scope.dadosArquivo = {
@@ -1136,14 +1212,17 @@
           el.on('change', onChangeHandler);
 
           scope.$watch('opts.colunasPossuemTitulos', (newValue, oldValue) => {
-            if ((!!newValue || !!oldValue) && newValue !== undefined && !!scope.file) {
+            if (!scope.dadosArquivo) {
+              ng.element(el).val('');
+              scope.file = null;
+            } else if ((!!newValue || !!oldValue) && newValue !== undefined && !!scope.file) {
               fileReaderHandler(scope.file);
             } else {
               scope.dadosArquivo = undefined;
               ng.element(el).val('');
             }
 
-            if (newValue === undefined) {
+            if (!newValue) {
               scope.file = null;
             }
           });
@@ -1698,6 +1777,7 @@
           this.gravarLote = undefined;
           this.visualizacao = false;
           this.loteProcessado = undefined;
+          this.titulosMensagensCustomizadas = [];
 
           ng.extend(this, obj);
 
@@ -1736,9 +1816,43 @@
             }
           }
         }
+
+        obterTitulosMensagensPorStep (step) {
+          if (!this.titulosMensagensCustomizadas || !this.titulosMensagensCustomizadas.length) {
+            return null;
+          }
+
+          let _retorno = this.titulosMensagensCustomizadas.filter((item) => {
+            return item.step === step;
+          });
+
+          if (!!_retorno && !!_retorno.length) {
+            return _retorno[0];
+          }
+
+          return null;
+        }
+
       }
 
       return OpcoesImportacao;
+    }]);
+}(angular));
+
+;(function(ng) {
+  "use strict";
+
+  ng.module('alt.importacao-csv')
+    .factory('AltImportacaoCsvOpcoesTituloMensagemModel', [function() {
+      class OpcoesTituloMensagemModel {
+        constructor(step, title, message) {
+          this.step = step;
+          this.title = title;
+          this.message = message;
+        }
+      }
+
+      return OpcoesTituloMensagemModel;
     }]);
 }(angular));
 

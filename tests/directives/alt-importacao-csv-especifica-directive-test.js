@@ -1,7 +1,7 @@
 'use strict';
 
 describe('altImportacaoCsvEspecifica', function() {
-  var _compile, _rootScope, _scope, _directiveScope, _element, _ctrl,
+  var _compile, _rootScope, _scope, _sce, _directiveScope, _element, _ctrl,
   _importacaoEspecificaService, _evento, _modalService, _OpcoesImportacao, _mockPessoas, 
   _mockCategorias, _mockCampos, _mockArquivo, _CampoImportacao, _timeout, _alertaService, _moment;
 
@@ -12,6 +12,7 @@ describe('altImportacaoCsvEspecifica', function() {
     _scope = _rootScope.$new();
     _compile = $injector.get('$compile');
     _timeout = $injector.get('$timeout');
+    _sce = $injector.get('$sce');
     _importacaoEspecificaService = $injector.get('AltImportacaoCsvEspecificaService');
     _evento = $injector.get('AltImportacaoCsvEvento');
     _modalService = $injector.get('AltModalService');
@@ -187,7 +188,8 @@ describe('altImportacaoCsvEspecifica', function() {
         eventoCriacao: 'venda:lote_importacao_criado',
         campos: _mockCampos,
         validarLote: (lote) => {return new Promise((resolve) => {return resolve(lote)});},
-        gravarLote: () => {return new Promise((resolve) => {return {}});}
+        gravarLote: () => {return new Promise((resolve) => {return {}});},
+        titulosMensagensCustomizadas: [{step: 1, title: 'a', message: 'abc'}]
       });
     });
     it('deve configurar opcoes corretamente', function() {
@@ -199,6 +201,8 @@ describe('altImportacaoCsvEspecifica', function() {
       expect(_ctrl.eventoCriacao).toBe(opcoes.eventoCriacao);
       expect(_ctrl.campos).toEqual(opcoes.campos);
       expect(_ctrl.camposConfigurados).toEqual(opcoes.campos);
+      expect(_ctrl.steps[0].title).toBe('a');
+      expect(_sce.getTrustedHtml(_ctrl.steps[0].message)).toBe('abc');
     });
     it('deve inicializar propriedades nulas', function() {
       _ctrl.campoSelecionado = {};
@@ -753,7 +757,7 @@ describe('altImportacaoCsvEspecifica', function() {
 
   });
 
-  describe('invalidStep()', function() {
+  describe('invalidStep(angular.noop)', function() {
     var opcoes, _mockArquivo2;
     beforeEach(function() {
       _criarComponente();
@@ -770,7 +774,7 @@ describe('altImportacaoCsvEspecifica', function() {
     describe('- etapa 1', function() {
       describe('- sem arquivo -', function() {
         it('deve considerar etapa inválida', function() {
-          expect(_ctrl.invalidStep()).toBe(true);
+          expect(_ctrl.invalidStep(angular.noop)).toBe(true);
         });
       });
       describe('- com arquivo inválido -', function() {
@@ -781,7 +785,7 @@ describe('altImportacaoCsvEspecifica', function() {
           _ctrl.arquivoAlterado();
         });
         it('deve considerar etapa inválida', function() {
-          expect(_ctrl.invalidStep()).toBe(true);
+          expect(_ctrl.invalidStep(angular.noop)).toBe(true);
         });
       });
       describe('- com arquivo válido -', function() {
@@ -790,7 +794,7 @@ describe('altImportacaoCsvEspecifica', function() {
           _ctrl.arquivoAlterado();
         });
         it('deve considerar etapa válida', function() {
-          expect(_ctrl.invalidStep()).toBe(false);
+          expect(_ctrl.invalidStep(angular.noop)).toBe(false);
         });
       });
     });
@@ -804,7 +808,7 @@ describe('altImportacaoCsvEspecifica', function() {
       });
       describe('- mapa inválido -', function() {
         it('deve considerar etapa inválida', function() {
-          expect(_ctrl.invalidStep()).toBe(true);
+          expect(_ctrl.invalidStep(angular.noop)).toBe(true);
         });
       });
       describe('- mapa válido -', function() {
@@ -815,7 +819,7 @@ describe('altImportacaoCsvEspecifica', function() {
           _ctrl.vincular('valor', 8);
         });
         it('deve considerar etapa válida', function() {
-          expect(_ctrl.invalidStep()).toBe(false);
+          expect(_ctrl.invalidStep(angular.noop)).toBe(false);
         });
       });
     });
@@ -835,7 +839,7 @@ describe('altImportacaoCsvEspecifica', function() {
       });
       describe('- com nulos inválidos -', function() {
         it('deve considerar etapa inválida', function() {
-          expect(_ctrl.invalidStep()).toBe(true);
+          expect(_ctrl.invalidStep(angular.noop)).toBe(true);
         });
       });
       describe('- sem nulos inválidos -', function() {
@@ -845,7 +849,7 @@ describe('altImportacaoCsvEspecifica', function() {
           _ctrl.resumirRegrasDeValor();
         });
         it('deve considerar etapa válida', function() {
-          expect(_ctrl.invalidStep()).toBe(false);
+          expect(_ctrl.invalidStep(angular.noop)).toBe(false);
         });
       });
     });
@@ -873,7 +877,7 @@ describe('altImportacaoCsvEspecifica', function() {
       });
       describe('- lote com erros -', function() {
         it('deve considerar etapa inválida', function() {
-          expect(_ctrl.invalidStep()).toBe(true);
+          expect(_ctrl.invalidStep(angular.noop)).toBe(true);
         });
       });
       describe('- lote sem erros -', function() {
@@ -881,7 +885,7 @@ describe('altImportacaoCsvEspecifica', function() {
           _ctrl.lote.desconsiderarItem(3);
         });
         it('deve considerar etapa válida', function() {
-          expect(_ctrl.invalidStep()).toBe(false);
+          expect(_ctrl.invalidStep(angular.noop)).toBe(false);
         });
       });
     }); */
@@ -1460,5 +1464,4 @@ describe('altImportacaoCsvEspecifica', function() {
       expect(_ctrl.formatarLinhaValor(valor)).toEqual(_moment(valor).add(1, 'days').format('DD/MM/YYYY'));
     });
   });
-
 });

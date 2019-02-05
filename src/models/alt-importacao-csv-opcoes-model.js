@@ -13,6 +13,7 @@
           this.gravarLote = undefined;
           this.visualizacao = false;
           this.loteProcessado = undefined;
+          this.titulosMensagensCustomizadas = [];
 
           ng.extend(this, obj);
 
@@ -51,6 +52,23 @@
             }
           }
         }
+
+        obterTitulosMensagensPorStep (step) {
+          if (!this.titulosMensagensCustomizadas || !this.titulosMensagensCustomizadas.length) {
+            return null;
+          }
+
+          let _retorno = this.titulosMensagensCustomizadas.filter((item) => {
+            return item.step === step;
+          });
+
+          if (!!_retorno && !!_retorno.length) {
+            return _retorno[0];
+          }
+
+          return null;
+        }
+
       }
 
       return OpcoesImportacao;

@@ -120,7 +120,7 @@
               // valida tamanho do arquivo
               else if (size > MAX_SIZE) {
                 valido = false;
-                mensagem = 'O tamanho máximo de arquivo permitido é de ' + MAX_SIZE_TEXT;
+                mensagem = 'Selecione um arquivo válido, o tamanho máximo de arquivo permitido é de ' + MAX_SIZE_TEXT;
               }
 
               else {
@@ -134,7 +134,7 @@
               // valida quantidade de registros
               if (linhas.length > MAX_REGS) {
                 valido = false;
-                mensagem = 'Quantidade máxima de registros permitida é de ' + MAX_REGS_TEXT;
+                mensagem = 'Selecione um arquivo válido, a quantidade máxima permitida para importação é de ' + MAX_REGS_TEXT + ' registros';
               }
 
               scope.dadosArquivo = {
@@ -173,14 +173,17 @@
           el.on('change', onChangeHandler);
 
           scope.$watch('opts.colunasPossuemTitulos', (newValue, oldValue) => {
-            if ((!!newValue || !!oldValue) && newValue !== undefined && !!scope.file) {
+            if (!scope.dadosArquivo) {
+              ng.element(el).val('');
+              scope.file = null;
+            } else if ((!!newValue || !!oldValue) && newValue !== undefined && !!scope.file) {
               fileReaderHandler(scope.file);
             } else {
               scope.dadosArquivo = undefined;
               ng.element(el).val('');
             }
 
-            if (newValue === undefined) {
+            if (!newValue) {
               scope.file = null;
             }
           });

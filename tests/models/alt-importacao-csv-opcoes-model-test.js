@@ -58,7 +58,8 @@ describe('OpcoesImportacao', function() {
           eventoCriacao: 'teste:objeto_criado',
           campos: [{nome: 'Prop1', chave: 'prop1', tipo: Number}],
           validarLote: () => {return new Promise((lote) => {return lote});},
-          gravarLote: () => {return new Promise((lote) => {return {}});}
+          gravarLote: () => {return new Promise((lote) => {return {}});},
+          titulosMensagensCustomizadas: [{step: 1, title: 'a', message: 'abc'}]
         };
         var obj = new OpcoesImportacao(params);
         expect(obj.labelTipo).toEqual(params.labelTipo);
@@ -66,6 +67,7 @@ describe('OpcoesImportacao', function() {
         expect(obj.campos).toEqual(params.campos);
         expect(obj.validarLote).toEqual(params.validarLote);
         expect(obj.gravarLote).toEqual(params.gravarLote);
+        expect(obj.titulosMensagensCustomizadas).toEqual(params.titulosMensagensCustomizadas);
       });
     });
     describe('- visualização -', function() {
@@ -105,4 +107,67 @@ describe('OpcoesImportacao', function() {
     
   });
 
+  describe('obterTitulosMensagensPorStep', () => {
+    it('deve obter null, nenhum titulo/mensagem informados', () => {
+      var params = {
+        labelTipo: 'teste',
+        eventoCriacao: 'teste:objeto_criado',
+        campos: [{nome: 'Prop1', chave: 'prop1', tipo: Number}],
+        validarLote: () => {return new Promise((lote) => {return lote});},
+        gravarLote: () => {return new Promise((lote) => {return {}});},
+      };
+      var obj = new OpcoesImportacao(params);
+
+      expect(obj.obterTitulosMensagensPorStep(1)).toBeNull();
+      
+    });
+
+    it('deve obter null, step informado é inexistente', () => {
+      var params = {
+        labelTipo: 'teste',
+        eventoCriacao: 'teste:objeto_criado',
+        campos: [{nome: 'Prop1', chave: 'prop1', tipo: Number}],
+        validarLote: () => {return new Promise((lote) => {return lote});},
+        gravarLote: () => {return new Promise((lote) => {return {}});},
+        titulosMensagensCustomizadas: [{step: 1, title: 'a', message: 'abc'}]
+      };
+      var obj = new OpcoesImportacao(params);
+      
+      expect(obj.obterTitulosMensagensPorStep(10)).toBeNull();
+    });
+
+    it('deve obter title/mensagem, step informado é válido', () => {
+      var params = {
+        labelTipo: 'teste',
+        eventoCriacao: 'teste:objeto_criado',
+        campos: [{nome: 'Prop1', chave: 'prop1', tipo: Number}],
+        validarLote: () => {return new Promise((lote) => {return lote});},
+        gravarLote: () => {return new Promise((lote) => {return {}});},
+        titulosMensagensCustomizadas: [
+          {step: 1, title: 'a', message: 'abc'},
+          {step: 2, title: 'ab', message: 'abcd'}
+        ]
+      };
+      var obj = new OpcoesImportacao(params);
+
+      expect(obj.obterTitulosMensagensPorStep(1)).toEqual({step: 1, title: 'a', message: 'abc'});
+    });
+
+    it('deve obter o primeiro resultado de title/mensagem, existe mais de um step informado na lista', () => {
+      var params = {
+        labelTipo: 'teste',
+        eventoCriacao: 'teste:objeto_criado',
+        campos: [{nome: 'Prop1', chave: 'prop1', tipo: Number}],
+        validarLote: () => {return new Promise((lote) => {return lote});},
+        gravarLote: () => {return new Promise((lote) => {return {}});},
+        titulosMensagensCustomizadas: [
+          {step: 1, title: 'a', message: 'abc'},
+          {step: 1, title: 'ab', message: 'abcd'}
+        ]
+      };
+      var obj = new OpcoesImportacao(params);
+
+      expect(obj.obterTitulosMensagensPorStep(1)).toEqual({step: 1, title: 'a', message: 'abc'});
+    });
+  });
 });
