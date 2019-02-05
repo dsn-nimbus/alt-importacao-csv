@@ -922,11 +922,18 @@
               var lotePersistencia = ng.copy(self.lote);
               // _.remove(lotePersistencia.itens, (item) => {return item.desconsiderado;});
 
-              self.gravarLote(lotePersistencia).then((resp) => {
+              self.gravarLote(lotePersistencia)
+              .then((resp) => {
                 self.limparImportacao();
 
                 $rootScope.$broadcast(self.eventoCriacao, resp);
+              })
+              .catch((erro) => {
+                if (erro && erro.data && erro.data.importacaoDuplicada) {
+                  self.limparImportacao();
+                }
               });
+
               return true;
             });
           }, 200);

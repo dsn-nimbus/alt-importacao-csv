@@ -1,15 +1,17 @@
 'use strict';
 
 describe('altImportacaoCsvEspecifica', function() {
-  var _compile, _rootScope, _scope, _sce, _directiveScope, _element, _ctrl,
+  var _compile, _rootScope, _scope, _q, _sce, _directiveScope, _element, _ctrl,
   _importacaoEspecificaService, _evento, _modalService, _OpcoesImportacao, _mockPessoas, 
-  _mockCategorias, _mockCampos, _mockArquivo, _CampoImportacao, _timeout, _alertaService, _moment;
+  _mockCategorias, _mockCampos, _mockArquivo, _CampoImportacao, _timeout, _alertaService,
+  _altCarregandoInfoService, _moment;
 
   beforeEach(module('alt.importacao-csv'));
 
   beforeEach(inject(function($injector) {
     _rootScope = $injector.get('$rootScope');
     _scope = _rootScope.$new();
+    _q = $injector.get('$q');
     _compile = $injector.get('$compile');
     _timeout = $injector.get('$timeout');
     _sce = $injector.get('$sce');
@@ -19,11 +21,13 @@ describe('altImportacaoCsvEspecifica', function() {
     _OpcoesImportacao = $injector.get('AltImportacaoCsvOpcoesModel');
     _CampoImportacao = $injector.get('AltImportacaoCsvCampoModel');
     _alertaService = $injector.get('AltAlertaFlutuanteService');
+    _altCarregandoInfoService = $injector.get('AltCarregandoInfoService');
     _moment = $injector.get('moment');
 
     spyOn(_modalService, 'open').and.callFake(angular.noop);
     spyOn(_modalService, 'close').and.callFake(angular.noop);
     spyOn(_alertaService, 'exibe').and.callFake(angular.noop);
+    spyOn(_altCarregandoInfoService, 'exibe').and.callFake(angular.noop);
 
     _mockPessoas = [
       {idUnico: 1, nome: 'Consumidor Final', tpPessoaGrupo: 'Clientes', tpPessoaGrupoEnum: 0}
