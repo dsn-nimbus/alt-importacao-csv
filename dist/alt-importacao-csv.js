@@ -929,7 +929,7 @@
                 $rootScope.$broadcast(self.eventoCriacao, resp);
               })
               .catch((erro) => {
-                if (erro && erro.data && erro.data.importacaoDuplicada) {
+                if (erro && erro.data && erro.data.informacaoDuplicada) {
                   self.limparImportacao();
                 }
               });
