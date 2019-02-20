@@ -228,10 +228,12 @@
                         {{campo.nome}} 
                         <span ng-show="!!campo.coluna && importacaoCsvCtrl.arquivoOpcoes.colunasPossuemTitulos">(coluna {{importacaoCsvCtrl.nomeColuna(campo.coluna)}})</span>
                       </label>
+                      <!--
                       <label ng-hide="importacaoCsvCtrl.obterQtdCamposRegras(importacaoCsvCtrl.importacao.campos) > 1"  class="alt-importacao-csv-rules-title no-alt-hand">
                         {{campo.nome}} 
                         <span ng-show="!!campo.coluna && importacaoCsvCtrl.arquivoOpcoes.colunasPossuemTitulos">(coluna {{importacaoCsvCtrl.nomeColuna(campo.coluna)}})</span>
                       </label>
+                      -->
                     </div>
                   </div>
                   <div class="alt-importacao-csv-rule-table-overflow">
@@ -243,7 +245,7 @@
                               <th class="status"></th>
                               <th>Informação arquivo</th>
                               <th>Ocorrências</th>
-                              <th>Informação ERP4ME</th>
+                              <th>{{ campo.nome }}</th>
                               <th></th>
                             </tr>
                           </thead>
@@ -265,9 +267,10 @@
                               <td ng-show="regra.geral"><i class="text-secondary">Todas as ocorrências</i></td>
                               <td class="alt-importacao-csv-rules-td-count-field">{{regra.quantidade}}</td>
                               <td class="alt-importacao-csv-rules-td-select-field"
-                                style="min-width: 180px;">
+                                style="min-width: 180px;"
+                                ng-class="{ 'has-error': importacaoCsvCtrl.resumoRegrasDeValor.nulosInvalidos > 0 && importacaoCsvCtrl.exibirMensagemErro && !regra.objeto }">
                                 <select id="alt-importacao-csv-rules-select-{{campo.chave}}-{{$index}}"
-                                  class="alt-importacao-csv-rules-select"
+                                  class="alt-importacao-csv-rules-select form-control"
                                   style="width: 100%;"
                                   ng-model="regra.objeto"
                                   ng-change="importacaoCsvCtrl.resumirRegrasDeValor()"
