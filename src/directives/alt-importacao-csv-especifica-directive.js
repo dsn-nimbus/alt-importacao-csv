@@ -22,8 +22,9 @@
         <div class="alt-importacao-csv-wizard-menu">
           <div class="modal-body" ng-hide="importacaoCsvCtrl.visualizacao">
             <div class="row">
-              <div ng-repeat="step in importacaoCsvCtrl.steps" 
-                      class="col-xs-4 text-center alt-importacao-csv-step-title-wrap" 
+              <div ng-repeat="step in importacaoCsvCtrl.steps"
+                      class="text-center alt-importacao-csv-step-title-wrap"
+                      ng-class="{'col-xs-4': !!importacaoCsvCtrl.exibeEtapaRegras, 'col-xs-6': !importacaoCsvCtrl.exibeEtapaRegras}"
                       ng-hide="step.menuHidden">
                 <div class="row">
                   <div class="col-xs-12">
@@ -228,12 +229,10 @@
                         {{campo.nome}} 
                         <span ng-show="!!campo.coluna && importacaoCsvCtrl.arquivoOpcoes.colunasPossuemTitulos">(coluna {{importacaoCsvCtrl.nomeColuna(campo.coluna)}})</span>
                       </label>
-                      <!--
                       <label ng-hide="importacaoCsvCtrl.obterQtdCamposRegras(importacaoCsvCtrl.importacao.campos) > 1"  class="alt-importacao-csv-rules-title no-alt-hand">
                         {{campo.nome}} 
                         <span ng-show="!!campo.coluna && importacaoCsvCtrl.arquivoOpcoes.colunasPossuemTitulos">(coluna {{importacaoCsvCtrl.nomeColuna(campo.coluna)}})</span>
                       </label>
-                      -->
                     </div>
                   </div>
                   <div class="alt-importacao-csv-rule-table-overflow">
@@ -245,7 +244,7 @@
                               <th class="status"></th>
                               <th>Informação arquivo</th>
                               <th>Ocorrências</th>
-                              <th>{{ campo.nome }}</th>
+                              <th>Informação ERP4ME</th>
                               <th></th>
                             </tr>
                           </thead>
@@ -267,10 +266,9 @@
                               <td ng-show="regra.geral"><i class="text-secondary">Todas as ocorrências</i></td>
                               <td class="alt-importacao-csv-rules-td-count-field">{{regra.quantidade}}</td>
                               <td class="alt-importacao-csv-rules-td-select-field"
-                                style="min-width: 180px;"
-                                ng-class="{ 'has-error': importacaoCsvCtrl.resumoRegrasDeValor.nulosInvalidos > 0 && importacaoCsvCtrl.exibirMensagemErro && !regra.objeto }">
+                                style="min-width: 180px;">
                                 <select id="alt-importacao-csv-rules-select-{{campo.chave}}-{{$index}}"
-                                  class="alt-importacao-csv-rules-select form-control"
+                                  class="alt-importacao-csv-rules-select"
                                   style="width: 100%;"
                                   ng-model="regra.objeto"
                                   ng-change="importacaoCsvCtrl.resumirRegrasDeValor()"
@@ -339,7 +337,7 @@
               <div class="tab-content">
                 <div role="tabpanel" class="tab-pane" ng-class="{'active': !!importacaoCsvCtrl.itensNaoImportados.length}" id="koopon-importacao-nao-importados">
 
-                  <div class="alt-sombra-secundaria">
+                  <div class="">
                     <div class="" ng-repeat="item in importacaoCsvCtrl.itensNaoImportados">
 
                       <div class="alt-importacao-csv-report">
@@ -351,8 +349,8 @@
                           </div>
 
                           <div class="row">
-                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}">
-                              <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span> <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) | LimitadorTexto:campo.template.textLimit"></span>
+                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}">
+                              <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span> <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) | LimitadorTexto:campo.template.textLimit"></span>
                             </div>
                             <div class="col-xs-9 col-sm-9 col-md-1 alt-importacao-csv-report-row alt-importacao-csv-report-row-status" ng-switch="item.status">
                               <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 
@@ -383,7 +381,7 @@
                 
                             <div class="row">
                               <div class="col-sm-6" ng-repeat="campo in importacaoCsvCtrl.campos" >
-                                <span class="small text-muted"><strong>{{ campo.nome }}:</strong></span> <span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}</span>
+                                <span class="small text-muted"><strong>{{ campo.nome }}:</strong></span> <span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}</span>
                               </div>
                             </div>
                           </div>
@@ -397,7 +395,7 @@
                 
                 <div role="tabpanel" class="tab-pane" ng-class="{'active': !importacaoCsvCtrl.itensNaoImportados.length}" id="koopon-importacao-importados-observacao">
 
-                  <div class="alt-sombra-secundaria">
+                  <div>
                     <div class="" ng-repeat="item in importacaoCsvCtrl.itensImportadosComObservacao">
 
                       <div class="alt-importacao-csv-report">
@@ -409,8 +407,8 @@
                           </div>
 
                           <div class="row">
-                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}">
-                              <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span>  <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) | LimitadorTexto:campo.template.textLimit"></span>
+                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}">
+                              <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span>  <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) | LimitadorTexto:campo.template.textLimit"></span>
                             </div>
                             <div class="col-xs-9 col-sm-9 col-md-1 alt-importacao-csv-report-row alt-importacao-csv-report-row-status" ng-switch="item.status">
                               <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 
@@ -441,7 +439,7 @@
                 
                             <div class="row">
                               <div class="col-sm-6" ng-repeat="campo in importacaoCsvCtrl.campos" >
-                                <span class="small text-muted"><strong>{{ campo.nome }}:</strong></span> <span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.tplProp) }}</span>
+                                <span class="small text-muted"><strong>{{ campo.nome }}:</strong></span> <span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}</span>
                               </div>
                             </div>
                           </div>
@@ -465,13 +463,13 @@
           </button>
 
           <button type="button" class="btn btn-primary"
-            ng-hide="importacaoCsvCtrl.steps[2].active"
+            ng-show="importacaoCsvCtrl.steps[0].active || (importacaoCsvCtrl.exibeEtapaRegras && importacaoCsvCtrl.steps[1].active)"
             ng-click="importacaoCsvCtrl.invalidStep(importacaoCsvCtrl.nextStep)">
             Próximo &nbsp;<i class="fa fa-long-arrow-right"></i>
           </button>
 
           <button type="button" class="btn btn-primary"
-            ng-show="importacaoCsvCtrl.steps[2].active"
+            ng-hide="importacaoCsvCtrl.steps[0].active || (importacaoCsvCtrl.exibeEtapaRegras && importacaoCsvCtrl.steps[1].active)"
             ng-click="importacaoCsvCtrl.invalidStep(importacaoCsvCtrl.salvarImportacao)">
             Importar
           </button>
@@ -623,6 +621,8 @@
           self.itensImportadosComObservacao = [];
           self.exibirMensagemErro = false;
 
+          self.exibeEtapaRegras = _.filter(self.camposConfigurados, {tipo: Object}).length !== 0;
+
           let _step1 = null;
           let _step2 = null;
           let _step3 = null;
@@ -638,7 +638,7 @@
               name: 'Passo 1',
               number: 1,
               active: true,
-              progress: 16.65,
+              progress: self.exibeEtapaRegras ? 16.65 : 25,
               init: null,
               title: _step1 ? _step1.title : 'Importar dados',
               message: _step1 ? $sce.trustAsHtml(_step1.message) : $sce.trustAsHtml('Selecione o arquivo para importação com extensão xls, xlsx, ods ou csv')
@@ -647,7 +647,7 @@
               name: 'Passo 2',
               number: 2,
               active: false,
-              progress: 49.95,
+              progress: self.exibeEtapaRegras ? 49.95 : 75,
               init: _inicializarMapeamento,
               title:  _step2 ? _step2.title : 'Configurar importação',
               message: _step2 ? $sce.trustAsHtml(_step2.message) : $sce.trustAsHtml('Selecione o(s) campo(s) do ERP4ME correspondente(s) a cada coluna do arquivo para realizar a importação')
@@ -656,10 +656,11 @@
               name: 'Passo 3',
               number: 3,
               active: false,
-              progress: 83.28,
+              progress: self.exibeEtapaRegras ? 83.28 : 100,
               init: _inicializarRegras,
               title:  _step3 ? _step3.title : 'Configurar vinculos',
-              message: _step3 ? $sce.trustAsHtml(_step3.message) : $sce.trustAsHtml('Vincule a informação do arquivo ao <em>Campo</em> correspondente no cadastro do ERP4ME')
+              message: _step3 ? $sce.trustAsHtml(_step3.message) : $sce.trustAsHtml('Vincule a informação do arquivo ao <em>Campo</em> correspondente no cadastro do ERP4ME'),
+              menuHidden: !self.exibeEtapaRegras
             },
             {
               name: 'Visualização',
@@ -683,19 +684,13 @@
         };
 
         self.getTitle = function () {
-          if (!self.steps || !self.steps.length) {
-            return '';
-          }
-
-          return self.steps.find((item) => { return item.active === true; }).title;
+          let step = _.find(self.steps, (item) => { return item.active === true; });
+          return step ? step.title : '';
         };
 
         self.getMessage = function () {
-          if (!self.steps || !self.steps.length) {
-            return '';
-          }
-
-          return self.steps.find((item) => { return item.active === true; }).message;
+          let step = _.find(self.steps, (item) => { return item.active === true; });
+          return step ? step.message : '';
         };
 
         self.nextStep = function() {
@@ -966,18 +961,21 @@
           return _.sortBy(_filtro, 'exibirNaVisualizacaoListaPosicao');
         };
 
-        self.obterValorCampoProp = function (obj, prop) {
-          if (typeof obj === 'undefined') {
+        self.obterValorCampoProp = function (obj, template) {
+          if (typeof obj === 'undefined' || !template || !template.property) {
             return false;
           }
-
-          let _index = prop.indexOf('.');
-
-          if (_index > -1) {
-            return self.obterValorCampoProp(obj[prop.substring(0, _index)], prop.substr(_index + 1));
+          if (typeof template.property === 'function') {
+            return template.property(obj);
           }
 
-          return obj[prop];
+          let _index = template.property.indexOf('.');
+
+          if (_index > -1) {
+            return self.obterValorCampoProp(obj[template.property.substring(0, _index)], {property: template.property.substr(_index + 1)});
+          }
+
+          return obj[template.property];
         };
 
         self.obterMensagemErro = function (msg) {

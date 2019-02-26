@@ -42,7 +42,8 @@ describe('CampoImportacao', function() {
         expect(campo.template).toEqual({
           label: 'Campo Teste',
           width: 12,
-          textLimit: 53
+          textLimit: 53,
+          property: 'campoTeste'
         });
         expect(campo.objetoChave).toBe(undefined);
         expect(campo.objetoReferencia).toBe(undefined);
@@ -70,7 +71,8 @@ describe('CampoImportacao', function() {
         expect(campo.template).toEqual({
           label: 'Campo Teste',
           width: 12,
-          textLimit: 53
+          textLimit: 53,
+          property: 'campoTeste'
         });
         expect(campo.objetoChave).toBe(undefined);
         expect(campo.objetoReferencia).toBe(undefined);
@@ -145,7 +147,8 @@ describe('CampoImportacao', function() {
         expect(campo.template).toEqual({
           label: 'Produto',
           width: 12,
-          textLimit: 53
+          textLimit: 53,
+          property: 'produto'
         });
         expect(campo.objetoChave).toBe('id');
         expect(campo.objetoReferencia).toBe('descricao');
@@ -212,7 +215,8 @@ describe('CampoImportacao', function() {
         expect(campo.template).toEqual({
           label: 'C. Teste',
           width: 6,
-          textLimit: 53
+          textLimit: 53,
+          property: 'campoTeste'
         });
         expect(campo.objetoChave).toBe(undefined);
         expect(campo.objetoReferencia).toBe(undefined);

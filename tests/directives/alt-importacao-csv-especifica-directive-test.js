@@ -1431,11 +1431,13 @@ describe('altImportacaoCsvEspecifica', function() {
         nome: 'teste',
         endereco: {
           logradouro: 'teste_objeto_complexo'
-        }
+        },
+        data: new Date(2019, 0, 1)
       };
 
-      expect(_ctrl.obterValorCampoProp(obj, 'nome')).toEqual('teste');
-      expect(_ctrl.obterValorCampoProp(obj, 'endereco.logradouro')).toEqual('teste_objeto_complexo');
+      expect(_ctrl.obterValorCampoProp(obj, {property: 'nome'})).toEqual('teste');
+      expect(_ctrl.obterValorCampoProp(obj, {property: 'endereco.logradouro'})).toEqual('teste_objeto_complexo');
+      expect(_ctrl.obterValorCampoProp(obj, {property: function(o) { return _moment(o.data).format('DD/MM/YY'); } })).toEqual('01/01/19');
     });
   });
 

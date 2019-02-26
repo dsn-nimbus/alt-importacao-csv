@@ -29,7 +29,6 @@
           this.objetoCriarNovo = undefined;
           this.objetoOpcoesListagem = {};
           this.mensagens = [];
-          this.tplProp = '';
           this.exibirNaVisualizacaoListaPosicao = 0; // 0 = não exibir
 
           ng.extend(this, e);
@@ -91,7 +90,8 @@
           this.template = {
             width: typeof this.template.width === "number" ? this.template.width : 12,
             label: this.template.label ? this.template.label : this.nome,
-            textLimit: this.template.textLimit ? this.template.textLimit : 53
+            textLimit: this.template.textLimit ? this.template.textLimit : 53,
+            property: this.template.property ? this.template.property : this.chave
           };
         }
 
