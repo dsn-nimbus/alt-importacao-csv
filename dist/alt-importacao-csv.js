@@ -193,7 +193,7 @@
                         <tr ng-repeat="linha in importacaoCsvCtrl.arquivo.dezPrimeirasLinhas">
                           <td ng-repeat="coluna in importacaoCsvCtrl.arquivo.colunas track by $index" 
                             ng-class="{'alt-importacao-csv-coluna-possui-campo-mapeado': !!importacaoCsvCtrl.importacao.colunas[$index].campos && importacaoCsvCtrl.importacao.colunas[$index].campos.length}">
-                            {{importacaoCsvCtrl.formatarLinhaValor(linha[coluna])}}
+                            {{importacaoCsvCtrl.formatarLinhaValor(linha[coluna]).toString() | LimitadorTexto:40}}
                           </td>
                         </tr>
                       </tbody>
@@ -534,6 +534,7 @@
         const ID_COMUM_SELECTS_REGRAS = '#alt-importacao-csv-rules-select';
         const ID_MENU_REGRAS_DE_VALOR = '#alt-importacao-csv-btn-group-rules';
         const CLASS_SELECT_CAMPOS = '.alt-importacao-csv-select-field';
+        const CLASS_PLANILHA_MAPEAMENTO = '.alt-importacao-csv-planilha-mapeamento';
 
         var _ativarEstacaoMenu = function(idMenu, posicao) {
           var btns = $(idMenu).find('input[type="radio"]');
@@ -564,6 +565,9 @@
           self.importacao.validarMapa();
 
           selectService.inicializar(CLASS_SELECT_CAMPOS);
+          $timeout(() => {
+            $(CLASS_PLANILHA_MAPEAMENTO)[0].scrollLeft = 0;
+          });
         };
 
         var _inicializarRegras = function() {
@@ -1232,43 +1236,6 @@
 }(angular));
 
 ;(function(ng) {
-    'use strict';
-
-    ng.module('alt.importacao-csv')
-    /**
-    * @description Filtro que retorna o texto limitado
-    * @class alt.importacao-csv.LimitadorTexto
-    * @memberof alt.importacao-csv
-    */
-    .filter('LimitadorTexto', ['_', function (_) {
-      /**
-       * @description Retorna o texto limitado
-       * @memberof alt.importacao-csv.LimitadorTexto
-       * @function limitadorTexto
-       * @param {string} o texto a ser filtrado
-       * @param {number} o número do limite
-       * @returns {string} retorna a string limitada
-       * @inner
-       */
-      return function (input, val) {
-          if (!input) {
-              return;
-          }
-
-          var _tamanho = val || 53;
-
-          if (input.length > _tamanho) {
-              input = _.truncate(input, {
-                  length: _tamanho
-              });
-          }
-
-          return input.trim();
-      };
-    }]);
-}(angular));
-
-;(function(ng) {
   "use strict";
 
   ng.module('alt.importacao-csv')
@@ -1870,5 +1837,42 @@
       }
 
       return ResumoItemImportacao;
+    }]);
+}(angular));
+
+;(function(ng) {
+    'use strict';
+
+    ng.module('alt.importacao-csv')
+    /**
+    * @description Filtro que retorna o texto limitado
+    * @class alt.importacao-csv.LimitadorTexto
+    * @memberof alt.importacao-csv
+    */
+    .filter('LimitadorTexto', ['_', function (_) {
+      /**
+       * @description Retorna o texto limitado
+       * @memberof alt.importacao-csv.LimitadorTexto
+       * @function limitadorTexto
+       * @param {string} o texto a ser filtrado
+       * @param {number} o número do limite
+       * @returns {string} retorna a string limitada
+       * @inner
+       */
+      return function (input, val) {
+          if (!input) {
+              return;
+          }
+
+          var _tamanho = val || 53;
+
+          if (input.length > _tamanho) {
+              input = _.truncate(input, {
+                  length: _tamanho
+              });
+          }
+
+          return input.trim();
+      };
     }]);
 }(angular));
