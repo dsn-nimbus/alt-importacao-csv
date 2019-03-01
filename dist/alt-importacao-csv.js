@@ -193,7 +193,7 @@
                         <tr ng-repeat="linha in importacaoCsvCtrl.arquivo.dezPrimeirasLinhas">
                           <td ng-repeat="coluna in importacaoCsvCtrl.arquivo.colunas track by $index" 
                             ng-class="{'alt-importacao-csv-coluna-possui-campo-mapeado': !!importacaoCsvCtrl.importacao.colunas[$index].campos && importacaoCsvCtrl.importacao.colunas[$index].campos.length}">
-                            {{ importacaoCsvCtrl.formatarLinhaValor(linha[coluna]) }}
+                            {{importacaoCsvCtrl.formatarLinhaValor(linha[coluna])}}
                           </td>
                         </tr>
                       </tbody>
@@ -251,10 +251,6 @@
                         {{campo.nome}} 
                         <span ng-show="!!campo.coluna && importacaoCsvCtrl.arquivoOpcoes.colunasPossuemTitulos">(coluna {{importacaoCsvCtrl.nomeColuna(campo.coluna)}})</span>
                       </label>
-                      <label ng-hide="importacaoCsvCtrl.obterQtdCamposRegras(importacaoCsvCtrl.importacao.campos) > 1"  class="alt-importacao-csv-rules-title no-alt-hand">
-                        {{campo.nome}} 
-                        <span ng-show="!!campo.coluna && importacaoCsvCtrl.arquivoOpcoes.colunasPossuemTitulos">(coluna {{importacaoCsvCtrl.nomeColuna(campo.coluna)}})</span>
-                      </label>
                     </div>
                   </div>
                   <div class="alt-importacao-csv-rule-table-overflow">
@@ -266,7 +262,7 @@
                               <th class="status"></th>
                               <th>Informação arquivo</th>
                               <th>Ocorrências</th>
-                              <th>Informação ERP4ME</th>
+                              <th>{{campo.nome}}</th>
                               <th></th>
                             </tr>
                           </thead>
@@ -290,7 +286,7 @@
                               <td class="alt-importacao-csv-rules-td-select-field"
                                 style="min-width: 180px;">
                                 <select id="alt-importacao-csv-rules-select-{{campo.chave}}-{{$index}}"
-                                  class="alt-importacao-csv-rules-select"
+                                  class="alt-importacao-csv-rules-select form-control"
                                   style="width: 100%;"
                                   ng-model="regra.objeto"
                                   ng-change="importacaoCsvCtrl.resumirRegrasDeValor()"
@@ -548,7 +544,6 @@
         };
 
         var _inicializarMapeamento = function() {
-
 
           if (!!self.importacao) {
             // roda quando o valor de arquivoOpcoes.colunasPossuemTitulos é alternado
@@ -1228,10 +1223,6 @@
             } else {
               scope.dadosArquivo = undefined;
               ng.element(el).val('');
-            }
-
-            if (!newValue) {
-              scope.file = null;
             }
           });
         }

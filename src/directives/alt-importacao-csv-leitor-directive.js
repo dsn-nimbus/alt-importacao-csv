@@ -182,10 +182,6 @@
               scope.dadosArquivo = undefined;
               ng.element(el).val('');
             }
-
-            if (!newValue) {
-              scope.file = null;
-            }
           });
         }
       };
