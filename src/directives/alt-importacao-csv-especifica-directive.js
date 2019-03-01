@@ -171,7 +171,7 @@
                         <tr ng-repeat="linha in importacaoCsvCtrl.arquivo.dezPrimeirasLinhas">
                           <td ng-repeat="coluna in importacaoCsvCtrl.arquivo.colunas track by $index" 
                             ng-class="{'alt-importacao-csv-coluna-possui-campo-mapeado': !!importacaoCsvCtrl.importacao.colunas[$index].campos && importacaoCsvCtrl.importacao.colunas[$index].campos.length}">
-                            {{importacaoCsvCtrl.formatarLinhaValor(linha[coluna])}}
+                            {{importacaoCsvCtrl.formatarLinhaValor(linha[coluna]).toString() | LimitadorTexto:40}}
                           </td>
                         </tr>
                       </tbody>
@@ -512,6 +512,7 @@
         const ID_COMUM_SELECTS_REGRAS = '#alt-importacao-csv-rules-select';
         const ID_MENU_REGRAS_DE_VALOR = '#alt-importacao-csv-btn-group-rules';
         const CLASS_SELECT_CAMPOS = '.alt-importacao-csv-select-field';
+        const CLASS_PLANILHA_MAPEAMENTO = '.alt-importacao-csv-planilha-mapeamento';
 
         var _ativarEstacaoMenu = function(idMenu, posicao) {
           var btns = $(idMenu).find('input[type="radio"]');
@@ -542,6 +543,9 @@
           self.importacao.validarMapa();
 
           selectService.inicializar(CLASS_SELECT_CAMPOS);
+          $timeout(() => {
+            $(CLASS_PLANILHA_MAPEAMENTO)[0].scrollLeft = 0;
+          });
         };
 
         var _inicializarRegras = function() {
