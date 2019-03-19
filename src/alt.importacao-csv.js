@@ -10,6 +10,9 @@
   .constant('AltImportacaoCsvEvento', {
     modal: {
       ABRE_MODAL_IMPORTACAO_ESPECIFICA: 'alt-importacao-csv:abrir_modal_importacao_especifica'
+    },
+    processamento: {
+      ATUALIZAR_LOTE: 'alt-importacao-csv:atualizar_processamento_lote'
     }
   })
   .constant('latinize', latinize)

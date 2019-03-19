@@ -11,6 +11,9 @@
           this.erros = 0;
           this.conflitos = 0;
           this.nomeArquivo = '';
+          this.quantidadeImportadosSucesso = 0;
+          this.quantidadeImportadosAviso = 0;
+          this.quantidadeErros = 0;
 
           ng.extend(this, lote);
         }
