@@ -71,6 +71,16 @@
   padding: 0;
 }
 
+.alt-importacao-csv-progress-details .progress{
+  border-radius: 0;
+  margin-bottom: 0;
+}
+
+.alt-importacao-csv-progress-details {
+  padding: 0;
+  top: -13px;
+}
+
 .alt-importacao-csv-wrapper {
   height: calc(100% - 160px);
   overflow-y: auto;
@@ -223,8 +233,12 @@
   font-weight: normal;
 }
 
-.alt-importacao-csv-report-row-body.row-body-par {
+.alt-importacao-csv-report.row-par {
   background-color: #f9f9f9;
+}
+
+.alt-importacao-csv-report-wrapper .alt-importacao-csv-report:nth-child(odd) {
+  background: #ccc !important;
 }
 
 .alt-importacao-csv-report-row {
@@ -236,10 +250,12 @@
 }
 
 .alt-importacao-csv-report-row-detalhes {
-  padding: 15px;
-  background-color: #eeeeee;
+  padding: 0 15px;
   margin-bottom: 12px;
-  border-top: 2px solid #ccc;
+}
+.alt-importacao-csv-report-row-detalhes strong{
+  font-weight: 600;
+  margin-right: 5px;
 }
 
 .alt-importacao-csv-report-row-detalhes > hr {
@@ -354,11 +370,13 @@
   font-weight: 600;
 }
 .alt-importacao-csv-report-row-head > .alt-importacao-csv-report-row-head-title {
-  margin-bottom: 10px;
+  font-size: 13px;
+  text-transform: uppercase;
   font-weight: 600;
 }
 .alt-importacao-csv-report-row-head > .alert {
-  margin-bottom: 0px;
+  margin-bottom: 20px;
+  font-weight: 600;
 }
 
 .alt-importacao-csv-file-label {
@@ -429,26 +447,37 @@
   margin-bottom: 20px;
 }
 
-.alt-importacao-registros-total,
-.alt-importacao-registros-sucesso,
-.alt-importacao-registros-erro,
-.alt-importacao-registros-conflito {
-  padding-left: 5px;
-  border-left: 3px solid #777777;
-  margin-bottom: 2px;
-  line-height: 16px;
-}
-
 .alt-importacao-registros-sucesso {
   border-color: #25834f;
 }
 
-.alt-importacao-registros-erro {
-  border-color: #a94442;
+.alt-importacao-registros-erro.active a{
+  border-color: #a94442 !important;
 }
 
-.alt-importacao-registros-conflito {
-  border-color: #c5820e;
+.alt-importacao-registros-conflito.active a {
+  border-color: #c5820e !important;
+}
+
+.alt-importacao-registros-info {
+  font-size: 18px;
+}
+
+.alt-importacao-registros-numero {
+  font-size: 30px;
+  margin-right: 5px;
+  font-weight: 700;
+  opacity: .9;
+}
+.alt-importacao-registros-numero-titulo {
+  font-size: 30px;
+  margin-right: 5px;
+  font-weight: 700;
+  color: #555;
+}
+
+.thumbs-success {
+  font-size: 60px;
 }
 
 @media all and (min-width: 1px) and (max-width: 767px) {
