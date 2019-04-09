@@ -477,7 +477,11 @@
 }
 
 .thumbs-success {
-  font-size: 60px;
+  font-size: 40px;
+}
+
+.alt-importacao-csv-menu-detalhes {
+  font-size: 17px;
 }
 
 @media all and (min-width: 1px) and (max-width: 767px) {

@@ -301,7 +301,7 @@
             class="alt-importacao-csv-wizard-step alt-espacamento-bottom">
             <div class="modal-body">
               
-              <div class="row">
+              <div class="row alt-importacao-csv-menu-detalhes">
                 <div class="col-md-4 bold">
                   {{importacaoCsvCtrl.lote.nomeArquivo}}
                 </div>
@@ -344,7 +344,7 @@
 
               <div class="row alt-espacamento-top" ng-show="importacaoCsvCtrl.lote.status == 1">
                 <div class="col-md-12 alt-espacamento-left">
-                  <h2 class="text-muted"><i class="fa fa-thumbs-up thumbs-success alt-espacamento-right"></i> Importação realizada com sucesso!</h2>
+                  <h3 class="text-muted"><i class="fa fa-thumbs-up thumbs-success alt-espacamento-right"></i> Todos os registros foram importados!</h3>
                 </div>
               </div>
 
