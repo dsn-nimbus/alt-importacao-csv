@@ -1008,11 +1008,9 @@
         };
 
         self.gerarCamposOrdenadosListaVisualizacao = function (campos) {
-          let _filtro = campos.filter((campo) => {
-            return (campo.exibirNaVisualizacaoListaPosicao > 0);
-          });
+          let _filtro = campos.filter((campo) => campo.template.column !== undefined);
 
-          return _.sortBy(_filtro, 'exibirNaVisualizacaoListaPosicao');
+          return _.sortBy(_filtro, 'template.column');
         };
 
         self.obterValorCampoProp = function (obj, template) {

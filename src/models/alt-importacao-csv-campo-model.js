@@ -29,7 +29,6 @@
           this.objetoCriarNovo = undefined;
           this.objetoOpcoesListagem = {};
           this.mensagens = [];
-          this.exibirNaVisualizacaoListaPosicao = 0; // 0 = não exibir
 
           ng.extend(this, e);
 
@@ -91,7 +90,8 @@
             width: typeof this.template.width === "number" ? this.template.width : 12,
             label: this.template.label ? this.template.label : this.nome,
             textLimit: this.template.textLimit ? this.template.textLimit : 53,
-            property: this.template.property ? this.template.property : this.chave
+            property: this.template.property ? this.template.property : this.chave,
+            column: !!this.template.column ? parseInt(this.template.column) : undefined
           };
         }
 
@@ -180,7 +180,7 @@
           this.valor = undefined;
           this.referencia = undefined;
           this.mensagens = [];
-          if (!this.dado) {
+          if (this.dado === undefined) {
             this.dado = '';
           }
 
