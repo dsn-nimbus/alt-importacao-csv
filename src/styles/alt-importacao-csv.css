@@ -81,6 +81,10 @@
   top: -13px;
 }
 
+.alt-importacao-modal-body-detalhes .progress-bar-info {
+  min-width: 50px;
+}
+
 .alt-importacao-csv-wrapper {
   height: calc(100% - 160px);
   overflow-y: auto;
@@ -444,7 +448,7 @@
 }
 
 .alt-importacao-nav-tabs {
-  margin-bottom: 20px;
+  margin-bottom: 1px;
 }
 
 .alt-importacao-registros-sucesso {
@@ -521,4 +525,23 @@
   .modal-xl-custom {
     width: 1080px;
   }
+}
+
+.alt-importacao-modal-body-detalhes {
+  padding-bottom: 0;
+}
+
+.alt-importacao-tab-scroll {
+  overflow-y: auto;
+  max-height: 350px;
+  padding: 1px 0;
+}
+
+.alt-importacao-detalhes-itens-footer{
+  background-color: #fff;
+  padding: 10px;
+  border: 1px solid #bbb;
+  border-top: 0;
+  color: #777;
+  font-size: 12px;
 }

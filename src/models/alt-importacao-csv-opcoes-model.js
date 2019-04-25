@@ -2,7 +2,7 @@
   "use strict";
 
   ng.module('alt.importacao-csv')
-    .factory('AltImportacaoCsvOpcoesModel', [function() {
+    .factory('AltImportacaoCsvOpcoesModel', ['$q', function($q) {
       class OpcoesImportacao {
         constructor(obj) {
           this.labelTipo = '';
@@ -14,6 +14,8 @@
           this.visualizacao = false;
           this.loteProcessado = undefined;
           this.titulosMensagensCustomizadas = [];
+          this.obterItensNaoImportados = () => $q.resolve([]);
+          this.obterItensImportadosComAviso = () => $q.resolve([]);
 
           ng.extend(this, obj);
 

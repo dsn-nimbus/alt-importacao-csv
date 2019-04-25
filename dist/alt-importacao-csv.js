@@ -23,6 +23,43 @@
 
 }(angular));
 
+;(function(ng) {
+    'use strict';
+
+    ng.module('alt.importacao-csv')
+    /**
+    * @description Filtro que retorna o texto limitado
+    * @class alt.importacao-csv.LimitadorTexto
+    * @memberof alt.importacao-csv
+    */
+    .filter('LimitadorTexto', ['_', function (_) {
+      /**
+       * @description Retorna o texto limitado
+       * @memberof alt.importacao-csv.LimitadorTexto
+       * @function limitadorTexto
+       * @param {string} o texto a ser filtrado
+       * @param {number} o número do limite
+       * @returns {string} retorna a string limitada
+       * @inner
+       */
+      return function (input, val) {
+          if (!input) {
+              return;
+          }
+
+          var _tamanho = val || 53;
+
+          if (input.length > _tamanho) {
+              input = _.truncate(input, {
+                  length: _tamanho
+              });
+          }
+
+          return input.trim();
+      };
+    }]);
+}(angular));
+
 ;
 (function (ng) {
   'use strict';
@@ -392,8 +429,8 @@
           </div>
 
           <div ng-show="importacaoCsvCtrl.steps[3].active"
-            class="alt-importacao-csv-wizard-step alt-espacamento-bottom">
-            <div class="modal-body">
+            class="alt-importacao-csv-wizard-step">
+            <div class="modal-body alt-importacao-modal-body-detalhes">
               
               <div class="row alt-importacao-csv-menu-detalhes">
                 <div class="col-md-4 bold">
@@ -442,10 +479,16 @@
                 </div>
               </div>
 
+              <div class="row alt-espacamento-top" ng-show="importacaoCsvCtrl.carregandoLogsItens">
+                <div class="col-md-12 alt-espacamento-left text-center">
+                  <br/><i class="text-muted fa fa-refresh fa-spin fa-3x fa-fw"></i>
+                </div>
+              </div>
+
               <div class="row alt-espacamento-top" ng-show="importacaoCsvCtrl.lote.status == 2">
                 <div class="col-md-12">
                   <ul class="nav nav-tabs row alt-importacao-nav-tabs alt-espacamento-top" role="tablist">
-                    <li class="alt-importacao-registros-conflito" role="presentation" ng-show="!!importacaoCsvCtrl.itensImportadosComObservacao.length" ng-class="{'active': !importacaoCsvCtrl.itensNaoImportados.length}" koopon-comum-toggle-aba toggle="#koopon-importacao-importados-observacao" contexto="#alt-importacao-csv-modal">
+                    <li class="alt-importacao-registros-conflito" role="presentation" ng-show="!!importacaoCsvCtrl.itensImportadosComAviso.length" ng-class="{'active': !importacaoCsvCtrl.itensNaoImportados.length}" koopon-comum-toggle-aba toggle="#koopon-importacao-importados-observacao" contexto="#alt-importacao-csv-modal">
                       <a href="">Importados com aviso ({{importacaoCsvCtrl.lote.quantidadeImportadosAviso}})</a>
                     </li>
                     <li class="alt-importacao-registros-erro" role="presentation" ng-show="!!importacaoCsvCtrl.itensNaoImportados.length" ng-class="{'active': !!importacaoCsvCtrl.itensNaoImportados.length}" koopon-comum-toggle-aba toggle="#koopon-importacao-nao-importados" contexto="#alt-importacao-csv-modal">
@@ -455,118 +498,157 @@
                 </div>
               </div>
 
-              <div class="tab-content" ng-show="importacaoCsvCtrl.lote.status == 2">
-                <div role="tabpanel" class="tab-pane" ng-class="{'active': !!importacaoCsvCtrl.itensNaoImportados.length}" id="koopon-importacao-nao-importados">
+              <div class="row alt-importacao-tab-scroll">
 
-                  <div class="">
-                    <div class="" ng-repeat="item in importacaoCsvCtrl.itensNaoImportados">
+                <div class="col-md-12 alt-espacamento-top alt-espacamento-bottom">
+                  <div class="tab-content alt-espacamento-top alt-espacamento-bottom" ng-show="importacaoCsvCtrl.lote.status == 2">
+                    <div role="tabpanel" class="tab-pane" ng-class="{'active': !!importacaoCsvCtrl.itensNaoImportados.length}" id="koopon-importacao-nao-importados">
 
-                      <div class="alt-importacao-csv-report row-{{ $index % 2 === 0 ? 'par' : 'impar' }}">
-                        <div class="alt-importacao-csv-report-row-body">
-                          <div class="row hidden-xs hidden-sm" ng-if="$first">
-                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-title">{{ campo.nome }}</div>
-                            <div class="col-md-1 alt-importacao-csv-report-title text-center">Status</div>
-                            <div class="col-md-1 alt-importacao-csv-report-title">&nbsp;</div>
-                          </div>
+                      <div class="">
+                        <div class="" ng-repeat="item in importacaoCsvCtrl.itensNaoImportados">
 
-                          <div class="row">
-                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}">
-                              <span class="text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span> <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) | LimitadorTexto:campo.template.textLimit"></span>
-                            </div>
-                            <div class="col-xs-9 col-sm-9 col-md-1 alt-importacao-csv-report-row alt-importacao-csv-report-row-status" ng-switch="item.status">
-                              <span class="text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 
-                              <i ng-switch-default class="fa fa-clock-o" aria-hidden="true"></i>
-                              <i ng-switch-when="1" class="fa fa-check-circle text-success" aria-hidden="true"></i>
-                              <i ng-switch-when="2" class="fa fa-times-circle text-danger" aria-hidden="true"></i>
-                              <i ng-switch-when="3" class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i>
-                              <span ng-switch-when="2" class="visible-xs-inline-block visible-sm-inline-block"> não importado</span>
-                              <span ng-switch-when="3" class="visible-xs-inline-block visible-sm-inline-block"> importado com observação</span>
-                            </div>
-                            <div class="col-xs-3 col-sm-3 col-md-1 alt-importacao-csv-report-row" ng-init="item.collapse = true">
-                              <button class="btn btn-sm btn-default pull-right alt-importacao-csv-report-row-button" ng-click="item.collapse = !item.collapse">
-                                <i ng-class="{'fa fa-angle-down': item.collapse, 'fa fa-angle-up': !item.collapse }"></i>
-                              </button>
-                            </div>
-                          </div>
-                          
-                          <div ng-show="!item.collapse" class="alt-importacao-csv-report-row-detalhes">
-                          
-                            <div class="row">
-                              <div class="alt-importacao-csv-report-row-head">
-                                <div class="alt-importacao-csv-report-row-head-title">Registro {{item.linha}}</div>
-                                <div class="alert alert-sm alert-danger" ng-bind-html="importacaoCsvCtrl.obterMensagemErro(item.mensagemErro)"></div>
+                          <div class="alt-importacao-csv-report row-{{ $index % 2 === 0 ? 'par' : 'impar' }}">
+                            <div class="alt-importacao-csv-report-row-body">
+                              <div class="row hidden-xs hidden-sm" ng-if="$first">
+                                <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-title">{{ campo.nome }}</div>
+                                <div class="col-md-1 alt-importacao-csv-report-title text-center">Status</div>
+                                <div class="col-md-1 alt-importacao-csv-report-title">&nbsp;</div>
+                              </div>
+
+                              <div class="row">
+                                <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}">
+                                  <span class="text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span> <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) | LimitadorTexto:campo.template.textLimit"></span>
+                                </div>
+                                <div class="col-xs-9 col-sm-9 col-md-1 alt-importacao-csv-report-row alt-importacao-csv-report-row-status" ng-switch="item.status">
+                                  <span class="text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 
+                                  <i ng-switch-default class="fa fa-clock-o" aria-hidden="true"></i>
+                                  <i ng-switch-when="1" class="fa fa-check-circle text-success" aria-hidden="true"></i>
+                                  <i ng-switch-when="2" class="fa fa-times-circle text-danger" aria-hidden="true"></i>
+                                  <i ng-switch-when="3" class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i>
+                                  <span ng-switch-when="2" class="visible-xs-inline-block visible-sm-inline-block"> não importado</span>
+                                  <span ng-switch-when="3" class="visible-xs-inline-block visible-sm-inline-block"> importado com observação</span>
+                                </div>
+                                <div class="col-xs-3 col-sm-3 col-md-1 alt-importacao-csv-report-row" ng-init="item.collapse = true">
+                                  <button class="btn btn-sm btn-default pull-right alt-importacao-csv-report-row-button" ng-click="item.collapse = !item.collapse">
+                                    <i ng-class="{'fa fa-angle-down': item.collapse, 'fa fa-angle-up': !item.collapse }"></i>
+                                  </button>
+                                </div>
+                              </div>
+                              
+                              <div ng-show="!item.collapse" class="alt-importacao-csv-report-row-detalhes">
+                              
+                                <div class="row">
+                                  <div class="alt-importacao-csv-report-row-head">
+                                    <div class="alt-importacao-csv-report-row-head-title">Registro {{item.linha}}</div>
+                                    <div class="alert alert-sm alert-danger" ng-bind-html="importacaoCsvCtrl.obterMensagemErro(item.mensagemErro)"></div>
+                                  </div>
+                                </div>
+                    
+                                <div class="row">
+                                  <div class="col-sm-6" ng-repeat="campo in importacaoCsvCtrl.campos" >
+                                    <strong>{{ campo.nome }}:</strong> <span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}</span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                
-                            <div class="row">
-                              <div class="col-sm-6" ng-repeat="campo in importacaoCsvCtrl.campos" >
-                                <strong>{{ campo.nome }}:</strong> <span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}</span>
-                              </div>
-                            </div>
-                          </div>
 
+                          </div>
+                        </div>
+                        <div class="ng-scope">
+                          <div class="alt-importacao-detalhes-itens-footer">
+                            <span ng-show="importacaoCsvCtrl.itensNaoImportados.length > 0 && importacaoCsvCtrl.itensNaoImportados.length === importacaoCsvCtrl.itensNaoImportados[0].qtdItens">
+                              Exibindo todos os {{importacaoCsvCtrl.itensNaoImportados.length}} itens
+                            </span>
+                            <span ng-hide="importacaoCsvCtrl.itensNaoImportados.length > 0 && importacaoCsvCtrl.itensNaoImportados.length === importacaoCsvCtrl.itensNaoImportados[0].qtdItens">
+                              Exibindo {{importacaoCsvCtrl.itensNaoImportados.length}} de
+                              {{importacaoCsvCtrl.itensNaoImportados.length > 0 ? importacaoCsvCtrl.itensNaoImportados[0].qtdItens : 0}}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                      <div class="alt-espacamento-top">
+                        <koopon-comum-mais-resultados
+                          visivel="importacaoCsvCtrl.itensNaoImportados.length > 0 && importacaoCsvCtrl.itensNaoImportados[0].qtdItens > importacaoCsvCtrl.itensNaoImportados.length"
+                          busca="importacaoCsvCtrl.obterMaisItensNaoImportados()">
+                        </koopon-comum-mais-resultados>
+                      </div>
+                    </div>
+
+                    <div role="tabpanel" class="tab-pane" ng-class="{'active': !importacaoCsvCtrl.itensNaoImportados.length}" id="koopon-importacao-importados-observacao">
+
+                      <div>
+                        <div class="" ng-repeat="item in importacaoCsvCtrl.itensImportadosComAviso">
+
+                          <div class="alt-importacao-csv-report row-{{ $index % 2 === 0 ? 'par' : 'impar' }}">
+                            <div class="alt-importacao-csv-report-row-body">
+                              <div class="row hidden-xs hidden-sm" ng-if="$first">
+                                <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-title">{{ campo.nome }}</div>
+                                <div class="col-md-1 alt-importacao-csv-report-title text-center">Status</div>
+                                <div class="col-md-1 alt-importacao-csv-report-title">&nbsp;</div>
+                              </div>
+
+                              <div class="row">
+                                <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}">
+                                  <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span>  <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) | LimitadorTexto:campo.template.textLimit"></span>
+                                </div>
+                                <div class="col-xs-9 col-sm-9 col-md-1 alt-importacao-csv-report-row alt-importacao-csv-report-row-status" ng-switch="item.status">
+                                  <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 
+                                  <i ng-switch-default class="fa fa-clock-o" aria-hidden="true"></i>
+                                  <i ng-switch-when="1" class="fa fa-check-circle text-success" aria-hidden="true"></i>
+                                  <i ng-switch-when="2" class="fa fa-times-circle text-danger" aria-hidden="true"></i>
+                                  <i ng-switch-when="3" class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i>
+                                  <span ng-switch-when="2" class="visible-xs-inline-block visible-sm-inline-block"> não importado</span>
+                                  <span ng-switch-when="3" class="visible-xs-inline-block visible-sm-inline-block"> importado com observação</span>
+                                </div>
+                                <div class="col-xs-3 col-sm-3 col-md-1 alt-importacao-csv-report-row" ng-init="item.collapse = true">
+                                  <button class="btn btn-sm btn-default pull-right alt-importacao-csv-report-row-button" ng-click="item.collapse = !item.collapse">
+                                    <i ng-class="{'fa fa-angle-down': item.collapse, 'fa fa-angle-up': !item.collapse }"></i>
+                                  </button>
+                                </div>
+                              </div>
+                              
+                              <div ng-show="!item.collapse" class="alt-importacao-csv-report-row-detalhes">
+                              
+                                <div class="row">
+                                  <div class="alt-importacao-csv-report-row-head">
+                                    <div class="alt-importacao-csv-report-row-head-title">Registro {{item.linha}}</div>
+                                    <div class="alert alert-sm alert-warning" ng-bind-html="importacaoCsvCtrl.obterMensagemErro(item.mensagemErro)"></div>
+                                  </div>
+                                </div>
+
+                                <div class="row">
+                                  <div class="col-sm-6" ng-repeat="campo in importacaoCsvCtrl.campos" >
+                                    <strong>{{ campo.nome }}:</strong> <span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                        <div class="ng-scope">
+                          <div class="alt-importacao-detalhes-itens-footer">
+                            <span ng-show="importacaoCsvCtrl.itensImportadosComAviso.length > 0 && importacaoCsvCtrl.itensImportadosComAviso.length === importacaoCsvCtrl.itensImportadosComAviso[0].qtdItens">
+                              Exibindo todos os {{importacaoCsvCtrl.itensImportadosComAviso.length}} itens
+                            </span>
+                            <span ng-hide="importacaoCsvCtrl.itensImportadosComAviso.length > 0 && importacaoCsvCtrl.itensImportadosComAviso.length === importacaoCsvCtrl.itensImportadosComAviso[0].qtdItens">
+                              Exibindo {{importacaoCsvCtrl.itensImportadosComAviso.length}} de
+                              {{importacaoCsvCtrl.itensImportadosComAviso.length > 0 ? importacaoCsvCtrl.itensImportadosComAviso[0].qtdItens : 0}}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="alt-espacamento-top">
+                        <koopon-comum-mais-resultados
+                          visivel="importacaoCsvCtrl.itensImportadosComAviso.length > 0 && importacaoCsvCtrl.itensImportadosComAviso[0].qtdItens > importacaoCsvCtrl.itensImportadosComAviso.length"
+                          busca="importacaoCsvCtrl.obterMaisItensImportadosComAviso()">
+                        </koopon-comum-mais-resultados>
+                      </div>
+
                     </div>
                   </div>
                 </div>
 
-                
-                <div role="tabpanel" class="tab-pane" ng-class="{'active': !importacaoCsvCtrl.itensNaoImportados.length}" id="koopon-importacao-importados-observacao">
-
-                  <div>
-                    <div class="" ng-repeat="item in importacaoCsvCtrl.itensImportadosComObservacao">
-
-                      <div class="alt-importacao-csv-report row-{{ $index % 2 === 0 ? 'par' : 'impar' }}">
-                        <div class="alt-importacao-csv-report-row-body">
-                          <div class="row hidden-xs hidden-sm" ng-if="$first">
-                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-title">{{ campo.nome }}</div>
-                            <div class="col-md-1 alt-importacao-csv-report-title text-center">Status</div>
-                            <div class="col-md-1 alt-importacao-csv-report-title">&nbsp;</div>
-                          </div>
-
-                          <div class="row">
-                            <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}">
-                              <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span>  <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) | LimitadorTexto:campo.template.textLimit"></span>
-                            </div>
-                            <div class="col-xs-9 col-sm-9 col-md-1 alt-importacao-csv-report-row alt-importacao-csv-report-row-status" ng-switch="item.status">
-                              <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 
-                              <i ng-switch-default class="fa fa-clock-o" aria-hidden="true"></i>
-                              <i ng-switch-when="1" class="fa fa-check-circle text-success" aria-hidden="true"></i>
-                              <i ng-switch-when="2" class="fa fa-times-circle text-danger" aria-hidden="true"></i>
-                              <i ng-switch-when="3" class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i>
-                              <span ng-switch-when="2" class="visible-xs-inline-block visible-sm-inline-block"> não importado</span>
-                              <span ng-switch-when="3" class="visible-xs-inline-block visible-sm-inline-block"> importado com observação</span>
-                            </div>
-                            <div class="col-xs-3 col-sm-3 col-md-1 alt-importacao-csv-report-row" ng-init="item.collapse = true">
-                              <button class="btn btn-sm btn-default pull-right alt-importacao-csv-report-row-button" ng-click="item.collapse = !item.collapse">
-                                <i ng-class="{'fa fa-angle-down': item.collapse, 'fa fa-angle-up': !item.collapse }"></i>
-                              </button>
-                            </div>
-                          </div>
-                          
-                          <div ng-show="!item.collapse" class="alt-importacao-csv-report-row-detalhes">
-                          
-                            <div class="row">
-                              <div class="alt-importacao-csv-report-row-head">
-                                <div class="alt-importacao-csv-report-row-head-title">Registro {{item.linha}}</div>
-                                <div class="alert alert-sm alert-warning" ng-bind-html="importacaoCsvCtrl.obterMensagemErro(item.mensagemErro)"></div>
-                              </div>
-                            </div>
-
-                            <div class="row">
-                              <div class="col-sm-6" ng-repeat="campo in importacaoCsvCtrl.campos" >
-                                <strong>{{ campo.nome }}:</strong> <span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}</span>
-                              </div>
-                            </div>
-                          </div>
-
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
               </div>
 
             </div>
@@ -618,6 +700,7 @@
         '$rootScope',
         '$scope',
         '$sce',
+        '$q',
         '$timeout',
         'AltModalService',
         'AltSelectService',
@@ -629,7 +712,7 @@
         'AltImportacaoCsvOpcoesTituloMensagemModel',
         'AltCarregandoInfoService',
         'moment',
-        function($rootScope, $scope, $sce, $timeout, modalService, selectService, alertaService, Campo, Lote, Importacao, evento, OpcoesImportacaoTituloMensagemModel, AltCarregandoInfoService, moment) {
+        function($rootScope, $scope, $sce, $q, $timeout, modalService, selectService, alertaService, Campo, Lote, Importacao, evento, OpcoesImportacaoTituloMensagemModel, AltCarregandoInfoService, moment) {
         var self = this;
 
         const ID_MODAL = '#alt-importacao-csv-modal';
@@ -637,6 +720,9 @@
         const ID_MENU_REGRAS_DE_VALOR = '#alt-importacao-csv-btn-group-rules';
         const CLASS_SELECT_CAMPOS = '.alt-importacao-csv-select-field';
         const CLASS_PLANILHA_MAPEAMENTO = '.alt-importacao-csv-planilha-mapeamento';
+
+        self.itensNaoImportados = [];
+        self.itensImportadosComAviso = [];
 
         var _ativarEstacaoMenu = function(idMenu, posicao) {
           var btns = $(idMenu).find('input[type="radio"]');
@@ -702,44 +788,47 @@
           }
         }
 
-        var _visualizarProcessado = function(lote) {
+        var _visualizarProcessado = function(opcoes) {
           self.visualizacao = true;
           self.steps[0].active = false;
           self.steps[3].active = true;
 
-          lote.itens.forEach((item) => {
-            if (item.status === 2) {
-              self.itensNaoImportados.push(item);
-            }
+          self.itensNaoImportados = [];
+          self.itensImportadosComObservacao = [];
 
-            if (item.status === 3) {
-              self.itensImportadosComObservacao.push(item);
-            }
-          });
+          self.lote = new Lote(opcoes.loteProcessado);
+          self.obterItensNaoImportados = opcoes.obterItensNaoImportados;
+          self.obterItensImportadosComAviso = opcoes.obterItensImportadosComAviso;
 
-          self.lote = null;
-          $timeout(() => {
-            self.lote = new Lote(lote);
+          self.carregandoLogsItens = true;
+          $q.all([
+            self.obterItensNaoImportados(self.lote.idLoteImportacao),
+            self.obterItensImportadosComAviso(self.lote.idLoteImportacao) 
+          ])
+          .then((resultado) => {
+            self.itensNaoImportados = resultado[0];
+            self.itensImportadosComAviso = resultado[1];
             _focoInicialAbasDetalhes();
-          });
+          })
+          .finally(() => self.carregandoLogsItens = false);
         };
 
-        var _atualizarProcessamentoLote = function(lote) {
+        var _atualizarProcessamentoLote = function(opcoes) {
           if (!self.lote) return;
 
-          if (lote.status != 0) {
-            _visualizarProcessado(lote);
+          if (opcoes.loteProcessado.status != 0) {
+            _visualizarProcessado(opcoes);
           }
           else {
             self.countFromImportadosSucesso = self.lote.quantidadeImportadosSucesso;
             self.countFromImportadosAviso = self.lote.quantidadeImportadosAviso;
             self.countFromNaoImportados = self.lote.quantidadeErros;
   
-            self.lote.quantidadeImportadosSucesso = lote.quantidadeImportadosSucesso;
-            self.lote.quantidadeImportadosAviso = lote.quantidadeImportadosAviso;
-            self.lote.quantidadeErros = lote.quantidadeErros;
-            self.lote.quantidadeProcessados = lote.quantidadeProcessados;
-            self.lote.status = lote.status;
+            self.lote.quantidadeImportadosSucesso = opcoes.loteProcessado.quantidadeImportadosSucesso;
+            self.lote.quantidadeImportadosAviso = opcoes.loteProcessado.quantidadeImportadosAviso;
+            self.lote.quantidadeErros = opcoes.loteProcessado.quantidadeErros;
+            self.lote.quantidadeProcessados = opcoes.loteProcessado.quantidadeProcessados;
+            self.lote.status = opcoes.loteProcessado.status;
           }
         };
 
@@ -826,9 +915,25 @@
           self.camposOrdenados = self.gerarCamposOrdenadosListaVisualizacao(opcoes.campos);
 
           if (!!opcoes.visualizacao) {
-            _visualizarProcessado(opcoes.loteProcessado);
+            _visualizarProcessado(opcoes);
           }
 
+        };
+
+        self.obterMaisItensNaoImportados = function () {
+          return self.obterItensNaoImportados(self.lote.idLoteImportacao, true).then((itens) => {
+            itens.forEach((i) => {
+              self.itensNaoImportados.push(i);
+            });
+          });
+        };
+
+        self.obterMaisItensImportadosComAviso = function () {
+          return self.obterItensImportadosComAviso(self.lote.idLoteImportacao, true).then((itens) => {
+            itens.forEach((i) => {
+              self.itensImportadosComAviso.push(i);
+            });
+          });
         };
 
         self.getTitle = function () {
@@ -1159,7 +1264,7 @@
         });
 
         $scope.$on(evento.processamento.ATUALIZAR_LOTE, (ev, opcoes) => {
-          _atualizarProcessamentoLote(opcoes.lote);
+          _atualizarProcessamentoLote(opcoes);
         });
       }];
 
@@ -1866,7 +1971,7 @@
   "use strict";
 
   ng.module('alt.importacao-csv')
-    .factory('AltImportacaoCsvOpcoesModel', [function() {
+    .factory('AltImportacaoCsvOpcoesModel', ['$q', function($q) {
       class OpcoesImportacao {
         constructor(obj) {
           this.labelTipo = '';
@@ -1878,6 +1983,8 @@
           this.visualizacao = false;
           this.loteProcessado = undefined;
           this.titulosMensagensCustomizadas = [];
+          this.obterItensNaoImportados = () => $q.resolve([]);
+          this.obterItensImportadosComAviso = () => $q.resolve([]);
 
           ng.extend(this, obj);
 
@@ -1971,42 +2078,5 @@
       }
 
       return ResumoItemImportacao;
-    }]);
-}(angular));
-
-;(function(ng) {
-    'use strict';
-
-    ng.module('alt.importacao-csv')
-    /**
-    * @description Filtro que retorna o texto limitado
-    * @class alt.importacao-csv.LimitadorTexto
-    * @memberof alt.importacao-csv
-    */
-    .filter('LimitadorTexto', ['_', function (_) {
-      /**
-       * @description Retorna o texto limitado
-       * @memberof alt.importacao-csv.LimitadorTexto
-       * @function limitadorTexto
-       * @param {string} o texto a ser filtrado
-       * @param {number} o número do limite
-       * @returns {string} retorna a string limitada
-       * @inner
-       */
-      return function (input, val) {
-          if (!input) {
-              return;
-          }
-
-          var _tamanho = val || 53;
-
-          if (input.length > _tamanho) {
-              input = _.truncate(input, {
-                  length: _tamanho
-              });
-          }
-
-          return input.trim();
-      };
     }]);
 }(angular));
