@@ -313,7 +313,7 @@
 
               <div class="row">
                 <div class="col-xs-12 alt-espacamento-bottom">
-                  <label class="alt-hand alt-espacamento-top" ng-show="importacaoCsvCtrl.arquivo.linhas.length > 1">
+                  <label class="alt-hand alt-espacamento-top" ng-show="importacaoCsvCtrl.arquivo.linhas.length > 1 || importacaoCsvCtrl.arquivoOpcoes.colunasPossuemTitulos">
                     <input type="checkbox"
                         ng-model="importacaoCsvCtrl.arquivoOpcoes.colunasPossuemTitulos"/>
                     <span class="alt-checkbox"></span> <span class="alt-checkbox-label">Primeira linha do arquivo são títulos das colunas</span>
@@ -323,10 +323,10 @@
 
               <div class="row">
                 <div class="col-xs-12 alt-importacao-csv-map-warnings">
-                  <div class="alert alert-danger alert-dismissible alt-espacamento-bottom" role="alert" ng-show="importacaoCsvCtrl.exibirMensagemErro">
+                  <div class="alert alert-danger alert-dismissible alt-espacamento-bottom" role="alert" ng-show="importacaoCsvCtrl.importacao.mapaInvalido && importacaoCsvCtrl.exibirMensagemErro">
                     <button type="button" ng-click="importacaoCsvCtrl.removerMensagemErro()" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <p ng-repeat="campo in importacaoCsvCtrl.importacao.campos" ng-if="campo.vinculoRequisitado && importacaoCsvCtrl.exibirMensagemErro">
-                      <i class="fa fa-exclamation-triangle"></i> 
+                    <p ng-repeat="campo in importacaoCsvCtrl.importacao.campos" ng-if="campo.vinculoRequisitado && !campo.valido">
+                      <i class="fa fa-exclamation-triangle"></i>
                       <span>O campo <b>{{campo.nome}}</b> do ERP4ME deve ser vinculado a uma coluna do arquivo</span>
                     </p>
                   </div>
@@ -364,7 +364,7 @@
                   </div>
                   <div class="alt-importacao-csv-rule-table-overflow">
                     <div class="row alt-espacamento-bottom collapse in" id="alt-importacao-csv-rules-field-{{campo.chave}}">
-                      <div class="col-xs-12 alt-importacao-csv-rule-table alt-espacamento-bottom">
+                      <div class="col-xs-12 alt-importacao-csv-rule-table">
                         <table class="table table-responsive table-condensed table-striped">
                           <thead>
                             <tr>
@@ -386,14 +386,15 @@
                                 ((!regra.objeto && campo.obrigatorio || regra.objeto) && importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'nulosValidos') ||
                                 ((!regra.objeto && !campo.obrigatorio || regra.objeto) && importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'nulosInvalidos')">
                               <td class="status">
-                                <i class="fa fa-exclamation-triangle text-warning" ng-show="!regra.objeto && campo.obrigatorio"></i>
+                                <i class="fa fa-exclamation-triangle text-warning" ng-show="!regra.objeto && campo.obrigatorio" title="Vínculo obrigatório"></i>
                                 <i class="fa fa-check text-success" ng-show="regra.objeto"></i>
                               </td>
                               <td ng-hide="regra.geral">{{regra.valor}}</td>
                               <td ng-show="regra.geral"><i class="text-secondary">Todas as ocorrências</i></td>
                               <td class="alt-importacao-csv-rules-td-count-field">{{regra.quantidade}}</td>
                               <td class="alt-importacao-csv-rules-td-select-field"
-                                style="min-width: 180px;">
+                                style="min-width: 180px;"
+                                ng-class="{'has-error': !regra.objeto && campo.obrigatorio && importacaoCsvCtrl.exibirMensagemErro}">
                                 <select id="alt-importacao-csv-rules-select-{{campo.chave}}-{{$index}}"
                                   class="alt-importacao-csv-rules-select form-control"
                                   style="width: 100%;"
@@ -415,16 +416,27 @@
                       </div>
                     </div>
 
-                    <div class="alert alert-danger alert-dismissible alt-espacamento-bottom" role="alert" ng-show="importacaoCsvCtrl.resumoRegrasDeValor.nulosInvalidos > 0 && importacaoCsvCtrl.exibirMensagemErro">
-                      <button type="button" ng-click="importacaoCsvCtrl.removerMensagemErro()" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                      <span ng-show="importacaoCsvCtrl.exibirMensagemErro" class="alt-importacao-csv-input-ckeck">
-                        <i class="fa fa-exclamation-triangle"></i> Vincule todas as informações para prosseguir com a importação
-                      </span>
+                    <div class="row alt-espacamento-bottom">
+                      <div class="col-xs-12 alt-espacamento-bottom" ng-show="campo.obrigatorio && campo.resumoRegrasDeValor.nulosInvalidos > 0 && importacaoCsvCtrl.exibirMensagemErro">
+                        <span class="text-danger">É necessário vincular todos os registros de <b>{{campo.nome}}</b></span>
+                      </div>
                     </div>
 
                   </div>
                 </div>
               </div>
+
+              <div class="row alt-espacamento-top">
+                <div class="col-xs-12 alt-espacamento-top" role="alert" ng-show="importacaoCsvCtrl.resumoRegrasDeValor.nulosInvalidos > 0 && importacaoCsvCtrl.exibirMensagemErro">
+                  <div class="alert alert-danger alert-dismissible">
+                    <button type="button" ng-click="importacaoCsvCtrl.removerMensagemErro()" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <span class="alt-importacao-csv-input-ckeck">
+                      <i class="fa fa-exclamation-triangle"></i> Configure todos os vinculos obrigatórios para importar o arquivo.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -895,7 +907,7 @@
               active: false,
               progress: self.exibeEtapaRegras ? 83.28 : 100,
               init: _inicializarRegras,
-              title:  _step3 ? _step3.title : 'Configurar vinculos',
+              title:  _step3 ? _step3.title : 'Configurar vínculos',
               message: _step3 ? $sce.trustAsHtml(_step3.message) : $sce.trustAsHtml('Vincule a informação do arquivo ao <em>Campo</em> correspondente no cadastro do ERP4ME'),
               menuHidden: !self.exibeEtapaRegras
             },
@@ -1012,14 +1024,14 @@
         };
 
         self.vincular = function(campo, coluna) {
-          self.removerMensagemErro();
+          console.log('v', self.importacao.validarMapa(), self.importacao);
 
           self.importacao.vincular(campo, coluna);
           selectService.inicializar(CLASS_SELECT_CAMPOS);
         };
 
         self.desvincular = function(campo) {
-          self.removerMensagemErro();
+          self.importacao.validarMapa();
 
           self.importacao.desvincular(campo);
           selectService.inicializar(CLASS_SELECT_CAMPOS);
@@ -1245,6 +1257,8 @@
         self.removerMensagemErro = function () {
           self.exibirMensagemErro = false;
         };
+
+        self.atualizarMensagensErro
 
         self.limparImportacao = function () {
           self.arquivo = null;
