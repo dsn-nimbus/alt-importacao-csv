@@ -30,7 +30,7 @@
               });
           }
 
-          return input.trim();
+          return typeof input === "string" ? input.trim() : input;
       };
     }]);
 }(angular));

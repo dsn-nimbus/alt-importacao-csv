@@ -123,11 +123,12 @@
         }
 
         _validarData() {
-          var m = moment(this.dado, 'DD/MM/YYYY');
-          if (m.isValid()) {
-            this.valor = m.toDate();
-            this.referencia = m.format('DD/MM/YYYY');
+          if (this.dado instanceof Date) {
+            this.valor = moment(this.dado).toISOString(); // moment(this.dado).format();
+            this.referencia = this.valor;
           } else {
+            this.valor = this.dado;
+            this.referencia = this.dado;
             var msg = 'não é uma data válida';
             this._incluirMensagemValidacao(msg);
             $log.error(msg);

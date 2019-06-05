@@ -24,10 +24,12 @@
             var result = {};
             workbook.SheetNames.forEach((sheetName) => {
               var row = XLS.utils.sheet_to_row_object_array(workbook.Sheets[sheetName], sheetToJsonOptions);
+
               if (row.length > 0) {
                 result[sheetName] = row;
               }
             });
+
             return result;
           }
 
@@ -88,6 +90,7 @@
             }
 
             var fileObject = workbookToJson(workbook, sheetToJsonOptions);
+
             return fileObject[Object.keys(fileObject)[0]];
           }
 

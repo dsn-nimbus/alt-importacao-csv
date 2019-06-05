@@ -55,7 +55,7 @@
               });
           }
 
-          return input.trim();
+          return typeof input === "string" ? input.trim() : input;
       };
     }]);
 }(angular));
@@ -546,16 +546,16 @@
                                   </button>
                                 </div>
                               </div>
-                              
+
                               <div ng-show="!item.collapse" class="alt-importacao-csv-report-row-detalhes">
-                              
+
                                 <div class="row">
                                   <div class="alt-importacao-csv-report-row-head">
                                     <div class="alt-importacao-csv-report-row-head-title">Registro {{item.linha}}</div>
                                     <div class="alert alert-sm alert-danger" ng-bind-html="importacaoCsvCtrl.obterMensagemErro(item.mensagemErro)"></div>
                                   </div>
                                 </div>
-                    
+
                                 <div class="row">
                                   <div class="col-sm-6" ng-repeat="campo in importacaoCsvCtrl.campos" >
                                     <strong>{{ campo.nome }}:</strong> <span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}</span>
@@ -618,9 +618,9 @@
                                   </button>
                                 </div>
                               </div>
-                              
+
                               <div ng-show="!item.collapse" class="alt-importacao-csv-report-row-detalhes">
-                              
+
                                 <div class="row">
                                   <div class="alt-importacao-csv-report-row-head">
                                     <div class="alt-importacao-csv-report-row-head-title">Registro {{item.linha}}</div>
@@ -1320,10 +1320,12 @@
             var result = {};
             workbook.SheetNames.forEach((sheetName) => {
               var row = XLS.utils.sheet_to_row_object_array(workbook.Sheets[sheetName], sheetToJsonOptions);
+
               if (row.length > 0) {
                 result[sheetName] = row;
               }
             });
+
             return result;
           }
 
@@ -1384,6 +1386,7 @@
             }
 
             var fileObject = workbookToJson(workbook, sheetToJsonOptions);
+
             return fileObject[Object.keys(fileObject)[0]];
           }
 
@@ -1610,11 +1613,12 @@
         }
 
         _validarData() {
-          var m = moment(this.dado, 'DD/MM/YYYY');
-          if (m.isValid()) {
-            this.valor = m.toDate();
-            this.referencia = m.format('DD/MM/YYYY');
+          if (this.dado instanceof Date) {
+            this.valor = moment(this.dado).toISOString(); // moment(this.dado).format();
+            this.referencia = this.valor;
           } else {
+            this.valor = this.dado;
+            this.referencia = this.dado;
             var msg = 'não é uma data válida';
             this._incluirMensagemValidacao(msg);
             $log.error(msg);

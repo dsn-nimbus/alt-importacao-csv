@@ -415,16 +415,16 @@
                                   </button>
                                 </div>
                               </div>
-                              
+
                               <div ng-show="!item.collapse" class="alt-importacao-csv-report-row-detalhes">
-                              
+
                                 <div class="row">
                                   <div class="alt-importacao-csv-report-row-head">
                                     <div class="alt-importacao-csv-report-row-head-title">Registro {{item.linha}}</div>
                                     <div class="alert alert-sm alert-danger" ng-bind-html="importacaoCsvCtrl.obterMensagemErro(item.mensagemErro)"></div>
                                   </div>
                                 </div>
-                    
+
                                 <div class="row">
                                   <div class="col-sm-6" ng-repeat="campo in importacaoCsvCtrl.campos" >
                                     <strong>{{ campo.nome }}:</strong> <span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}</span>
@@ -487,9 +487,9 @@
                                   </button>
                                 </div>
                               </div>
-                              
+
                               <div ng-show="!item.collapse" class="alt-importacao-csv-report-row-detalhes">
-                              
+
                                 <div class="row">
                                   <div class="alt-importacao-csv-report-row-head">
                                     <div class="alt-importacao-csv-report-row-head-title">Registro {{item.linha}}</div>
