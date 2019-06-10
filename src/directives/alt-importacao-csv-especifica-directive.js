@@ -139,7 +139,7 @@
                               data-placeholder="Selecione"
                               ng-model="coluna.campoSelecionado"
                               ng-change="importacaoCsvCtrl.vincular(coluna.campoSelecionado, coluna.numero)"
-                              ng-options="campo.chave as campo.nome for campo in importacaoCsvCtrl.importacao.campos | filter: importacaoCsvCtrl.campoNaoMapeado track by campo.chave">
+                              ng-options="campo.chave as campo.nome group by campo.grupo for campo in importacaoCsvCtrl.importacao.campos | filter: importacaoCsvCtrl.campoNaoMapeado track by campo.chave">
                               <option value=""></option>
                             </select>
                           </th>
