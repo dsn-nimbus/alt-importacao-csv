@@ -259,7 +259,7 @@
                                 <i class="fa fa-exclamation-triangle text-warning" ng-show="!regra.objeto && campo.obrigatorio" title="Vínculo obrigatório"></i>
                                 <i class="fa fa-check text-success" ng-show="regra.objeto"></i>
                               </td>
-                              <td ng-hide="regra.geral">{{regra.valor}}</td>
+                              <td ng-hide="regra.geral">{{(regra.valor === null ? '' : regra.valor)}}</td>
                               <td ng-show="regra.geral"><i class="text-secondary">Todas as ocorrências</i></td>
                               <td class="alt-importacao-csv-rules-td-count-field">{{regra.quantidade}}</td>
                               <td class="alt-importacao-csv-rules-td-select-field"
@@ -894,8 +894,6 @@
         };
 
         self.vincular = function(campo, coluna) {
-          console.log('v', self.importacao.validarMapa(), self.importacao);
-
           self.importacao.vincular(campo, coluna);
           selectService.inicializar(CLASS_SELECT_CAMPOS);
         };

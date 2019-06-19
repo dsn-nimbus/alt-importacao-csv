@@ -65,7 +65,6 @@
 
         aplicarRegrasDeValor(linhas) {
           this.campos.forEach((campo) => {
-            // if (campo.tipo !== Object || !!campo.regrasDeValor) {
             if (campo.tipo !== Object) {
               return;
             }
@@ -74,7 +73,7 @@
               var distinct = _.groupBy(linhas, (r) => { return r[coluna.nome]; });
               campo.regrasDeValor = Object.keys(distinct).map((key) => {
                 return {
-                  valor: key,
+                  valor: key === 'undefined' ? '' : key,
                   quantidade: distinct[key].length,
                   objeto: campo.objetoAutoVinculo(key)
                 };

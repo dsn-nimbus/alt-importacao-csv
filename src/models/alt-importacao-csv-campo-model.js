@@ -123,12 +123,27 @@
         }
 
         _validarData() {
-          if (this.dado instanceof Date) {
-            this.valor = moment(this.dado).toISOString(); // moment(this.dado).format();
+          var dado = this.dado;
+          if (this.dado instanceof Date === false) {
+            dado = moment(this.dado, [
+              'DD/MM/YYYY',
+              'DD-MM-YYYY',
+              'DD.MM.YYYY',
+              'YYYY/MM/DD',
+              'YYYY-MM-DD',
+              'YYYY.MM.DD',
+              'DD/MM/YY',
+              'DD-MM-YY',
+              'DD.MM.YY'
+            ]);
+          }
+
+          if (moment(dado).isValid()) {
+            this.valor = moment(dado).toISOString();
             this.referencia = this.valor;
           } else {
-            this.valor = this.dado;
-            this.referencia = this.dado;
+            this.valor = this.dado === undefined ? '' : this.dado;
+            this.referencia = this.valor;
             var msg = 'não é uma data válida';
             this._incluirMensagemValidacao(msg);
             $log.error(msg);
