@@ -23,6 +23,43 @@
 
 }(angular));
 
+;(function(ng) {
+    'use strict';
+
+    ng.module('alt.importacao-csv')
+    /**
+    * @description Filtro que retorna o texto limitado
+    * @class alt.importacao-csv.LimitadorTexto
+    * @memberof alt.importacao-csv
+    */
+    .filter('LimitadorTexto', ['_', function (_) {
+      /**
+       * @description Retorna o texto limitado
+       * @memberof alt.importacao-csv.LimitadorTexto
+       * @function limitadorTexto
+       * @param {string} o texto a ser filtrado
+       * @param {number} o número do limite
+       * @returns {string} retorna a string limitada
+       * @inner
+       */
+      return function (input, val) {
+          if (!input) {
+              return;
+          }
+
+          var _tamanho = val || 53;
+
+          if (input.length > _tamanho) {
+              input = _.truncate(input, {
+                  length: _tamanho
+              });
+          }
+
+          return typeof input === "string" ? input.trim() : input;
+      };
+    }]);
+}(angular));
+
 ;
 (function (ng) {
   'use strict';
@@ -353,7 +390,7 @@
                                 <i class="fa fa-exclamation-triangle text-warning" ng-show="!regra.objeto && campo.obrigatorio" title="Vínculo obrigatório"></i>
                                 <i class="fa fa-check text-success" ng-show="regra.objeto"></i>
                               </td>
-                              <td ng-hide="regra.geral">{{regra.valor}}</td>
+                              <td ng-hide="regra.geral">{{(regra.valor === null ? '' : regra.valor)}}</td>
                               <td ng-show="regra.geral"><i class="text-secondary">Todas as ocorrências</i></td>
                               <td class="alt-importacao-csv-rules-td-count-field">{{regra.quantidade}}</td>
                               <td class="alt-importacao-csv-rules-td-select-field"
@@ -492,8 +529,8 @@
                               </div>
 
                               <div class="row">
-                                <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}">
-                                  <span class="text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span> <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) | LimitadorTexto:campo.template.textLimit"></span>
+                                <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterPropriedadeTemplate(item.objeto, campo) }}">
+                                  <span class="text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span> <span ng-bind="importacaoCsvCtrl.obterPropriedadeTemplate(item.objeto, campo) | LimitadorTexto:campo.template.textLimit"></span>
                                 </div>
                                 <div class="col-xs-9 col-sm-9 col-md-1 alt-importacao-csv-report-row alt-importacao-csv-report-row-status" ng-switch="item.status">
                                   <span class="text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 
@@ -515,14 +552,14 @@
 
                                 <div class="row">
                                   <div class="alt-importacao-csv-report-row-head">
-                                    <div class="alt-importacao-csv-report-row-head-title">Registro {{item.linha}}</div>
+                                    <div class="alt-importacao-csv-report-row-head-title">Linha {{item.linha}}</div>
                                     <div class="alert alert-sm alert-danger" ng-bind-html="importacaoCsvCtrl.obterMensagemErro(item.mensagemErro)"></div>
                                   </div>
                                 </div>
 
                                 <div class="row">
                                   <div class="col-sm-6" ng-repeat="campo in importacaoCsvCtrl.campos" >
-                                    <strong>{{ campo.nome }}:</strong> <span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}</span>
+                                    <strong>{{ campo.nome }}:</strong> <span>{{ importacaoCsvCtrl.obterPropriedadeTemplate(item.objeto, campo) }}</span>
                                   </div>
                                 </div>
                               </div>
@@ -564,8 +601,8 @@
                               </div>
 
                               <div class="row">
-                                <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}">
-                                  <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span>  <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) | LimitadorTexto:campo.template.textLimit"></span>
+                                <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterPropriedadeTemplate(item.objeto, campo) }}">
+                                  <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span>  <span ng-bind="importacaoCsvCtrl.obterPropriedadeTemplate(item.objeto, campo) | LimitadorTexto:campo.template.textLimit"></span>
                                 </div>
                                 <div class="col-xs-9 col-sm-9 col-md-1 alt-importacao-csv-report-row alt-importacao-csv-report-row-status" ng-switch="item.status">
                                   <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 
@@ -594,7 +631,7 @@
 
                                 <div class="row">
                                   <div class="col-sm-6" ng-repeat="campo in importacaoCsvCtrl.campos" >
-                                    <strong>{{ campo.nome }}:</strong> <span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}</span>
+                                    <strong>{{ campo.nome }}:</strong> <span>{{ importacaoCsvCtrl.obterPropriedadeTemplate(item.objeto, campo) }}</span>
                                   </div>
                                 </div>
                               </div>
@@ -1186,21 +1223,29 @@
           return _.sortBy(_filtro, 'template.column');
         };
 
-        self.obterValorCampoProp = function (obj, template) {
-          if (typeof obj === 'undefined' || !template || !template.property) {
+        self.obterPropriedadeTemplate = function (obj, campo) {
+          if (typeof obj === 'undefined' || !campo || !campo.template || !campo.template.property) {
             return false;
           }
-          if (typeof template.property === 'function') {
-            return template.property(obj);
+          if (typeof campo.template.property === 'function') {
+            return campo.template.property(obj);
           }
 
-          let _index = template.property.indexOf('.');
+          let _index = campo.template.property.indexOf('.');
 
           if (_index > -1) {
-            return self.obterValorCampoProp(obj[template.property.substring(0, _index)], {property: template.property.substr(_index + 1)});
+            var campoExibicao = angular.copy(campo);
+            campoExibicao.property = campo.template.property.substr(_index + 1);
+            return self.obterPropriedadeTemplate(obj[campo.template.property.substring(0, _index)], campoExibicao);
           }
 
-          return obj[template.property];
+          if (campo.tipo === Date) {
+            var template = obj[campo.template.property];
+            var m = moment(template);
+            return m.isValid() ? m.format('DD/MM/YYYY') : template;
+          }
+
+          return obj[campo.template.property];
         };
 
         self.obterMensagemErro = function (msg) {
@@ -1451,43 +1496,6 @@
 }(angular));
 
 ;(function(ng) {
-    'use strict';
-
-    ng.module('alt.importacao-csv')
-    /**
-    * @description Filtro que retorna o texto limitado
-    * @class alt.importacao-csv.LimitadorTexto
-    * @memberof alt.importacao-csv
-    */
-    .filter('LimitadorTexto', ['_', function (_) {
-      /**
-       * @description Retorna o texto limitado
-       * @memberof alt.importacao-csv.LimitadorTexto
-       * @function limitadorTexto
-       * @param {string} o texto a ser filtrado
-       * @param {number} o número do limite
-       * @returns {string} retorna a string limitada
-       * @inner
-       */
-      return function (input, val) {
-          if (!input) {
-              return;
-          }
-
-          var _tamanho = val || 53;
-
-          if (input.length > _tamanho) {
-              input = _.truncate(input, {
-                  length: _tamanho
-              });
-          }
-
-          return typeof input === "string" ? input.trim() : input;
-      };
-    }]);
-}(angular));
-
-;(function(ng) {
   "use strict";
 
   ng.module('alt.importacao-csv')
@@ -1612,12 +1620,27 @@
         }
 
         _validarData() {
-          if (this.dado instanceof Date) {
-            this.valor = moment(this.dado).toISOString(); // moment(this.dado).format();
-            this.referencia = this.valor;
-          } else {
-            this.valor = this.dado;
+          var dado = this.dado;
+          if (this.dado instanceof Date === false) {
+            dado = moment(this.dado, [
+              'DD/MM/YYYY',
+              'DD-MM-YYYY',
+              'DD.MM.YYYY',
+              'YYYY/MM/DD',
+              'YYYY-MM-DD',
+              'YYYY.MM.DD',
+              'DD/MM/YY',
+              'DD-MM-YY',
+              'DD.MM.YY'
+            ]);
+          }
+
+          if (moment(dado).isValid()) {
+            this.valor = moment(dado).utc().format('YYYY-MM-DD');
             this.referencia = this.dado;
+          } else {
+            this.valor = this.dado === undefined ? '' : this.dado;
+            this.referencia = this.valor;
             var msg = 'não é uma data válida';
             this._incluirMensagemValidacao(msg);
             $log.error(msg);
@@ -1830,7 +1853,6 @@
 
         aplicarRegrasDeValor(linhas) {
           this.campos.forEach((campo) => {
-            // if (campo.tipo !== Object || !!campo.regrasDeValor) {
             if (campo.tipo !== Object) {
               return;
             }
@@ -1839,7 +1861,7 @@
               var distinct = _.groupBy(linhas, (r) => { return r[coluna.nome]; });
               campo.regrasDeValor = Object.keys(distinct).map((key) => {
                 return {
-                  valor: key,
+                  valor: key === 'undefined' ? '' : key,
                   quantidade: distinct[key].length,
                   objeto: campo.objetoAutoVinculo(key)
                 };
@@ -1853,6 +1875,11 @@
                 objeto: null
               }];
             };
+
+            if (campo.objetoRegrasDeValor) {
+              console.log('FOI');
+              campo.objetoRegrasDeValor(this.campos);
+            }
           });
 
           return this.resumirRegrasDeValor();
