@@ -89,7 +89,6 @@
             };
 
             if (campo.objetoRegrasDeValor) {
-              console.log('FOI');
               campo.objetoRegrasDeValor(this.campos);
             }
           });
