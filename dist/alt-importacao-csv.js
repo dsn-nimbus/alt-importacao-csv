@@ -988,8 +988,6 @@
         };
 
         self.vincular = function(campo, coluna) {
-          console.log('v', self.importacao.validarMapa(), self.importacao);
-
           self.importacao.vincular(campo, coluna);
           selectService.inicializar(CLASS_SELECT_CAMPOS);
         };

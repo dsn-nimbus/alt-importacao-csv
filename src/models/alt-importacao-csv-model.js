@@ -87,6 +87,10 @@
                 objeto: null
               }];
             };
+
+            if (campo.objetoRegrasDeValor) {
+              campo.objetoRegrasDeValor(this.campos);
+            }
           });
 
           return this.resumirRegrasDeValor();

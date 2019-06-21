@@ -398,8 +398,8 @@
                               </div>
 
                               <div class="row">
-                                <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}">
-                                  <span class="text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span> <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) | LimitadorTexto:campo.template.textLimit"></span>
+                                <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterPropriedadeTemplate(item.objeto, campo) }}">
+                                  <span class="text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span> <span ng-bind="importacaoCsvCtrl.obterPropriedadeTemplate(item.objeto, campo) | LimitadorTexto:campo.template.textLimit"></span>
                                 </div>
                                 <div class="col-xs-9 col-sm-9 col-md-1 alt-importacao-csv-report-row alt-importacao-csv-report-row-status" ng-switch="item.status">
                                   <span class="text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 
@@ -421,14 +421,14 @@
 
                                 <div class="row">
                                   <div class="alt-importacao-csv-report-row-head">
-                                    <div class="alt-importacao-csv-report-row-head-title">Registro {{item.linha}}</div>
+                                    <div class="alt-importacao-csv-report-row-head-title">Linha {{item.linha}}</div>
                                     <div class="alert alert-sm alert-danger" ng-bind-html="importacaoCsvCtrl.obterMensagemErro(item.mensagemErro)"></div>
                                   </div>
                                 </div>
 
                                 <div class="row">
                                   <div class="col-sm-6" ng-repeat="campo in importacaoCsvCtrl.campos" >
-                                    <strong>{{ campo.nome }}:</strong> <span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}</span>
+                                    <strong>{{ campo.nome }}:</strong> <span>{{ importacaoCsvCtrl.obterPropriedadeTemplate(item.objeto, campo) }}</span>
                                   </div>
                                 </div>
                               </div>
@@ -470,8 +470,8 @@
                               </div>
 
                               <div class="row">
-                                <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}">
-                                  <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span>  <span ng-bind="importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) | LimitadorTexto:campo.template.textLimit"></span>
+                                <div ng-repeat="campo in importacaoCsvCtrl.camposOrdenados" class="col-md-{{ campo.template.width }} alt-importacao-csv-report-row" title="{{ importacaoCsvCtrl.obterPropriedadeTemplate(item.objeto, campo) }}">
+                                  <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">{{ campo.nome }}:</span>  <span ng-bind="importacaoCsvCtrl.obterPropriedadeTemplate(item.objeto, campo) | LimitadorTexto:campo.template.textLimit"></span>
                                 </div>
                                 <div class="col-xs-9 col-sm-9 col-md-1 alt-importacao-csv-report-row alt-importacao-csv-report-row-status" ng-switch="item.status">
                                   <span class="small text-muted visible-xs-inline-block visible-sm-inline-block">Status:</span> 
@@ -500,7 +500,7 @@
 
                                 <div class="row">
                                   <div class="col-sm-6" ng-repeat="campo in importacaoCsvCtrl.campos" >
-                                    <strong>{{ campo.nome }}:</strong> <span>{{ importacaoCsvCtrl.obterValorCampoProp(item.objeto, campo.template) }}</span>
+                                    <strong>{{ campo.nome }}:</strong> <span>{{ importacaoCsvCtrl.obterPropriedadeTemplate(item.objeto, campo) }}</span>
                                   </div>
                                 </div>
                               </div>
@@ -1092,21 +1092,29 @@
           return _.sortBy(_filtro, 'template.column');
         };
 
-        self.obterValorCampoProp = function (obj, template) {
-          if (typeof obj === 'undefined' || !template || !template.property) {
+        self.obterPropriedadeTemplate = function (obj, campo) {
+          if (typeof obj === 'undefined' || !campo || !campo.template || !campo.template.property) {
             return false;
           }
-          if (typeof template.property === 'function') {
-            return template.property(obj);
+          if (typeof campo.template.property === 'function') {
+            return campo.template.property(obj);
           }
 
-          let _index = template.property.indexOf('.');
+          let _index = campo.template.property.indexOf('.');
 
           if (_index > -1) {
-            return self.obterValorCampoProp(obj[template.property.substring(0, _index)], {property: template.property.substr(_index + 1)});
+            var campoExibicao = angular.copy(campo);
+            campoExibicao.property = campo.template.property.substr(_index + 1);
+            return self.obterPropriedadeTemplate(obj[campo.template.property.substring(0, _index)], campoExibicao);
           }
 
-          return obj[template.property];
+          if (campo.tipo === Date) {
+            var template = obj[campo.template.property];
+            var m = moment(template);
+            return m.isValid() ? m.format('DD/MM/YYYY') : template;
+          }
+
+          return obj[campo.template.property];
         };
 
         self.obterMensagemErro = function (msg) {

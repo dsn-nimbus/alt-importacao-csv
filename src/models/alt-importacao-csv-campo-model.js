@@ -139,8 +139,8 @@
           }
 
           if (moment(dado).isValid()) {
-            this.valor = moment(dado).toISOString();
-            this.referencia = this.valor;
+            this.valor = moment(dado).utc().format('YYYY-MM-DD');
+            this.referencia = this.dado;
           } else {
             this.valor = this.dado === undefined ? '' : this.dado;
             this.referencia = this.valor;
