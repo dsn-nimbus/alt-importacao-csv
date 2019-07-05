@@ -17,26 +17,6 @@
 
           ng.extend(this, lote);
         }
-
-        resumir() {
-          this.processando = 0;
-          this.validos = 0;
-          this.erros = 0;
-          this.conflitos = 0;
-
-          this.itens.forEach((item) => {
-            if (item.status === 3) {
-              this.conflitos++;
-            } else if (item.status === 2) {
-              this.erros++;
-            } else if (item.status === 1) {
-              this.validos++;
-            }
-            else {
-              this.processando++;
-            }
-          });
-        }
       }
 
       return LoteImportacao;

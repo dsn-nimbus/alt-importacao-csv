@@ -4,33 +4,46 @@
   ng.module('alt.importacao-csv')
   .factory('AltImportacaoCsvModel', [
     '$sce',
-    '$q',
     'AltImportacaoCsvItemModel',
     'AltImportacaoCsvLoteModel',
+    'AltImportacaoCsvRegraModel',
     '_',
-    function($sce, $q, ItemImportacao, LoteImportacao, _) {
+    function($sce, ItemImportacao, LoteImportacao, RegraImportacao, _) {
       class Importacao {
-        constructor(campos) {
+        constructor(campos, validacaoEspecifica) {
           this.campos = campos;
 
           this.colunas = [];
           this.mapaInvalido = false;
+          this.mensagensMapa = [];
+          this.validacaoEspecifica = angular.noop;
+
+          if (typeof validacaoEspecifica === 'function') {
+            this.validacaoEspecifica = validacaoEspecifica;
+          }
         }
 
         validarMapa() {
           this.mapaInvalido = false;
+          this.mensagensMapa = [];
+
           this.campos.forEach((campo) => {
             if (campo.tipo === Object) {
               return;
             }
             if (campo.obrigatorio && !campo.coluna) {
-              campo.vinculoRequisitado = true;
               this.mapaInvalido = true;
-            }
-            else {
-              campo.vinculoRequisitado = false;
+              this.mensagensMapa.push($sce.trustAsHtml(`O campo <b>${campo.nome}</b> deve ser vinculado a uma coluna do arquivo.`));
             }
           });
+
+          var erros = this.validacaoEspecifica(this.campos);
+          if (Array.isArray(erros) && erros.length > 0) {
+            this.mapaInvalido = true;
+            this.mensagensMapa = this.mensagensMapa.concat(erros);
+          }
+
+          return this.mapaInvalido;
         }
 
         adicionarColuna(nome, index) {
@@ -63,34 +76,120 @@
           }
         }
 
+        formataObjeto(valor, campo) {
+          if (campo.regrasDeValor && campo.regrasDeValor.length > 0) {
+            var regra = _.find(campo.regrasDeValor, {valor: valor});
+            if (regra && regra.objeto) {
+              return regra.objeto;
+            }
+
+            var geral = _.find(campo.regrasDeValor, {geral: true});
+            if (geral && geral.objeto) {
+              return geral.objeto;
+            }
+          }
+        }
+
+        formataData(valor) {
+          var data = valor;
+
+          if (valor instanceof Date === false) {
+            data = moment(valor, [
+              'DD/MM/YYYY',
+              'DD-MM-YYYY',
+              'DD.MM.YYYY',
+              'YYYY/MM/DD',
+              'YYYY-MM-DD',
+              'YYYY.MM.DD',
+              'DD/MM/YY',
+              'DD-MM-YY',
+              'DD.MM.YY'
+            ]);
+          }
+
+          if (moment(data).isValid()) {
+            return moment(data).utc().format('YYYY-MM-DD');
+          }
+
+          return valor === undefined ? '' : valor;
+        }
+
+        formataTexto(valor) {
+          if (typeof valor !== "string") {
+            valor = valor === undefined ? '' : valor.toString();
+          }
+
+          return valor.length <= 255 ? valor : valor.substring(255, 0);
+        }
+
+        formataValor(valor, campo) {
+          switch(campo.tipo) {
+            case Date:
+              return this.formataData(valor);
+            case String:
+              return this.formataTexto(valor);
+            default:
+              return valor;
+          }
+        }
+
+        mapearLinhas(linhas, formatar) {
+          var itens = [];
+          linhas.forEach((linha) => {
+            var item = {};
+            this.campos.forEach((campo) => {
+              if (!!campo.coluna) {
+                var coluna = _.find(this.colunas, {numero: campo.coluna});
+                var valor = linha[coluna.nome];
+
+                item[campo.chave] = formatar ? this.formataValor(valor, campo) : valor;
+              }
+            });
+            itens.push(item);
+          });
+          return itens;
+        }
+
         aplicarRegrasDeValor(linhas) {
+          var linhasMapeadas = this.mapearLinhas(linhas);
+
           this.campos.forEach((campo) => {
             if (campo.tipo !== Object) {
               return;
             }
+
+            if (campo.objetoRegraFiltroLinhas) {
+              linhasMapeadas = _.filter(linhasMapeadas, campo.objetoRegraFiltroLinhas);
+            }
+
             if (!!campo.coluna) {
-              var coluna = _.find(this.colunas, {numero: campo.coluna});
-              var distinct = _.groupBy(linhas, (r) => { return r[coluna.nome]; });
+
+              var distinct = _.groupBy(linhasMapeadas, (l) => { return l[campo.chave]; });
+
               campo.regrasDeValor = Object.keys(distinct).map((key) => {
-                return {
-                  valor: key === 'undefined' ? '' : key,
+                var valor = key === 'undefined' ? '' : key;
+                return new RegraImportacao({
+                  valor: valor,
                   quantidade: distinct[key].length,
-                  objeto: campo.objetoAutoVinculo(key)
-                };
+                  objeto: campo.objetoAutoVinculo(key),
+                  obrigatoria: campo.objetoRegraObrigatoria ?
+                    () => campo.objetoRegraObrigatoria(this.campos, null) : () => campo.obrigatorio
+                });
               });
             }
             else {
-              campo.regrasDeValor = [{
+              if (linhasMapeadas.length === 0) {
+                campo.obrigatorio = false; // Remove obrigatoriedade de colunas que não tenham nenhuma linha mapeada para vínculo.
+              }
+
+              campo.regrasDeValor = [new RegraImportacao({
                 valor: null,
                 geral: true,
-                quantidade: linhas.length,
-                objeto: null
-              }];
+                quantidade: linhasMapeadas.length,
+                objeto: null,
+                obrigatoria: () => campo.obrigatorio
+              })];
             };
-
-            if (campo.objetoRegrasDeValor) {
-              campo.objetoRegrasDeValor(this.campos);
-            }
           });
 
           return this.resumirRegrasDeValor();
@@ -122,7 +221,7 @@
                 nulosInvalidos: 0
               };
               campo.regrasDeValor.forEach((regra) => {
-                if (!regra.objeto && campo.obrigatorio) {
+                if (!regra.objeto && regra.obrigatoria()) {
                   campo.resumoRegrasDeValor.nulosInvalidos++;
                 }
                 else if (!regra.objeto) {
@@ -149,68 +248,29 @@
           };
         }
 
-        montarLote(linhas, nomeArquivo, loteAnterior) {
-          var lote = {
-            nomeArquivo: nomeArquivo
-          };
+        montarLote(linhas, nomeArquivo) {
+          var lote = new LoteImportacao({
+            nomeArquivo: nomeArquivo,
+            itens: []
+          });
 
-          lote = new LoteImportacao(lote);
-
-          linhas.forEach((r, i) => {
-            var linha = i + 2;
-            var item = new ItemImportacao(linha);
+          this.mapearLinhas(linhas, true).forEach((obj, index) => {
 
             this.campos.forEach((campo) => {
-              if (!campo.possuiVinculoOuRegraGeral() && !campo.obrigatorio) {
+              if (campo.tipo !== Object) {
+                return;
+              }
+              if (campo.objetoRegraFiltroLinhas && _.filter([obj], campo.objetoRegraFiltroLinhas).length === 0) {
+                obj[campo.chave] = undefined;
                 return;
               }
 
-              campo.dado = undefined;
-              if (!!campo.coluna) {
-                var coluna = _.find(this.colunas, {numero: campo.coluna});
-                campo.dado = r[coluna.nome];
-              }
-
-              campo.validar();
-
-              if (!campo.valido) {
-                if (campo.obrigatorio) {
-                  item.objeto.invalido = true;
-                  item.possuiErro = true;
-                  item.possuiConflito = false;
-                }
-                else if (!item.possuiErro) {
-                  /*
-                    Campos "inválidos não-obrigatórios" configuram um item conflituoso se, e somente se, não haja
-                    erro em outro campo do item previamente verificado. Uma vez que se ao menos um campo do
-                    item estiver com erro o item inteiro estará com erro, mesmo que possua campos "inválidos não-obrigatórios".
-                  */
-                  item.possuiConflito = true;
-                }
-              }
-
-              campo.mensagens.forEach((msg) => {
-                item.resumo.mensagens.push(msg);
-              });
-
-              item.objeto[campo.chave] = campo.valor;
-              item.resumo.campos.push({
-                valido: campo.valido,
-                chave: campo.chave,
-                dado: campo.dado,
-                referencia: campo.referencia,
-                template: ng.copy(campo.template)
-              });
+              var valor = obj[campo.chave] === undefined ? '' : obj[campo.chave];
+              obj[campo.chave] = this.formataObjeto(valor, campo);
             });
 
-            if (!!loteAnterior && loteAnterior.itens[i].desconsiderado === true) {
-              item.desconsiderado = true;
-            }
-
-            lote.itens.push(item);
+            lote.itens.push(new ItemImportacao(index + 2, obj));
           });
-
-          lote.resumir();
 
           return lote;
         }

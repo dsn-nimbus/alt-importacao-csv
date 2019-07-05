@@ -67,21 +67,21 @@
                     <div class="alt-importacao-csv-wizard-title" ng-bind="importacaoCsvCtrl.getTitle()"></div>
                     <p class="alt-importacao-csv-wizard-obs alt-espacamento-top" ng-bind-html="importacaoCsvCtrl.getMessage()"><p>
                     <div class="alt-espacamento-top alt-espacamento-bottom clearfix">
-                        <div class="col-xs-12 col-sm-4 col-sm-offset-4 anexos-input-file-escondido-container text-center">
-                          <button type="button" class="btn btn-block btn-default alt-espacamento-bottom alt-espacamento-top anexos-input-file-fake">
-                            Selecionar arquivo
-                          </button>
-                          <span class="small microcopy text-muted">Tamanho máximo: 2MB ou 3.000 registros</span>
+                      <div class="col-xs-12 col-sm-4 col-sm-offset-4 anexos-input-file-escondido-container text-center">
+                        <button type="button" class="btn btn-block btn-default alt-espacamento-bottom alt-espacamento-top anexos-input-file-fake">
+                          Selecionar arquivo
+                        </button>
+                        <span class="small microcopy text-muted">Tamanho máximo: 2MB ou 3.000 registros</span>
 
-                          <input type="file" class="anexos-input-file-real alt-hand ng-isolate-scope" 
-                            ng-model="importacaoCsvCtrl.arquivo" 
-                            id="alt-importacao-csv-input-file-step1"
-                            accept=".xls,.xlsx,.csv,.ods"
-                            alt-importacao-csv-leitor
-                            data-opts="importacaoCsvCtrl.arquivoOpcoes"
-                            ng-change="importacaoCsvCtrl.arquivoAlterado()"
-                            required>
-                        </div>
+                        <input type="file" class="anexos-input-file-real alt-hand ng-isolate-scope" 
+                          ng-model="importacaoCsvCtrl.arquivo"
+                          id="alt-importacao-csv-input-file-step1"
+                          accept=".xls,.xlsx,.csv,.ods"
+                          alt-importacao-csv-leitor
+                          data-opts="importacaoCsvCtrl.arquivoOpcoes"
+                          ng-change="importacaoCsvCtrl.arquivoAlterado()"
+                          required>
+                      </div>
                     </div>
                     <div class="text-center" ng-show="!!importacaoCsvCtrl.arquivo && importacaoCsvCtrl.arquivo.valido">
                       <span class="text-success alt-importacao-csv-input-ckeck">
@@ -194,9 +194,9 @@
                 <div class="col-xs-12 alt-importacao-csv-map-warnings">
                   <div class="alert alert-danger alert-dismissible alt-espacamento-bottom" role="alert" ng-show="importacaoCsvCtrl.importacao.mapaInvalido && importacaoCsvCtrl.exibirMensagemErro">
                     <button type="button" ng-click="importacaoCsvCtrl.removerMensagemErro()" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <p ng-repeat="campo in importacaoCsvCtrl.importacao.campos" ng-if="campo.vinculoRequisitado && !campo.valido">
-                      <i class="fa fa-exclamation-triangle"></i>
-                      <span>O campo <b>{{campo.nome}}</b> do ERP4ME deve ser vinculado a uma coluna do arquivo</span>
+                    <p ng-repeat="msg in importacaoCsvCtrl.importacao.mensagensMapa">
+                      <i class="fa fa-exclamation-triangle"></i>&nbsp;
+                      <span ng-bind-html="msg"></span>
                     </p>
                   </div>
                 </div>
@@ -218,17 +218,13 @@
                 <div class="col-xs-12 alt-importacao-csv-rules-field" 
                   ng-repeat="campo in importacaoCsvCtrl.importacao.campos track by campo.chave" 
                   ng-if="campo.tipo.name === 'Object'"
-                  ng-hide="
-                    (importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'regras' && campo.resumoRegrasDeValor.vinculados === 0) ||
-                    (importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'nulosInvalidos' && campo.resumoRegrasDeValor.nulosInvalidos === 0) ||
-                    (importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'nulosValidos' && campo.resumoRegrasDeValor.nulosValidos === 0) ||
-                    (!campo.obrigatorio && campo.coluna === undefined)">
+                  ng-hide="importacaoCsvCtrl.ocultarCampo(campo)">
                   <div class="row alt-espacamento-top">
                     <div class="col-xs-12">
                       <label ng-show="importacaoCsvCtrl.obterQtdCamposRegras(importacaoCsvCtrl.importacao.campos) > 1" class="alt-importacao-csv-rules-title" data-toggle="collapse" data-target="#alt-importacao-csv-rules-field-{{campo.chave}}">
                         <i class="fa fa-angle-down"></i>
                         {{campo.nome}} 
-                        <span ng-show="!!campo.coluna && importacaoCsvCtrl.arquivoOpcoes.colunasPossuemTitulos">(coluna {{importacaoCsvCtrl.nomeColuna(campo.coluna)}})</span>
+                        <span ng-show="campo.possuiColunaMapeada() && importacaoCsvCtrl.arquivoOpcoes.colunasPossuemTitulos">(coluna {{importacaoCsvCtrl.nomeColuna(campo.coluna)}})</span>
                       </label>
                     </div>
                   </div>
@@ -249,14 +245,10 @@
                             <tr ng-repeat="regra in campo.regrasDeValor"
                               ng-class="{
                                 'rule-success': regra.objeto,
-                                'rule-warning': !regra.objeto && !campo.obrigatorio,
-                                'rule-error': !regra.objeto && campo.obrigatorio}"
-                              ng-hide="
-                                (!regra.objeto && importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'regras') ||
-                                ((!regra.objeto && campo.obrigatorio || regra.objeto) && importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'nulosValidos') ||
-                                ((!regra.objeto && !campo.obrigatorio || regra.objeto) && importacaoCsvCtrl.resumoRegrasDeValor.exibir === 'nulosInvalidos')">
+                                'rule-warning': !regra.objeto && !regra.obrigatoria(),
+                                'rule-error': !regra.objeto && regra.obrigatoria()}">
                               <td class="status">
-                                <i class="fa fa-exclamation-triangle text-warning" ng-show="!regra.objeto && campo.obrigatorio" title="Vínculo obrigatório"></i>
+                                <i class="fa fa-exclamation-triangle text-warning" ng-show="!regra.objeto && regra.obrigatoria()" title="Vínculo obrigatório"></i>
                                 <i class="fa fa-check text-success" ng-show="regra.objeto"></i>
                               </td>
                               <td ng-hide="regra.geral">{{(regra.valor === null ? '' : regra.valor)}}</td>
@@ -264,7 +256,7 @@
                               <td class="alt-importacao-csv-rules-td-count-field">{{regra.quantidade}}</td>
                               <td class="alt-importacao-csv-rules-td-select-field"
                                 style="min-width: 180px;"
-                                ng-class="{'has-error': !regra.objeto && campo.obrigatorio && importacaoCsvCtrl.exibirMensagemErro}">
+                                ng-class="{'has-error': !regra.objeto && regra.obrigatoria() && importacaoCsvCtrl.exibirMensagemErro}">
                                 <select id="alt-importacao-csv-rules-select-{{campo.chave}}-{{$index}}"
                                   class="alt-importacao-csv-rules-select form-control"
                                   style="width: 100%;"
@@ -625,7 +617,7 @@
 
             self.arquivoAnterior = ng.copy(self.arquivo);
           } else {
-            self.importacao = new Importacao(self.campos);
+            self.importacao = new Importacao(self.campos, self.validarMapa);
 
             self.arquivo.colunas.map((col, i) => {
               self.importacao.adicionarColuna(col, i);
@@ -657,7 +649,6 @@
             }
           });
 
-          self.resumoRegrasDeValor.exibir = 'todos';
           _ativarEstacaoMenu(ID_MENU_REGRAS_DE_VALOR, 0);
         };
 
@@ -719,6 +710,7 @@
           self.labelTipoSingular = opcoes.labelTipoSingular;
           self.validarLote = opcoes.validarLote;
           self.gravarLote = opcoes.gravarLote;
+          self.validarMapa = opcoes.validarMapa;
           self.eventoCriacao = opcoes.eventoCriacao;
           self.campos = ng.copy(opcoes.campos);
           self.camposConfigurados = ng.copy(opcoes.campos);
@@ -874,7 +866,7 @@
               invalid = (!self.arquivo || !self.arquivo.valido);
               break;
             case 1:
-              invalid = self.importacao.mapaInvalido;
+              invalid = self.importacao.validarMapa();
               break;
             case 2:
               invalid = self.resumoRegrasDeValor.nulosInvalidos > 0;
@@ -910,16 +902,16 @@
         };
 
         self.resumirRegrasDeValor = function() {
-          self.removerMensagemErro();
-
           ng.extend(self.resumoRegrasDeValor, self.importacao.resumirRegrasDeValor());
-          if (self.resumoRegrasDeValor.exibir === 'nulosValidos' && self.resumoRegrasDeValor.nulosValidos === 0) {
-            self.resumoRegrasDeValor.exibir = 'todos';
+          if (self.resumoRegrasDeValor.nulosValidos === 0) {
             _ativarEstacaoMenu(ID_MENU_REGRAS_DE_VALOR, 0);
           }
-          if (self.resumoRegrasDeValor.exibir === 'nulosInvalidos' && self.resumoRegrasDeValor.nulosInvalidos === 0) {
-            self.resumoRegrasDeValor.exibir = 'todos';
+          if (self.resumoRegrasDeValor.nulosInvalidos === 0) {
             _ativarEstacaoMenu(ID_MENU_REGRAS_DE_VALOR, 0);
+          }
+
+          if (self.resumoRegrasDeValor.nulosInvalidos === 0) {
+            self.removerMensagemErro();
           }
         };
 
@@ -1007,6 +999,11 @@
           self.resumirRegrasDeValor();
         };
 
+        self.ocultarCampo = function(campo) {
+          var totalRegras = _.sumBy(campo.regrasDeValor, 'quantidade');
+          return (!campo.obrigatorio && !campo.possuiColunaMapeada()) || totalRegras === 0;
+        }
+
         self.inicializarComboComOpcaoCriarNovo = function(id, chaveCampo, indexRegra) {
           $timeout(() => {
             selectService.inicializarComOpcaoCriarNovo(id, {
@@ -1017,8 +1014,6 @@
         };
 
         self.salvarImportacao = function() {
-          // Chamado neste ponto pois Passo 4 foi retirado do fluxo
-          // Trouxe o codigo do metodo _inicializarRevisao, pois preciso executar o restande no retorno da Promise
           AltCarregandoInfoService.exibe();
 
           $timeout(() => {
@@ -1026,7 +1021,6 @@
 
             self.validarLote(loteProvisorio).then((lote) => {
               self.lote = lote;
-              self.lote.exibir = 'todos';
 
               var lotePersistencia = ng.copy(self.lote);
               // _.remove(lotePersistencia.itens, (item) => {return item.desconsiderado;});
