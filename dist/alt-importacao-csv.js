@@ -888,6 +888,10 @@
 
         };
 
+        var _ajustaAlturaModal = function() {
+          $('.alt-importacao-csv-wrapper').css('max-height', `${($(window).height() - 250)}px`)
+        };
+
         self.obterMaisItensNaoImportados = function () {
           return self.obterItensNaoImportados(self.lote.idLoteImportacao, true).then((itens) => {
             itens.forEach((i) => {
@@ -1238,6 +1242,7 @@
 
         $scope.$on(evento.modal.ABRE_MODAL_IMPORTACAO_ESPECIFICA, (ev, opcoes) => {
           _inicializar(opcoes);
+          _ajustaAlturaModal();
           modalService.open(ID_MODAL);
         });
 
@@ -1815,6 +1820,10 @@
               linhasMapeadas = _.filter(linhasMapeadas, campo.objetoRegraFiltroLinhas);
             }
 
+            // Força obrigatoriedade de colunas que tenham linhas mapeadas para vínculo e remove dos
+            // que não tem linhas quando a coluna do arquivo não foi mapeada.
+            campo.obrigatorio = linhasMapeadas.length > 0;
+
             if (!!campo.coluna) {
 
               var distinct = _.groupBy(linhasMapeadas, (l) => { return l[campo.chave]; });
@@ -1831,10 +1840,6 @@
               });
             }
             else {
-              if (linhasMapeadas.length === 0) {
-                campo.obrigatorio = false; // Remove obrigatoriedade de colunas que não tenham nenhuma linha mapeada para vínculo.
-              }
-
               campo.regrasDeValor = [new RegraImportacao({
                 valor: null,
                 geral: true,

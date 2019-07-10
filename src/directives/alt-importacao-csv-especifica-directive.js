@@ -794,6 +794,10 @@
 
         };
 
+        var _ajustaAlturaModal = function() {
+          $('.alt-importacao-csv-wrapper').css('max-height', `${($(window).height() - 250)}px`)
+        };
+
         self.obterMaisItensNaoImportados = function () {
           return self.obterItensNaoImportados(self.lote.idLoteImportacao, true).then((itens) => {
             itens.forEach((i) => {
@@ -1144,6 +1148,7 @@
 
         $scope.$on(evento.modal.ABRE_MODAL_IMPORTACAO_ESPECIFICA, (ev, opcoes) => {
           _inicializar(opcoes);
+          _ajustaAlturaModal();
           modalService.open(ID_MODAL);
         });
 

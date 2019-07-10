@@ -162,6 +162,10 @@
               linhasMapeadas = _.filter(linhasMapeadas, campo.objetoRegraFiltroLinhas);
             }
 
+            // Força obrigatoriedade de colunas que tenham linhas mapeadas para vínculo e remove dos
+            // que não tem linhas quando a coluna do arquivo não foi mapeada.
+            campo.obrigatorio = linhasMapeadas.length > 0;
+
             if (!!campo.coluna) {
 
               var distinct = _.groupBy(linhasMapeadas, (l) => { return l[campo.chave]; });
@@ -178,10 +182,6 @@
               });
             }
             else {
-              if (linhasMapeadas.length === 0) {
-                campo.obrigatorio = false; // Remove obrigatoriedade de colunas que não tenham nenhuma linha mapeada para vínculo.
-              }
-
               campo.regrasDeValor = [new RegraImportacao({
                 valor: null,
                 geral: true,
