@@ -307,11 +307,11 @@
                   <div class="alt-espacamento-bottom" ng-bind-html="importacaoCsvCtrl.getMessage()"></div>
                 </div>
               </div>
-              
+
               <div class="row alt-espacamento-top">
                 <div class="col-xs-12 alt-importacao-csv-rules-field" 
                   ng-repeat="campo in importacaoCsvCtrl.importacao.campos track by campo.chave" 
-                  ng-if="campo.tipo.name === 'Object'"
+                  ng-if="campo.tipo.name === 'Object' && campo.quantidadeRegrasSemVinculo > 0"
                   ng-hide="importacaoCsvCtrl.ocultarCampo(campo)">
                   <div class="row alt-espacamento-top">
                     <div class="col-xs-12">
@@ -336,7 +336,7 @@
                             </tr>
                           </thead>
                           <tbody>
-                            <tr ng-repeat="regra in campo.regrasDeValor"
+                            <tr ng-repeat="regra in campo.regrasDeValor | filter: {autoVinculoAplicado: false}"
                               ng-class="{
                                 'rule-success': regra.objeto,
                                 'rule-warning': !regra.objeto && !regra.obrigatoria(),
@@ -632,7 +632,7 @@
           <button type="button" class="btn btn-primary"
             ng-show="importacaoCsvCtrl.steps[0].active || (importacaoCsvCtrl.exibeEtapaRegras && importacaoCsvCtrl.steps[1].active)"
             ng-click="importacaoCsvCtrl.invalidStep(importacaoCsvCtrl.nextStep)">
-            Próximo &nbsp;<i class="fa fa-long-arrow-right"></i>
+            Importar
           </button>
 
           <button type="button" class="btn btn-primary"
@@ -685,20 +685,20 @@
 
         const ID_MODAL = '#alt-importacao-csv-modal';
         const ID_COMUM_SELECTS_REGRAS = '#alt-importacao-csv-rules-select';
-        const ID_MENU_REGRAS_DE_VALOR = '#alt-importacao-csv-btn-group-rules';
         const CLASS_SELECT_CAMPOS = '.alt-importacao-csv-select-field';
         const CLASS_PLANILHA_MAPEAMENTO = '.alt-importacao-csv-planilha-mapeamento';
+        const QTD_MAXIMA_VINCULO_REGRAS_MANUAIS = 20;
 
         self.itensNaoImportados = [];
         self.itensImportadosComAviso = [];
 
-        var _ativarEstacaoMenu = function(idMenu, posicao) {
-          var btns = $(idMenu).find('input[type="radio"]');
-          btns.removeAttr('checked');
-          btns.parent('label').removeClass('active');
-          $(btns[posicao]).attr('checked', 'checked');
-          $(btns[posicao]).parent('label').addClass('active');
-        };
+        // var _ativarEstacaoMenu = function(idMenu, posicao) {
+        //   var btns = $(idMenu).find('input[type="radio"]');
+        //   btns.removeAttr('checked');
+        //   btns.parent('label').removeClass('active');
+        //   $(btns[posicao]).attr('checked', 'checked');
+        //   $(btns[posicao]).parent('label').addClass('active');
+        // };
 
         var _inicializarMapeamento = function() {
 
@@ -729,21 +729,30 @@
         var _inicializarRegras = function() {
           self.resumoRegrasDeValor = self.importacao.aplicarRegrasDeValor(self.arquivo.linhas);
 
-          self.importacao.campos.forEach((campo) => {
-            if (campo.tipo === Object) {
-              campo.regrasDeValor.forEach((regra, index) => {
-                var id = ID_COMUM_SELECTS_REGRAS + '-' + campo.chave + '-' + index;
-                if (!!campo.objetoCriarNovo) {
-                  self.inicializarComboComOpcaoCriarNovo(id, campo.chave, index);
-                }
-                else {
-                  selectService.inicializar(id);
-                }
-              });
-            }
-          });
+          var camposRegrasRequisitadas = _.filter(self.importacao.campos, (campo) =>  campo.tipo === Object && campo.quantidadeRegrasSemVinculo > 0)
+          if (camposRegrasRequisitadas.length === 0) {
+            return self.salvarImportacao();
+          }
 
-          _ativarEstacaoMenu(ID_MENU_REGRAS_DE_VALOR, 0);
+          for (var i=0; i< camposRegrasRequisitadas.length; i++) {
+            var campo = camposRegrasRequisitadas[i];
+
+            if (campo.quantidadeRegrasSemVinculo > QTD_MAXIMA_VINCULO_REGRAS_MANUAIS) {
+              self.prevStep();
+              self._exibeMensagemExcessoRegras(campo);
+              break;
+            }
+
+            campo.regrasDeValor.forEach((regra, index) => {
+              var id = ID_COMUM_SELECTS_REGRAS + '-' + campo.chave + '-' + index;
+              if (!!campo.objetoCriarNovo) {
+                self.inicializarComboComOpcaoCriarNovo(id, campo.chave, index);
+              }
+              else {
+                selectService.inicializar(id);
+              }
+            });
+          }
         };
 
         var _focoInicialAbasDetalhes = function() {
@@ -864,7 +873,7 @@
               progress: self.exibeEtapaRegras ? 83.28 : 100,
               init: _inicializarRegras,
               title:  _step3 ? _step3.title : 'Configurar vínculos',
-              message: _step3 ? $sce.trustAsHtml(_step3.message) : $sce.trustAsHtml('Vincule a informação do arquivo ao <em>Campo</em> correspondente no cadastro do ERP4ME'),
+              message: _step3 ? $sce.trustAsHtml(_step3.message) : $sce.trustAsHtml('Vincule a informação do arquivo ao cadastro do ERP for Me!'),
               menuHidden: !self.exibeEtapaRegras
             },
             {
@@ -889,7 +898,7 @@
         };
 
         var _ajustaAlturaModal = function() {
-          $('.alt-importacao-csv-wrapper').css('max-height', `${($(window).height() - 250)}px`)
+          $('.alt-importacao-csv-wrapper').css('max-height', `${($(window).height() - 170)}px`)
         };
 
         self.obterMaisItensNaoImportados = function () {
@@ -1001,12 +1010,6 @@
 
         self.resumirRegrasDeValor = function() {
           ng.extend(self.resumoRegrasDeValor, self.importacao.resumirRegrasDeValor());
-          if (self.resumoRegrasDeValor.nulosValidos === 0) {
-            _ativarEstacaoMenu(ID_MENU_REGRAS_DE_VALOR, 0);
-          }
-          if (self.resumoRegrasDeValor.nulosInvalidos === 0) {
-            _ativarEstacaoMenu(ID_MENU_REGRAS_DE_VALOR, 0);
-          }
 
           if (self.resumoRegrasDeValor.nulosInvalidos === 0) {
             self.removerMensagemErro();
@@ -1226,7 +1229,14 @@
           self.exibirMensagemErro = false;
         };
 
-        self.atualizarMensagensErro
+        self._exibeMensagemExcessoRegras = function(campo) {
+          alertaService.exibe({
+            tipo: 'info',
+            titulo: 'Atenção',
+            msg: `O arquivo possui mais de ${QTD_MAXIMA_VINCULO_REGRAS_MANUAIS} itens sem registro
+              compatível de <b>${campo.nome}</b> no ERP for Me. </br>${campo.mensagemExcessoRegras}`
+          });
+        };
 
         self.limparImportacao = function () {
           self.arquivo = null;
@@ -1458,43 +1468,6 @@
 }(angular));
 
 ;(function(ng) {
-    'use strict';
-
-    ng.module('alt.importacao-csv')
-    /**
-    * @description Filtro que retorna o texto limitado
-    * @class alt.importacao-csv.LimitadorTexto
-    * @memberof alt.importacao-csv
-    */
-    .filter('LimitadorTexto', ['_', function (_) {
-      /**
-       * @description Retorna o texto limitado
-       * @memberof alt.importacao-csv.LimitadorTexto
-       * @function limitadorTexto
-       * @param {string} o texto a ser filtrado
-       * @param {number} o número do limite
-       * @returns {string} retorna a string limitada
-       * @inner
-       */
-      return function (input, val) {
-          if (!input) {
-              return;
-          }
-
-          var _tamanho = val || 53;
-
-          if (input.length > _tamanho) {
-              input = _.truncate(input, {
-                  length: _tamanho
-              });
-          }
-
-          return typeof input === "string" ? input.trim() : input;
-      };
-    }]);
-}(angular));
-
-;(function(ng) {
   "use strict";
 
   ng.module('alt.importacao-csv')
@@ -1523,6 +1496,7 @@
           this.objetoReferencia = undefined;
           this.objetoAutoVinculo = undefined;
           this.objetoCriarNovo = undefined;
+          this.possuiRegrasSemVinculo = false;
           this.objetoOpcoesListagem = {};
           this.mensagens = [];
 
@@ -1823,6 +1797,7 @@
             // Força obrigatoriedade de colunas que tenham linhas mapeadas para vínculo e remove dos
             // que não tem linhas quando a coluna do arquivo não foi mapeada.
             campo.obrigatorio = linhasMapeadas.length > 0;
+            campo.quantidadeRegrasSemVinculo = 0;
 
             if (!!campo.coluna) {
 
@@ -1830,10 +1805,15 @@
 
               campo.regrasDeValor = Object.keys(distinct).map((key) => {
                 var valor = key === 'undefined' ? '' : key;
+                var obj = campo.objetoAutoVinculo(key);
+                if (!obj) {
+                  campo.quantidadeRegrasSemVinculo++;
+                }
                 return new RegraImportacao({
                   valor: valor,
                   quantidade: distinct[key].length,
-                  objeto: campo.objetoAutoVinculo(key),
+                  objeto: obj,
+                  autoVinculoAplicado: !!obj,
                   obrigatoria: campo.objetoRegraObrigatoria ?
                     () => campo.objetoRegraObrigatoria(this.campos, null) : () => campo.obrigatorio
                 });
@@ -1847,6 +1827,7 @@
                 objeto: null,
                 obrigatoria: () => campo.obrigatorio
               })];
+              campo.quantidadeRegrasSemVinculo++;
             };
           });
 
@@ -2047,6 +2028,7 @@
           this.geral = false;
           this.quantidade = 0;
           this.objeto = null;
+          this.autoVinculoAplicado = false;
           this.obrigatoria = () => false;
 
           ng.extend(this, obj);
@@ -2071,5 +2053,42 @@
       }
 
       return ResumoItemImportacao;
+    }]);
+}(angular));
+
+;(function(ng) {
+    'use strict';
+
+    ng.module('alt.importacao-csv')
+    /**
+    * @description Filtro que retorna o texto limitado
+    * @class alt.importacao-csv.LimitadorTexto
+    * @memberof alt.importacao-csv
+    */
+    .filter('LimitadorTexto', ['_', function (_) {
+      /**
+       * @description Retorna o texto limitado
+       * @memberof alt.importacao-csv.LimitadorTexto
+       * @function limitadorTexto
+       * @param {string} o texto a ser filtrado
+       * @param {number} o número do limite
+       * @returns {string} retorna a string limitada
+       * @inner
+       */
+      return function (input, val) {
+          if (!input) {
+              return;
+          }
+
+          var _tamanho = val || 53;
+
+          if (input.length > _tamanho) {
+              input = _.truncate(input, {
+                  length: _tamanho
+              });
+          }
+
+          return typeof input === "string" ? input.trim() : input;
+      };
     }]);
 }(angular));

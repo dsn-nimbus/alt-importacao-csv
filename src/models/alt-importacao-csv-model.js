@@ -165,6 +165,7 @@
             // Força obrigatoriedade de colunas que tenham linhas mapeadas para vínculo e remove dos
             // que não tem linhas quando a coluna do arquivo não foi mapeada.
             campo.obrigatorio = linhasMapeadas.length > 0;
+            campo.quantidadeRegrasSemVinculo = 0;
 
             if (!!campo.coluna) {
 
@@ -172,10 +173,15 @@
 
               campo.regrasDeValor = Object.keys(distinct).map((key) => {
                 var valor = key === 'undefined' ? '' : key;
+                var obj = campo.objetoAutoVinculo(key);
+                if (!obj) {
+                  campo.quantidadeRegrasSemVinculo++;
+                }
                 return new RegraImportacao({
                   valor: valor,
                   quantidade: distinct[key].length,
-                  objeto: campo.objetoAutoVinculo(key),
+                  objeto: obj,
+                  autoVinculoAplicado: !!obj,
                   obrigatoria: campo.objetoRegraObrigatoria ?
                     () => campo.objetoRegraObrigatoria(this.campos, null) : () => campo.obrigatorio
                 });
@@ -189,6 +195,7 @@
                 objeto: null,
                 obrigatoria: () => campo.obrigatorio
               })];
+              campo.quantidadeRegrasSemVinculo++;
             };
           });
 

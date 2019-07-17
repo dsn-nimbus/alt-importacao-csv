@@ -27,6 +27,7 @@
           this.objetoReferencia = undefined;
           this.objetoAutoVinculo = undefined;
           this.objetoCriarNovo = undefined;
+          this.possuiRegrasSemVinculo = false;
           this.objetoOpcoesListagem = {};
           this.mensagens = [];
 
