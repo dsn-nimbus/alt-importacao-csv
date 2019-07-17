@@ -308,7 +308,7 @@
               
               <div class="row alt-importacao-csv-menu-detalhes">
                 <div class="col-md-4 bold">
-                  {{importacaoCsvCtrl.lote.nomeArquivo}}
+                  <span title="{{importacaoCsvCtrl.lote.nomeArquivo}}">{{importacaoCsvCtrl.lote.nomeArquivo | LimitadorTexto:35}}</span>
                 </div>
                 <div class="col-md-4">
                   <b alt-importacao-csv-contador count-to="importacaoCsvCtrl.lote.quantidadeRegistros" duration="1" count-from="0"></b> registros
@@ -635,7 +635,11 @@
         var _inicializarRegras = function() {
           self.resumoRegrasDeValor = self.importacao.aplicarRegrasDeValor(self.arquivo.linhas);
 
-          var camposRegrasRequisitadas = _.filter(self.importacao.campos, (campo) =>  campo.tipo === Object && campo.quantidadeRegrasSemVinculo > 0)
+          var camposRegrasRequisitadas = _.filter(self.importacao.campos, (campo) => 
+            campo.tipo === Object &&
+            campo.quantidadeRegrasSemVinculo > 0 &&
+            campo.obrigatorio);
+
           if (camposRegrasRequisitadas.length === 0) {
             return self.salvarImportacao();
           }
