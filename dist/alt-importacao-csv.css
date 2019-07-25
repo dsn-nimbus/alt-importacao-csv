@@ -325,6 +325,9 @@
 .alt-importacao-csv-rules-td-select-field {
   width: 400px;
 }
+.alt-importacao-csv-rules-td-select-field select {
+  opacity: 0;
+}
 .alt-importacao-csv-rules-td-count-field {
   width: 50px;
   text-align: right;

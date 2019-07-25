@@ -23,6 +23,647 @@
 
 }(angular));
 
+;(function(ng) {
+    'use strict';
+
+    ng.module('alt.importacao-csv')
+    /**
+    * @description Filtro que retorna o texto limitado
+    * @class alt.importacao-csv.LimitadorTexto
+    * @memberof alt.importacao-csv
+    */
+    .filter('LimitadorTexto', ['_', function (_) {
+      /**
+       * @description Retorna o texto limitado
+       * @memberof alt.importacao-csv.LimitadorTexto
+       * @function limitadorTexto
+       * @param {string} o texto a ser filtrado
+       * @param {number} o número do limite
+       * @returns {string} retorna a string limitada
+       * @inner
+       */
+      return function (input, val) {
+          if (!input) {
+              return;
+          }
+
+          var _tamanho = val || 53;
+
+          if (input.length > _tamanho) {
+              input = _.truncate(input, {
+                  length: _tamanho
+              });
+          }
+
+          return typeof input === "string" ? input.trim() : input;
+      };
+    }]);
+}(angular));
+
+;(function(ng) {
+  "use strict";
+
+  ng.module('alt.importacao-csv')
+    .factory('AltImportacaoCsvCampoModel', [
+      '$sce',
+      '$filter',
+      '$log',
+      'moment',
+      'latinize',
+      function($sce, $filter, $log, moment, latinize) {
+      class CampoImportacao {
+        constructor(e) {
+          this.nome = '';
+          this.chave = '';
+          this.obrigatorio = false;
+          this.dado = '';
+          this.coluna = undefined;
+          this.valor = undefined;
+          this.referencia = undefined;
+          this.valido = false;
+          this.tipo = undefined;
+          this.vinculoRequisitado = false;
+          this.template = {};
+          this.objetoChave = undefined;
+          this.objetoListagem = undefined;
+          this.objetoReferencia = undefined;
+          this.objetoAutoVinculo = undefined;
+          this.objetoCriarNovo = undefined;
+          this.possuiRegrasSemVinculo = false;
+          this.objetoOpcoesListagem = {};
+          this.mensagens = [];
+
+          ng.extend(this, e);
+
+          this._parseObrigatorio();
+          this._parseObjetoAutoVinculo();
+          this._parseTipo();
+          this._parseTemplate();
+          this._validarOpcoes();
+        }
+
+        _validarOpcoes() {
+          if (!this.nome) {
+            throw new Error('Parametro "nome" é obrigatório.');
+          }
+          if (!this.chave) {
+            throw new Error('Parametro "chave" é obrigatório.');
+          }
+          if (this.tipo === Object && !this.objetoChave) {
+            throw new Error('Parametro "objetoChave" é obrigatório para campo Object.');
+          }
+          if (this.tipo === Object && !this.objetoReferencia) {
+            throw new Error('Parametro "objetoReferencia" é obrigatório para campo Object.');
+          }
+          if (this.tipo === Object && !this.objetoListagem) {
+            throw new Error('Parametro "objetoListagem" é obrigatório para campo Object.');
+          }
+        }
+
+        _parseObrigatorio() {
+          this.obrigatorio = !!this.obrigatorio;
+        }
+
+        _parseObjetoAutoVinculo() {
+          if (this.tipo === Object && (!this.objetoAutoVinculo || typeof this.objetoAutoVinculo !== "function")) {
+            this.objetoAutoVinculo = (valor) => {
+              var obj = undefined;
+              if (valor) {
+                valor = latinize(valor.toLowerCase());
+                this.objetoListagem().forEach((o) => {
+                  if (latinize(o[this.objetoReferencia]).toLowerCase() === valor) {
+                    obj = o;
+                    return;
+                  }
+                });
+              }
+              return obj;
+            };
+          }
+        }
+
+        _parseTipo() {
+          if (this.tipo !== Object && this.tipo !== Date && this.tipo !== Boolean && this.tipo !== Number) {
+            this.tipo = String;
+          }
+        }
+
+        _parseTemplate() {
+          this.template = {
+            width: typeof this.template.width === "number" ? this.template.width : 12,
+            label: this.template.label ? this.template.label : this.nome,
+            textLimit: this.template.textLimit ? this.template.textLimit : 53,
+            property: this.template.property ? this.template.property : this.chave,
+            column: !!this.template.column ? parseInt(this.template.column) : undefined
+          };
+        }
+
+        _incluirMensagemValidacao(texto) {
+          this.mensagens.push({
+            textoHtml: $sce.trustAsHtml('O campo <u>' + this.template.label + '</u> ' + texto + '.')
+          });
+        }
+
+        possuiColunaMapeada() {
+          return !!this.coluna;
+        }
+
+        possuiRegraGeral() {
+          var regra = _.find(this.regrasDeValor, {geral: true});
+          return !!regra && !!regra.objeto;
+        }
+
+        possuiVinculoOuRegraGeral() {
+          return this.possuiColunaMapeada() || this.possuiRegraGeral();
+        }
+      }
+
+      return CampoImportacao;
+    }]);
+}(angular));
+
+;(function(ng) {
+  "use strict";
+
+  ng.module('alt.importacao-csv')
+    .factory('AltImportacaoCsvItemModel', ['AltImportacaoCsvResumoItemModel', function(ResumoItemImportacao) {
+      class ItemImportacao {
+        constructor(linha, objeto) {
+          this.linha = linha;
+          this.objeto = objeto;
+        }
+      }
+
+      return ItemImportacao;
+    }]);
+}(angular));
+
+;(function(ng) {
+  "use strict";
+
+  ng.module('alt.importacao-csv')
+    .factory('AltImportacaoCsvLoteModel', [function() {
+      class LoteImportacao {
+        constructor(lote) {
+          this.itens = [];
+          this.processando = 0;
+          this.validos = 0;
+          this.erros = 0;
+          this.conflitos = 0;
+          this.nomeArquivo = '';
+          this.quantidadeImportadosSucesso = 0;
+          this.quantidadeImportadosAviso = 0;
+          this.quantidadeErros = 0;
+
+          ng.extend(this, lote);
+        }
+      }
+
+      return LoteImportacao;
+    }]);
+}(angular));
+
+;(function(ng) {
+  "use strict";
+
+  ng.module('alt.importacao-csv')
+  .factory('AltImportacaoCsvModel', [
+    '$q',
+    '$sce',
+    'AltImportacaoCsvItemModel',
+    'AltImportacaoCsvLoteModel',
+    'AltImportacaoCsvRegraModel',
+    '_',
+    function($q, $sce, ItemImportacao, LoteImportacao, RegraImportacao, _) {
+      class Importacao {
+        constructor(campos, validacaoEspecifica) {
+          this.campos = campos;
+
+          this.colunas = [];
+          this.mapaInvalido = false;
+          this.mensagensMapa = [];
+          this.validacaoEspecifica = angular.noop;
+
+          if (typeof validacaoEspecifica === 'function') {
+            this.validacaoEspecifica = validacaoEspecifica;
+          }
+        }
+
+        validarMapa() {
+          this.mapaInvalido = false;
+          this.mensagensMapa = [];
+
+          this.campos.forEach((campo) => {
+            if (campo.tipo === Object) {
+              return;
+            }
+            if (campo.obrigatorio && !campo.coluna) {
+              this.mapaInvalido = true;
+              this.mensagensMapa.push($sce.trustAsHtml(`O campo <b>${campo.nome}</b> deve ser vinculado a uma coluna do arquivo.`));
+            }
+          });
+
+          var erros = this.validacaoEspecifica(this.campos);
+          if (Array.isArray(erros) && erros.length > 0) {
+            this.mapaInvalido = true;
+            this.mensagensMapa = this.mensagensMapa.concat(erros);
+          }
+
+          return this.mapaInvalido;
+        }
+
+        adicionarColuna(nome, index) {
+          this.colunas.push({
+            nome: nome,
+            numero: index + 1,
+            titulo: 'Coluna ' + (index + 1) + ' – ' + nome,
+            campos: []
+          });
+        }
+
+        vincular(chaveCampo, numeroColuna) {
+          var campo = _.find(this.campos, {chave: chaveCampo});
+          var coluna = _.find(this.colunas, {numero: numeroColuna});
+          if (!!campo && !!coluna) {
+            campo.coluna = numeroColuna;
+            coluna.campos.push(campo);
+            this.validarMapa();
+          }
+        }
+
+        desvincular(chaveCampo) {
+          var campo = _.find(this.campos, {chave: chaveCampo});
+          var coluna = _.find(this.colunas, {numero: campo.coluna});
+          if (!!campo && !!coluna) {
+            _.remove(coluna.campos, {chave: campo.chave});
+            campo.coluna = undefined;
+            campo.regrasDeValor = undefined;
+            this.validarMapa();
+          }
+        }
+
+        formataObjeto(valor, campo) {
+          if (campo.regrasDeValor && campo.regrasDeValor.length > 0) {
+            var regra = _.find(campo.regrasDeValor, {valor: valor});
+            if (regra && regra.objeto) {
+              return regra.objeto;
+            }
+
+            var geral = _.find(campo.regrasDeValor, {geral: true});
+            if (geral && geral.objeto) {
+              return geral.objeto;
+            }
+          }
+        }
+
+        formataData(valor) {
+          var data = valor;
+
+          if (valor instanceof Date === false) {
+            data = moment(valor, [
+              'DD/MM/YYYY',
+              'DD-MM-YYYY',
+              'DD.MM.YYYY',
+              'YYYY/MM/DD',
+              'YYYY-MM-DD',
+              'YYYY.MM.DD',
+              'DD/MM/YY',
+              'DD-MM-YY',
+              'DD.MM.YY'
+            ]);
+          }
+
+          if (moment(data).isValid()) {
+            return moment(data).utc().format('YYYY-MM-DD');
+          }
+
+          return valor === undefined ? '' : valor;
+        }
+
+        formataTexto(valor) {
+          if (typeof valor !== "string") {
+            valor = valor === undefined ? '' : valor.toString();
+          }
+
+          return valor.length <= 255 ? valor : valor.substring(255, 0);
+        }
+
+        formataValor(valor, campo) {
+          switch(campo.tipo) {
+            case Date:
+              return this.formataData(valor);
+            case String:
+              return this.formataTexto(valor);
+            default:
+              return valor;
+          }
+        }
+
+        mapearLinhas(linhas, formatar) {
+          var itens = [];
+          linhas.forEach((linha) => {
+            var item = {};
+            this.campos.forEach((campo) => {
+              if (!!campo.coluna) {
+                var coluna = _.find(this.colunas, {numero: campo.coluna});
+                var valor = linha[coluna.nome];
+
+                item[campo.chave] = formatar ? this.formataValor(valor, campo) : valor;
+              }
+            });
+            itens.push(item);
+          });
+          return itens;
+        }
+
+        aplicarRegrasDeValor(linhas) {
+          return $q((res) => {
+            var linhasMapeadas = this.mapearLinhas(linhas);
+
+            for (var c = 0; c < this.campos.length; c++) {
+              var campo = this.campos[c];
+              if (campo.tipo !== Object) {
+                continue;
+              }
+  
+              if (campo.objetoRegraFiltroLinhas) {
+                linhasMapeadas = _.filter(linhasMapeadas, campo.objetoRegraFiltroLinhas);
+              }
+  
+              // Força obrigatoriedade de colunas que tenham linhas mapeadas para vínculo e remove dos
+              // que não tem linhas quando a coluna do arquivo não foi mapeada.
+              campo.obrigatorio = linhasMapeadas.length > 0;
+              campo.quantidadeRegrasSemVinculo = 0;
+  
+              if (!!campo.coluna) {
+                var distinct = _.groupBy(linhasMapeadas, (l) => { return l[campo.chave]; });
+
+                campo.regrasDeValor = Object.keys(distinct).map((key, index) => {
+                  var valor = key === 'undefined' ? '' : key;
+                  var regra = new RegraImportacao({
+                    valor: valor,
+                    quantidade: distinct[key].length,
+                    objeto: campo.objetoAutoVinculo(key),
+                    obrigatoria: campo.obrigatorio
+                  });
+                  if (!regra.autoVinculoAplicado) {
+                    campo.quantidadeRegrasSemVinculo++;
+                    console.log('regra pendente', regra, 'EXCLAMATION?', !regra.objeto && regra.obrigatoria);
+                  }
+                  return regra;
+                });
+              }
+              else {
+                campo.regrasDeValor = [new RegraImportacao({
+                  valor: null,
+                  geral: true,
+                  quantidade: linhasMapeadas.length,
+                  objeto: null,
+                  obrigatoria: campo.obrigatorio
+                })];
+                campo.quantidadeRegrasSemVinculo++;
+              }
+            }
+
+            this.resumirRegrasDeValor().then((resumo) => res(resumo));
+          });
+        }
+
+        resumirRegrasDeValor() {
+          return $q((res) => {
+            var valores = 0;
+            var vinculados = 0;
+            var nulosValidos = 0;
+            var nulosInvalidos = 0;
+
+            for (var c = 0; c < this.campos.length; c++) {
+              var campo = this.campos[0];
+              if (campo.tipo !== Object) {
+                continue;
+              }
+
+              if (!campo.coluna) {
+                var possuiRegra = !!campo.regrasDeValor[0].objeto;
+                campo.resumoRegrasDeValor = {
+                  valores: 1,
+                  vinculados: possuiRegra ? 1 : 0,
+                  nulosValidos: !possuiRegra && !campo.obrigatorio ? 1 : 0,
+                  nulosInvalidos: !possuiRegra && campo.obrigatorio ? 1 : 0
+                };
+              }
+              else {
+                campo.resumoRegrasDeValor = {
+                  valores: 0,
+                  vinculados: 0,
+                  nulosValidos: 0,
+                  nulosInvalidos: 0
+                };
+
+                for (var r = 0; r < campo.regrasDeValor.length; r++) {
+                  var regra = campo.regrasDeValor[r];
+                  if (!regra.objeto && regra.obrigatoria) {
+                    campo.resumoRegrasDeValor.nulosInvalidos++;
+                  }
+                  else if (!regra.objeto) {
+                    campo.resumoRegrasDeValor.nulosValidos++;
+                  }
+                  else {
+                    campo.resumoRegrasDeValor.vinculados++;
+                  }
+                  campo.resumoRegrasDeValor.valores++;
+                }
+              }
+  
+              valores += campo.resumoRegrasDeValor.valores;
+              vinculados += campo.resumoRegrasDeValor.vinculados;
+              nulosValidos += campo.resumoRegrasDeValor.nulosValidos;
+              nulosInvalidos += campo.resumoRegrasDeValor.nulosInvalidos;
+            }
+  
+            res({
+              valores: valores,
+              vinculados: vinculados,
+              nulosValidos: nulosValidos,
+              nulosInvalidos: nulosInvalidos
+            });
+          });
+        }
+
+        montarLote(linhas, nomeArquivo) {
+          var lote = new LoteImportacao({
+            nomeArquivo: nomeArquivo,
+            itens: []
+          });
+
+          this.mapearLinhas(linhas, true).forEach((obj, index) => {
+
+            this.campos.forEach((campo) => {
+              if (campo.tipo !== Object) {
+                return;
+              }
+              if (campo.objetoRegraFiltroLinhas && _.filter([obj], campo.objetoRegraFiltroLinhas).length === 0) {
+                obj[campo.chave] = undefined;
+                return;
+              }
+
+              var valor = obj[campo.chave] === undefined ? '' : obj[campo.chave];
+              obj[campo.chave] = this.formataObjeto(valor, campo);
+            });
+
+            lote.itens.push(new ItemImportacao(index + 2, obj));
+          });
+
+          return lote;
+        }
+
+      }
+
+      return Importacao;
+    }
+  ]);
+}(angular));
+
+;(function(ng) {
+  "use strict";
+
+  ng.module('alt.importacao-csv')
+    .factory('AltImportacaoCsvOpcoesModel', ['$q', function($q) {
+      class OpcoesImportacao {
+        constructor(obj) {
+          this.labelTipo = '';
+          this.labelTipoSingular = '';
+          this.eventoCriacao = '';
+          this.campos = undefined;
+          this.validarLote = undefined;
+          this.gravarLote = undefined;
+          this.visualizacao = false;
+          this.loteProcessado = undefined;
+          this.titulosMensagensCustomizadas = [];
+          this.obterItensNaoImportados = () => $q.resolve([]);
+          this.obterItensImportadosComAviso = () => $q.resolve([]);
+
+          ng.extend(this, obj);
+
+          this._parseVisualizacao();
+          this._validarOpcoes();
+        }
+
+        _parseVisualizacao() {
+          this.visualizacao = !!this.visualizacao;
+        }
+
+        _validarOpcoes() {
+          if (!this.labelTipo) {
+            throw new Error('Parametro "labelTipo" é obrigatório.');
+          }
+          if (!this.campos) {
+            throw new Error('Parametro "campos" é obrigatório.');
+          }
+          if (this.visualizacao) {
+            if (!this.labelTipoSingular) {
+              throw new Error('Parametro "labelTipoSingular" é obrigatório quando em visualização.');
+            }
+            if (!this.loteProcessado) {
+              throw new Error('Parametro "loteProcessado" é obrigatório quando em visualização.');
+            }
+          }
+          else {
+            if (!this.eventoCriacao) {
+              throw new Error('Parametro "eventoCriacao" é obrigatório quando em importação.');
+            }
+            if (!this.validarLote) {
+              throw new Error('Parametro "validarLote" é obrigatório quando em importação.');
+            }
+            if (!this.gravarLote) {
+              throw new Error('Parametro "gravarLote" é obrigatório quando em importação.');
+            }
+          }
+        }
+
+        obterTitulosMensagensPorStep (step) {
+          if (!this.titulosMensagensCustomizadas || !this.titulosMensagensCustomizadas.length) {
+            return null;
+          }
+
+          let _retorno = this.titulosMensagensCustomizadas.filter((item) => {
+            return item.step === step;
+          });
+
+          if (!!_retorno && !!_retorno.length) {
+            return _retorno[0];
+          }
+
+          return null;
+        }
+
+      }
+
+      return OpcoesImportacao;
+    }]);
+}(angular));
+
+;(function(ng) {
+  "use strict";
+
+  ng.module('alt.importacao-csv')
+    .factory('AltImportacaoCsvOpcoesTituloMensagemModel', [function() {
+      class OpcoesTituloMensagemModel {
+        constructor(step, title, message) {
+          this.step = step;
+          this.title = title;
+          this.message = message;
+        }
+      }
+
+      return OpcoesTituloMensagemModel;
+    }]);
+}(angular));
+
+; (function (ng) {
+  "use strict";
+
+  ng.module('alt.importacao-csv')
+    .factory('AltImportacaoCsvRegraModel', [function () {
+      class RegraImportacao {
+        constructor(obj) {
+          this.valor = '';
+          this.geral = false;
+          this.quantidade = 0;
+          this.objeto = null;
+          this.autoVinculoAplicado = false;
+          this.obrigatoria = () => false;
+
+          ng.extend(this, obj);
+
+          this._parseAutoVinculoAplicado();
+        }
+
+        _parseAutoVinculoAplicado() {
+          this.autoVinculoAplicado = !!this.objeto;
+        }
+      }
+
+      return RegraImportacao;
+    }]);
+}(angular));
+;(function(ng) {
+  "use strict";
+
+  ng.module('alt.importacao-csv')
+    .factory('AltImportacaoCsvResumoItemModel', [function() {
+      class ResumoItemImportacao {
+        constructor(linha) {
+          this.linha = linha;
+          this.status = '';
+          this.campos = [];
+          this.mensagens = [];
+        }
+      }
+
+      return ResumoItemImportacao;
+    }]);
+}(angular));
+
 ;
 (function (ng) {
   'use strict';
@@ -339,18 +980,18 @@
                             <tr ng-repeat="regra in campo.regrasDeValor | filter: {autoVinculoAplicado: false}"
                               ng-class="{
                                 'rule-success': regra.objeto,
-                                'rule-warning': !regra.objeto && !regra.obrigatoria(),
-                                'rule-error': !regra.objeto && regra.obrigatoria()}">
+                                'rule-warning': !regra.objeto && !regra.obrigatoria,
+                                'rule-error': !regra.objeto && regra.obrigatoria}">
                               <td class="status">
-                                <i class="fa fa-exclamation-triangle text-warning" ng-show="!regra.objeto && regra.obrigatoria()" title="Vínculo obrigatório"></i>
+                                <i class="fa fa-exclamation-triangle text-warning" ng-show="!regra.objeto && regra.obrigatoria" title="Vínculo obrigatório"></i>
                                 <i class="fa fa-check text-success" ng-show="regra.objeto"></i>
                               </td>
-                              <td ng-hide="regra.geral">{{(regra.valor === null ? '' : regra.valor)}}</td>
+                              <td ng-hide="regra.geral" title="{{regra.valor}}">{{(regra.valor === null ? '' : regra.valor)| LimitadorTexto:28 }}</td>
                               <td ng-show="regra.geral"><i class="text-secondary">Todas as ocorrências</i></td>
                               <td class="alt-importacao-csv-rules-td-count-field">{{regra.quantidade}}</td>
                               <td class="alt-importacao-csv-rules-td-select-field"
                                 style="min-width: 180px;"
-                                ng-class="{'has-error': !regra.objeto && regra.obrigatoria() && importacaoCsvCtrl.exibirMensagemErro}">
+                                ng-class="{'has-error': !regra.objeto && regra.obrigatoria && importacaoCsvCtrl.exibirMensagemErro}">
                                 <select id="alt-importacao-csv-rules-select-{{campo.chave}}-{{$index}}"
                                   class="alt-importacao-csv-rules-select form-control"
                                   style="width: 100%;"
@@ -687,18 +1328,10 @@
         const ID_COMUM_SELECTS_REGRAS = '#alt-importacao-csv-rules-select';
         const CLASS_SELECT_CAMPOS = '.alt-importacao-csv-select-field';
         const CLASS_PLANILHA_MAPEAMENTO = '.alt-importacao-csv-planilha-mapeamento';
-        const QTD_MAXIMA_VINCULO_REGRAS_MANUAIS = 20;
+        const QTD_MAXIMA_VINCULO_REGRAS_MANUAIS = 10;
 
         self.itensNaoImportados = [];
         self.itensImportadosComAviso = [];
-
-        // var _ativarEstacaoMenu = function(idMenu, posicao) {
-        //   var btns = $(idMenu).find('input[type="radio"]');
-        //   btns.removeAttr('checked');
-        //   btns.parent('label').removeClass('active');
-        //   $(btns[posicao]).attr('checked', 'checked');
-        //   $(btns[posicao]).parent('label').addClass('active');
-        // };
 
         var _inicializarMapeamento = function() {
 
@@ -727,36 +1360,44 @@
         };
 
         var _inicializarRegras = function() {
-          self.resumoRegrasDeValor = self.importacao.aplicarRegrasDeValor(self.arquivo.linhas);
+          self.importacao.aplicarRegrasDeValor(self.arquivo.linhas).then((resumo) => {
+            self.resumoRegrasDeValor = resumo;
 
-          var camposRegrasRequisitadas = _.filter(self.importacao.campos, (campo) => 
-            campo.tipo === Object &&
-            campo.quantidadeRegrasSemVinculo > 0 &&
-            campo.obrigatorio);
-
-          if (camposRegrasRequisitadas.length === 0) {
-            return self.salvarImportacao();
-          }
-
-          for (var i=0; i< camposRegrasRequisitadas.length; i++) {
-            var campo = camposRegrasRequisitadas[i];
-
-            if (campo.quantidadeRegrasSemVinculo > QTD_MAXIMA_VINCULO_REGRAS_MANUAIS) {
-              self.prevStep();
-              self._exibeMensagemExcessoRegras(campo);
-              break;
+            var camposRegrasRequisitadas = _.filter(self.importacao.campos, (campo) => 
+              campo.tipo === Object &&
+              campo.quantidadeRegrasSemVinculo > 0 &&
+              campo.obrigatorio);
+  
+            if (camposRegrasRequisitadas.length === 0) {
+              return self.salvarImportacao();
             }
+  
+            for (var i=0; i< camposRegrasRequisitadas.length; i++) {
+              var campo = camposRegrasRequisitadas[i];
+  
+              if (campo.quantidadeRegrasSemVinculo > QTD_MAXIMA_VINCULO_REGRAS_MANUAIS) {
+                self.prevStep();
+                self._exibeMensagemExcessoRegras(campo);
+                break;
+              }
 
-            campo.regrasDeValor.forEach((regra, index) => {
-              var id = ID_COMUM_SELECTS_REGRAS + '-' + campo.chave + '-' + index;
-              if (!!campo.objetoCriarNovo) {
-                self.inicializarComboComOpcaoCriarNovo(id, campo.chave, index);
-              }
-              else {
-                selectService.inicializar(id);
-              }
-            });
-          }
+              var indexPendente = 0;
+              campo.regrasDeValor.forEach((regra, index) => {
+                if (regra.autoVinculoAplicado) {
+                  return;
+                }
+
+                var id = ID_COMUM_SELECTS_REGRAS + '-' + campo.chave + '-' + indexPendente;
+                if (!!campo.objetoCriarNovo) {
+                  self.inicializarComboComOpcaoCriarNovo(id, campo.chave, index);
+                }
+                else {
+                  selectService.inicializar(id);
+                }
+                indexPendente++;
+              });
+            }
+          });
         };
 
         var _focoInicialAbasDetalhes = function() {
@@ -1013,11 +1654,13 @@
         };
 
         self.resumirRegrasDeValor = function() {
-          ng.extend(self.resumoRegrasDeValor, self.importacao.resumirRegrasDeValor());
+          self.importacao.resumirRegrasDeValor().then((resumo) => {
+            ng.extend(self.resumoRegrasDeValor, resumo);
 
-          if (self.resumoRegrasDeValor.nulosInvalidos === 0) {
-            self.removerMensagemErro();
-          }
+            if (self.resumoRegrasDeValor.nulosInvalidos === 0) {
+              self.removerMensagemErro();
+            }
+          });
         };
 
         self.permiteAlteracaoArquivo = function() {
@@ -1066,13 +1709,14 @@
           self.reloadStep(index);
         };
 
-        self.criarNovoObjetoDeRegra = function(chaveCampo, indexRegra) {
+        self.criarNovoObjetoDeRegra = function(chaveCampo, idRegra, indexRegra) {
           modalService.close(ID_MODAL);
           $timeout(() => {
             var campo = _.find(self.importacao.campos, {chave: chaveCampo});
             if (!!campo.objetoCriarNovo && !!campo.objetoCriarNovo.funcao) {
               campo.objetoCriarNovo.funcao();
               campo.atribuirNovoARegra = indexRegra;
+              campo.atribuirNovoARegraId = idRegra;
 
               $scope.$on(campo.objetoCriarNovo.eventoAtualizacao, (ev, objNovo) => {
                 if (campo.atribuirNovoARegra !== undefined) {
@@ -1080,9 +1724,9 @@
 
                   $timeout(() => {
                     campo.regrasDeValor[campo.atribuirNovoARegra].objeto = objNovo;
-                    var id = ID_COMUM_SELECTS_REGRAS + '-' + campo.chave + '-' + campo.atribuirNovoARegra;
-                    self.inicializarComboComOpcaoCriarNovo(id, campo.chave, campo.atribuirNovoARegra);
+                    self.inicializarComboComOpcaoCriarNovo(campo.atribuirNovoARegraId, campo.chave, campo.atribuirNovoARegra);
                     campo.atribuirNovoARegra = undefined;
+                    campo.atribuirNovoARegraId = undefined;
                     self.resumirRegrasDeValor();
                   }, 200);
                 }
@@ -1113,7 +1757,7 @@
           $timeout(() => {
             selectService.inicializarComOpcaoCriarNovo(id, {
               escopo: $scope,
-              strMetodo: `importacaoCsvCtrl.criarNovoObjetoDeRegra('${chaveCampo}', ${indexRegra})`
+              strMetodo: `importacaoCsvCtrl.criarNovoObjetoDeRegra('${chaveCampo}', '${id}', ${indexRegra})`
             }, {});
           });
         };
@@ -1469,630 +2113,4 @@
       };
     }
   ]);
-}(angular));
-
-;(function(ng) {
-    'use strict';
-
-    ng.module('alt.importacao-csv')
-    /**
-    * @description Filtro que retorna o texto limitado
-    * @class alt.importacao-csv.LimitadorTexto
-    * @memberof alt.importacao-csv
-    */
-    .filter('LimitadorTexto', ['_', function (_) {
-      /**
-       * @description Retorna o texto limitado
-       * @memberof alt.importacao-csv.LimitadorTexto
-       * @function limitadorTexto
-       * @param {string} o texto a ser filtrado
-       * @param {number} o número do limite
-       * @returns {string} retorna a string limitada
-       * @inner
-       */
-      return function (input, val) {
-          if (!input) {
-              return;
-          }
-
-          var _tamanho = val || 53;
-
-          if (input.length > _tamanho) {
-              input = _.truncate(input, {
-                  length: _tamanho
-              });
-          }
-
-          return typeof input === "string" ? input.trim() : input;
-      };
-    }]);
-}(angular));
-
-;(function(ng) {
-  "use strict";
-
-  ng.module('alt.importacao-csv')
-    .factory('AltImportacaoCsvCampoModel', [
-      '$sce',
-      '$filter',
-      '$log',
-      'moment',
-      'latinize',
-      function($sce, $filter, $log, moment, latinize) {
-      class CampoImportacao {
-        constructor(e) {
-          this.nome = '';
-          this.chave = '';
-          this.obrigatorio = false;
-          this.dado = '';
-          this.coluna = undefined;
-          this.valor = undefined;
-          this.referencia = undefined;
-          this.valido = false;
-          this.tipo = undefined;
-          this.vinculoRequisitado = false;
-          this.template = {};
-          this.objetoChave = undefined;
-          this.objetoListagem = undefined;
-          this.objetoReferencia = undefined;
-          this.objetoAutoVinculo = undefined;
-          this.objetoCriarNovo = undefined;
-          this.possuiRegrasSemVinculo = false;
-          this.objetoOpcoesListagem = {};
-          this.mensagens = [];
-
-          ng.extend(this, e);
-
-          this._parseObrigatorio();
-          this._parseObjetoAutoVinculo();
-          this._parseTipo();
-          this._parseTemplate();
-          this._validarOpcoes();
-        }
-
-        _validarOpcoes() {
-          if (!this.nome) {
-            throw new Error('Parametro "nome" é obrigatório.');
-          }
-          if (!this.chave) {
-            throw new Error('Parametro "chave" é obrigatório.');
-          }
-          if (this.tipo === Object && !this.objetoChave) {
-            throw new Error('Parametro "objetoChave" é obrigatório para campo Object.');
-          }
-          if (this.tipo === Object && !this.objetoReferencia) {
-            throw new Error('Parametro "objetoReferencia" é obrigatório para campo Object.');
-          }
-          if (this.tipo === Object && !this.objetoListagem) {
-            throw new Error('Parametro "objetoListagem" é obrigatório para campo Object.');
-          }
-        }
-
-        _parseObrigatorio() {
-          this.obrigatorio = !!this.obrigatorio;
-        }
-
-        _parseObjetoAutoVinculo() {
-          if (this.tipo === Object && (!this.objetoAutoVinculo || typeof this.objetoAutoVinculo !== "function")) {
-            this.objetoAutoVinculo = (valor) => {
-              var obj = undefined;
-              if (valor) {
-                valor = latinize(valor.toLowerCase());
-                this.objetoListagem().forEach((o) => {
-                  if (latinize(o[this.objetoReferencia]).toLowerCase() === valor) {
-                    obj = o;
-                    return;
-                  }
-                });
-              }
-              return obj;
-            };
-          }
-        }
-
-        _parseTipo() {
-          if (this.tipo !== Object && this.tipo !== Date && this.tipo !== Boolean && this.tipo !== Number) {
-            this.tipo = String;
-          }
-        }
-
-        _parseTemplate() {
-          this.template = {
-            width: typeof this.template.width === "number" ? this.template.width : 12,
-            label: this.template.label ? this.template.label : this.nome,
-            textLimit: this.template.textLimit ? this.template.textLimit : 53,
-            property: this.template.property ? this.template.property : this.chave,
-            column: !!this.template.column ? parseInt(this.template.column) : undefined
-          };
-        }
-
-        _incluirMensagemValidacao(texto) {
-          this.mensagens.push({
-            textoHtml: $sce.trustAsHtml('O campo <u>' + this.template.label + '</u> ' + texto + '.')
-          });
-        }
-
-        possuiColunaMapeada() {
-          return !!this.coluna;
-        }
-
-        possuiRegraGeral() {
-          var regra = _.find(this.regrasDeValor, {geral: true});
-          return !!regra && !!regra.objeto;
-        }
-
-        possuiVinculoOuRegraGeral() {
-          return this.possuiColunaMapeada() || this.possuiRegraGeral();
-        }
-      }
-
-      return CampoImportacao;
-    }]);
-}(angular));
-
-;(function(ng) {
-  "use strict";
-
-  ng.module('alt.importacao-csv')
-    .factory('AltImportacaoCsvItemModel', ['AltImportacaoCsvResumoItemModel', function(ResumoItemImportacao) {
-      class ItemImportacao {
-        constructor(linha, objeto) {
-          this.linha = linha;
-          this.objeto = objeto;
-        }
-      }
-
-      return ItemImportacao;
-    }]);
-}(angular));
-
-;(function(ng) {
-  "use strict";
-
-  ng.module('alt.importacao-csv')
-    .factory('AltImportacaoCsvLoteModel', [function() {
-      class LoteImportacao {
-        constructor(lote) {
-          this.itens = [];
-          this.processando = 0;
-          this.validos = 0;
-          this.erros = 0;
-          this.conflitos = 0;
-          this.nomeArquivo = '';
-          this.quantidadeImportadosSucesso = 0;
-          this.quantidadeImportadosAviso = 0;
-          this.quantidadeErros = 0;
-
-          ng.extend(this, lote);
-        }
-      }
-
-      return LoteImportacao;
-    }]);
-}(angular));
-
-;(function(ng) {
-  "use strict";
-
-  ng.module('alt.importacao-csv')
-  .factory('AltImportacaoCsvModel', [
-    '$sce',
-    'AltImportacaoCsvItemModel',
-    'AltImportacaoCsvLoteModel',
-    'AltImportacaoCsvRegraModel',
-    '_',
-    function($sce, ItemImportacao, LoteImportacao, RegraImportacao, _) {
-      class Importacao {
-        constructor(campos, validacaoEspecifica) {
-          this.campos = campos;
-
-          this.colunas = [];
-          this.mapaInvalido = false;
-          this.mensagensMapa = [];
-          this.validacaoEspecifica = angular.noop;
-
-          if (typeof validacaoEspecifica === 'function') {
-            this.validacaoEspecifica = validacaoEspecifica;
-          }
-        }
-
-        validarMapa() {
-          this.mapaInvalido = false;
-          this.mensagensMapa = [];
-
-          this.campos.forEach((campo) => {
-            if (campo.tipo === Object) {
-              return;
-            }
-            if (campo.obrigatorio && !campo.coluna) {
-              this.mapaInvalido = true;
-              this.mensagensMapa.push($sce.trustAsHtml(`O campo <b>${campo.nome}</b> deve ser vinculado a uma coluna do arquivo.`));
-            }
-          });
-
-          var erros = this.validacaoEspecifica(this.campos);
-          if (Array.isArray(erros) && erros.length > 0) {
-            this.mapaInvalido = true;
-            this.mensagensMapa = this.mensagensMapa.concat(erros);
-          }
-
-          return this.mapaInvalido;
-        }
-
-        adicionarColuna(nome, index) {
-          this.colunas.push({
-            nome: nome,
-            numero: index + 1,
-            titulo: 'Coluna ' + (index + 1) + ' – ' + nome,
-            campos: []
-          });
-        }
-
-        vincular(chaveCampo, numeroColuna) {
-          var campo = _.find(this.campos, {chave: chaveCampo});
-          var coluna = _.find(this.colunas, {numero: numeroColuna});
-          if (!!campo && !!coluna) {
-            campo.coluna = numeroColuna;
-            coluna.campos.push(campo);
-            this.validarMapa();
-          }
-        }
-
-        desvincular(chaveCampo) {
-          var campo = _.find(this.campos, {chave: chaveCampo});
-          var coluna = _.find(this.colunas, {numero: campo.coluna});
-          if (!!campo && !!coluna) {
-            _.remove(coluna.campos, {chave: campo.chave});
-            campo.coluna = undefined;
-            campo.regrasDeValor = undefined;
-            this.validarMapa();
-          }
-        }
-
-        formataObjeto(valor, campo) {
-          if (campo.regrasDeValor && campo.regrasDeValor.length > 0) {
-            var regra = _.find(campo.regrasDeValor, {valor: valor});
-            if (regra && regra.objeto) {
-              return regra.objeto;
-            }
-
-            var geral = _.find(campo.regrasDeValor, {geral: true});
-            if (geral && geral.objeto) {
-              return geral.objeto;
-            }
-          }
-        }
-
-        formataData(valor) {
-          var data = valor;
-
-          if (valor instanceof Date === false) {
-            data = moment(valor, [
-              'DD/MM/YYYY',
-              'DD-MM-YYYY',
-              'DD.MM.YYYY',
-              'YYYY/MM/DD',
-              'YYYY-MM-DD',
-              'YYYY.MM.DD',
-              'DD/MM/YY',
-              'DD-MM-YY',
-              'DD.MM.YY'
-            ]);
-          }
-
-          if (moment(data).isValid()) {
-            return moment(data).utc().format('YYYY-MM-DD');
-          }
-
-          return valor === undefined ? '' : valor;
-        }
-
-        formataTexto(valor) {
-          if (typeof valor !== "string") {
-            valor = valor === undefined ? '' : valor.toString();
-          }
-
-          return valor.length <= 255 ? valor : valor.substring(255, 0);
-        }
-
-        formataValor(valor, campo) {
-          switch(campo.tipo) {
-            case Date:
-              return this.formataData(valor);
-            case String:
-              return this.formataTexto(valor);
-            default:
-              return valor;
-          }
-        }
-
-        mapearLinhas(linhas, formatar) {
-          var itens = [];
-          linhas.forEach((linha) => {
-            var item = {};
-            this.campos.forEach((campo) => {
-              if (!!campo.coluna) {
-                var coluna = _.find(this.colunas, {numero: campo.coluna});
-                var valor = linha[coluna.nome];
-
-                item[campo.chave] = formatar ? this.formataValor(valor, campo) : valor;
-              }
-            });
-            itens.push(item);
-          });
-          return itens;
-        }
-
-        aplicarRegrasDeValor(linhas) {
-          var linhasMapeadas = this.mapearLinhas(linhas);
-
-          this.campos.forEach((campo) => {
-            if (campo.tipo !== Object) {
-              return;
-            }
-
-            if (campo.objetoRegraFiltroLinhas) {
-              linhasMapeadas = _.filter(linhasMapeadas, campo.objetoRegraFiltroLinhas);
-            }
-
-            // Força obrigatoriedade de colunas que tenham linhas mapeadas para vínculo e remove dos
-            // que não tem linhas quando a coluna do arquivo não foi mapeada.
-            campo.obrigatorio = linhasMapeadas.length > 0;
-            campo.quantidadeRegrasSemVinculo = 0;
-
-            if (!!campo.coluna) {
-
-              var distinct = _.groupBy(linhasMapeadas, (l) => { return l[campo.chave]; });
-
-              campo.regrasDeValor = Object.keys(distinct).map((key) => {
-                var valor = key === 'undefined' ? '' : key;
-                var obj = campo.objetoAutoVinculo(key);
-                if (!obj) {
-                  campo.quantidadeRegrasSemVinculo++;
-                }
-                return new RegraImportacao({
-                  valor: valor,
-                  quantidade: distinct[key].length,
-                  objeto: obj,
-                  autoVinculoAplicado: !!obj,
-                  obrigatoria: campo.objetoRegraObrigatoria ?
-                    () => campo.objetoRegraObrigatoria(this.campos, null) : () => campo.obrigatorio
-                });
-              });
-            }
-            else {
-              campo.regrasDeValor = [new RegraImportacao({
-                valor: null,
-                geral: true,
-                quantidade: linhasMapeadas.length,
-                objeto: null,
-                obrigatoria: () => campo.obrigatorio
-              })];
-              campo.quantidadeRegrasSemVinculo++;
-            };
-          });
-
-          return this.resumirRegrasDeValor();
-        }
-
-        resumirRegrasDeValor() {
-          var valores = 0;
-          var vinculados = 0;
-          var nulosValidos = 0;
-          var nulosInvalidos = 0;
-          this.campos.forEach((campo) => {
-            if (campo.tipo !== Object) {
-              return;
-            }
-            if (!campo.coluna) {
-              var possuiRegra = !!campo.regrasDeValor[0].objeto;
-              campo.resumoRegrasDeValor = {
-                valores: 1,
-                vinculados: possuiRegra ? 1 : 0,
-                nulosValidos: !possuiRegra && !campo.obrigatorio ? 1 : 0,
-                nulosInvalidos: !possuiRegra && campo.obrigatorio ? 1 : 0
-              };
-            }
-            else {
-              campo.resumoRegrasDeValor = {
-                valores: 0,
-                vinculados: 0,
-                nulosValidos: 0,
-                nulosInvalidos: 0
-              };
-              campo.regrasDeValor.forEach((regra) => {
-                if (!regra.objeto && regra.obrigatoria()) {
-                  campo.resumoRegrasDeValor.nulosInvalidos++;
-                }
-                else if (!regra.objeto) {
-                  campo.resumoRegrasDeValor.nulosValidos++;
-                }
-                else {
-                  campo.resumoRegrasDeValor.vinculados++;
-                }
-                campo.resumoRegrasDeValor.valores++;
-              });
-            }
-
-            valores += campo.resumoRegrasDeValor.valores;
-            vinculados += campo.resumoRegrasDeValor.vinculados;
-            nulosValidos += campo.resumoRegrasDeValor.nulosValidos;
-            nulosInvalidos += campo.resumoRegrasDeValor.nulosInvalidos;
-          });
-
-          return {
-            valores: valores,
-            vinculados: vinculados,
-            nulosValidos: nulosValidos,
-            nulosInvalidos: nulosInvalidos
-          };
-        }
-
-        montarLote(linhas, nomeArquivo) {
-          var lote = new LoteImportacao({
-            nomeArquivo: nomeArquivo,
-            itens: []
-          });
-
-          this.mapearLinhas(linhas, true).forEach((obj, index) => {
-
-            this.campos.forEach((campo) => {
-              if (campo.tipo !== Object) {
-                return;
-              }
-              if (campo.objetoRegraFiltroLinhas && _.filter([obj], campo.objetoRegraFiltroLinhas).length === 0) {
-                obj[campo.chave] = undefined;
-                return;
-              }
-
-              var valor = obj[campo.chave] === undefined ? '' : obj[campo.chave];
-              obj[campo.chave] = this.formataObjeto(valor, campo);
-            });
-
-            lote.itens.push(new ItemImportacao(index + 2, obj));
-          });
-
-          return lote;
-        }
-
-      }
-
-      return Importacao;
-    }
-  ]);
-}(angular));
-
-;(function(ng) {
-  "use strict";
-
-  ng.module('alt.importacao-csv')
-    .factory('AltImportacaoCsvOpcoesModel', ['$q', function($q) {
-      class OpcoesImportacao {
-        constructor(obj) {
-          this.labelTipo = '';
-          this.labelTipoSingular = '';
-          this.eventoCriacao = '';
-          this.campos = undefined;
-          this.validarLote = undefined;
-          this.gravarLote = undefined;
-          this.visualizacao = false;
-          this.loteProcessado = undefined;
-          this.titulosMensagensCustomizadas = [];
-          this.obterItensNaoImportados = () => $q.resolve([]);
-          this.obterItensImportadosComAviso = () => $q.resolve([]);
-
-          ng.extend(this, obj);
-
-          this._parseVisualizacao();
-          this._validarOpcoes();
-        }
-
-        _parseVisualizacao() {
-          this.visualizacao = !!this.visualizacao;
-        }
-
-        _validarOpcoes() {
-          if (!this.labelTipo) {
-            throw new Error('Parametro "labelTipo" é obrigatório.');
-          }
-          if (!this.campos) {
-            throw new Error('Parametro "campos" é obrigatório.');
-          }
-          if (this.visualizacao) {
-            if (!this.labelTipoSingular) {
-              throw new Error('Parametro "labelTipoSingular" é obrigatório quando em visualização.');
-            }
-            if (!this.loteProcessado) {
-              throw new Error('Parametro "loteProcessado" é obrigatório quando em visualização.');
-            }
-          }
-          else {
-            if (!this.eventoCriacao) {
-              throw new Error('Parametro "eventoCriacao" é obrigatório quando em importação.');
-            }
-            if (!this.validarLote) {
-              throw new Error('Parametro "validarLote" é obrigatório quando em importação.');
-            }
-            if (!this.gravarLote) {
-              throw new Error('Parametro "gravarLote" é obrigatório quando em importação.');
-            }
-          }
-        }
-
-        obterTitulosMensagensPorStep (step) {
-          if (!this.titulosMensagensCustomizadas || !this.titulosMensagensCustomizadas.length) {
-            return null;
-          }
-
-          let _retorno = this.titulosMensagensCustomizadas.filter((item) => {
-            return item.step === step;
-          });
-
-          if (!!_retorno && !!_retorno.length) {
-            return _retorno[0];
-          }
-
-          return null;
-        }
-
-      }
-
-      return OpcoesImportacao;
-    }]);
-}(angular));
-
-;(function(ng) {
-  "use strict";
-
-  ng.module('alt.importacao-csv')
-    .factory('AltImportacaoCsvOpcoesTituloMensagemModel', [function() {
-      class OpcoesTituloMensagemModel {
-        constructor(step, title, message) {
-          this.step = step;
-          this.title = title;
-          this.message = message;
-        }
-      }
-
-      return OpcoesTituloMensagemModel;
-    }]);
-}(angular));
-
-; (function (ng) {
-  "use strict";
-
-  ng.module('alt.importacao-csv')
-    .factory('AltImportacaoCsvRegraModel', [function () {
-      class RegraImportacao {
-        constructor(obj) {
-          this.valor = '';
-          this.geral = false;
-          this.quantidade = 0;
-          this.objeto = null;
-          this.autoVinculoAplicado = false;
-          this.obrigatoria = () => false;
-
-          ng.extend(this, obj);
-        }
-      }
-
-      return RegraImportacao;
-    }]);
-}(angular));
-;(function(ng) {
-  "use strict";
-
-  ng.module('alt.importacao-csv')
-    .factory('AltImportacaoCsvResumoItemModel', [function() {
-      class ResumoItemImportacao {
-        constructor(linha) {
-          this.linha = linha;
-          this.status = '';
-          this.campos = [];
-          this.mensagens = [];
-        }
-      }
-
-      return ResumoItemImportacao;
-    }]);
 }(angular));

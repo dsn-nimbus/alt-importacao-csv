@@ -3,12 +3,13 @@
 
   ng.module('alt.importacao-csv')
   .factory('AltImportacaoCsvModel', [
+    '$q',
     '$sce',
     'AltImportacaoCsvItemModel',
     'AltImportacaoCsvLoteModel',
     'AltImportacaoCsvRegraModel',
     '_',
-    function($sce, ItemImportacao, LoteImportacao, RegraImportacao, _) {
+    function($q, $sce, ItemImportacao, LoteImportacao, RegraImportacao, _) {
       class Importacao {
         constructor(campos, validacaoEspecifica) {
           this.campos = campos;
@@ -151,108 +152,116 @@
         }
 
         aplicarRegrasDeValor(linhas) {
-          var linhasMapeadas = this.mapearLinhas(linhas);
+          return $q((res) => {
+            var linhasMapeadas = this.mapearLinhas(linhas);
 
-          this.campos.forEach((campo) => {
-            if (campo.tipo !== Object) {
-              return;
-            }
+            for (var c = 0; c < this.campos.length; c++) {
+              var campo = this.campos[c];
+              if (campo.tipo !== Object) {
+                continue;
+              }
+  
+              if (campo.objetoRegraFiltroLinhas) {
+                linhasMapeadas = _.filter(linhasMapeadas, campo.objetoRegraFiltroLinhas);
+              }
+  
+              // Força obrigatoriedade de colunas que tenham linhas mapeadas para vínculo e remove dos
+              // que não tem linhas quando a coluna do arquivo não foi mapeada.
+              campo.obrigatorio = linhasMapeadas.length > 0;
+              campo.quantidadeRegrasSemVinculo = 0;
+  
+              if (!!campo.coluna) {
+                var distinct = _.groupBy(linhasMapeadas, (l) => { return l[campo.chave]; });
 
-            if (campo.objetoRegraFiltroLinhas) {
-              linhasMapeadas = _.filter(linhasMapeadas, campo.objetoRegraFiltroLinhas);
-            }
-
-            // Força obrigatoriedade de colunas que tenham linhas mapeadas para vínculo e remove dos
-            // que não tem linhas quando a coluna do arquivo não foi mapeada.
-            campo.obrigatorio = linhasMapeadas.length > 0;
-            campo.quantidadeRegrasSemVinculo = 0;
-
-            if (!!campo.coluna) {
-
-              var distinct = _.groupBy(linhasMapeadas, (l) => { return l[campo.chave]; });
-
-              campo.regrasDeValor = Object.keys(distinct).map((key) => {
-                var valor = key === 'undefined' ? '' : key;
-                var obj = campo.objetoAutoVinculo(key);
-                if (!obj) {
-                  campo.quantidadeRegrasSemVinculo++;
-                }
-                return new RegraImportacao({
-                  valor: valor,
-                  quantidade: distinct[key].length,
-                  objeto: obj,
-                  autoVinculoAplicado: !!obj,
-                  obrigatoria: campo.objetoRegraObrigatoria ?
-                    () => campo.objetoRegraObrigatoria(this.campos, null) : () => campo.obrigatorio
+                campo.regrasDeValor = Object.keys(distinct).map((key, index) => {
+                  var valor = key === 'undefined' ? '' : key;
+                  var regra = new RegraImportacao({
+                    valor: valor,
+                    quantidade: distinct[key].length,
+                    objeto: campo.objetoAutoVinculo(key),
+                    obrigatoria: campo.obrigatorio
+                  });
+                  if (!regra.autoVinculoAplicado) {
+                    campo.quantidadeRegrasSemVinculo++;
+                    console.log('regra pendente', regra, 'EXCLAMATION?', !regra.objeto && regra.obrigatoria);
+                  }
+                  return regra;
                 });
-              });
+              }
+              else {
+                campo.regrasDeValor = [new RegraImportacao({
+                  valor: null,
+                  geral: true,
+                  quantidade: linhasMapeadas.length,
+                  objeto: null,
+                  obrigatoria: campo.obrigatorio
+                })];
+                campo.quantidadeRegrasSemVinculo++;
+              }
             }
-            else {
-              campo.regrasDeValor = [new RegraImportacao({
-                valor: null,
-                geral: true,
-                quantidade: linhasMapeadas.length,
-                objeto: null,
-                obrigatoria: () => campo.obrigatorio
-              })];
-              campo.quantidadeRegrasSemVinculo++;
-            };
-          });
 
-          return this.resumirRegrasDeValor();
+            this.resumirRegrasDeValor().then((resumo) => res(resumo));
+          });
         }
 
         resumirRegrasDeValor() {
-          var valores = 0;
-          var vinculados = 0;
-          var nulosValidos = 0;
-          var nulosInvalidos = 0;
-          this.campos.forEach((campo) => {
-            if (campo.tipo !== Object) {
-              return;
-            }
-            if (!campo.coluna) {
-              var possuiRegra = !!campo.regrasDeValor[0].objeto;
-              campo.resumoRegrasDeValor = {
-                valores: 1,
-                vinculados: possuiRegra ? 1 : 0,
-                nulosValidos: !possuiRegra && !campo.obrigatorio ? 1 : 0,
-                nulosInvalidos: !possuiRegra && campo.obrigatorio ? 1 : 0
-              };
-            }
-            else {
-              campo.resumoRegrasDeValor = {
-                valores: 0,
-                vinculados: 0,
-                nulosValidos: 0,
-                nulosInvalidos: 0
-              };
-              campo.regrasDeValor.forEach((regra) => {
-                if (!regra.objeto && regra.obrigatoria()) {
-                  campo.resumoRegrasDeValor.nulosInvalidos++;
-                }
-                else if (!regra.objeto) {
-                  campo.resumoRegrasDeValor.nulosValidos++;
-                }
-                else {
-                  campo.resumoRegrasDeValor.vinculados++;
-                }
-                campo.resumoRegrasDeValor.valores++;
-              });
-            }
+          return $q((res) => {
+            var valores = 0;
+            var vinculados = 0;
+            var nulosValidos = 0;
+            var nulosInvalidos = 0;
 
-            valores += campo.resumoRegrasDeValor.valores;
-            vinculados += campo.resumoRegrasDeValor.vinculados;
-            nulosValidos += campo.resumoRegrasDeValor.nulosValidos;
-            nulosInvalidos += campo.resumoRegrasDeValor.nulosInvalidos;
+            for (var c = 0; c < this.campos.length; c++) {
+              var campo = this.campos[0];
+              if (campo.tipo !== Object) {
+                continue;
+              }
+
+              if (!campo.coluna) {
+                var possuiRegra = !!campo.regrasDeValor[0].objeto;
+                campo.resumoRegrasDeValor = {
+                  valores: 1,
+                  vinculados: possuiRegra ? 1 : 0,
+                  nulosValidos: !possuiRegra && !campo.obrigatorio ? 1 : 0,
+                  nulosInvalidos: !possuiRegra && campo.obrigatorio ? 1 : 0
+                };
+              }
+              else {
+                campo.resumoRegrasDeValor = {
+                  valores: 0,
+                  vinculados: 0,
+                  nulosValidos: 0,
+                  nulosInvalidos: 0
+                };
+
+                for (var r = 0; r < campo.regrasDeValor.length; r++) {
+                  var regra = campo.regrasDeValor[r];
+                  if (!regra.objeto && regra.obrigatoria) {
+                    campo.resumoRegrasDeValor.nulosInvalidos++;
+                  }
+                  else if (!regra.objeto) {
+                    campo.resumoRegrasDeValor.nulosValidos++;
+                  }
+                  else {
+                    campo.resumoRegrasDeValor.vinculados++;
+                  }
+                  campo.resumoRegrasDeValor.valores++;
+                }
+              }
+  
+              valores += campo.resumoRegrasDeValor.valores;
+              vinculados += campo.resumoRegrasDeValor.vinculados;
+              nulosValidos += campo.resumoRegrasDeValor.nulosValidos;
+              nulosInvalidos += campo.resumoRegrasDeValor.nulosInvalidos;
+            }
+  
+            res({
+              valores: valores,
+              vinculados: vinculados,
+              nulosValidos: nulosValidos,
+              nulosInvalidos: nulosInvalidos
+            });
           });
-
-          return {
-            valores: valores,
-            vinculados: vinculados,
-            nulosValidos: nulosValidos,
-            nulosInvalidos: nulosInvalidos
-          };
         }
 
         montarLote(linhas, nomeArquivo) {

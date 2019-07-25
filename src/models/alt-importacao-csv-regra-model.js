@@ -13,6 +13,12 @@
           this.obrigatoria = () => false;
 
           ng.extend(this, obj);
+
+          this._parseAutoVinculoAplicado();
+        }
+
+        _parseAutoVinculoAplicado() {
+          this.autoVinculoAplicado = !!this.objeto;
         }
       }
 

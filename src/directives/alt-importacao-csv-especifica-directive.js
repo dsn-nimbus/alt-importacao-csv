@@ -245,18 +245,18 @@
                             <tr ng-repeat="regra in campo.regrasDeValor | filter: {autoVinculoAplicado: false}"
                               ng-class="{
                                 'rule-success': regra.objeto,
-                                'rule-warning': !regra.objeto && !regra.obrigatoria(),
-                                'rule-error': !regra.objeto && regra.obrigatoria()}">
+                                'rule-warning': !regra.objeto && !regra.obrigatoria,
+                                'rule-error': !regra.objeto && regra.obrigatoria}">
                               <td class="status">
-                                <i class="fa fa-exclamation-triangle text-warning" ng-show="!regra.objeto && regra.obrigatoria()" title="Vínculo obrigatório"></i>
+                                <i class="fa fa-exclamation-triangle text-warning" ng-show="!regra.objeto && regra.obrigatoria" title="Vínculo obrigatório"></i>
                                 <i class="fa fa-check text-success" ng-show="regra.objeto"></i>
                               </td>
-                              <td ng-hide="regra.geral">{{(regra.valor === null ? '' : regra.valor)}}</td>
+                              <td ng-hide="regra.geral" title="{{regra.valor}}">{{(regra.valor === null ? '' : regra.valor)| LimitadorTexto:28 }}</td>
                               <td ng-show="regra.geral"><i class="text-secondary">Todas as ocorrências</i></td>
                               <td class="alt-importacao-csv-rules-td-count-field">{{regra.quantidade}}</td>
                               <td class="alt-importacao-csv-rules-td-select-field"
                                 style="min-width: 180px;"
-                                ng-class="{'has-error': !regra.objeto && regra.obrigatoria() && importacaoCsvCtrl.exibirMensagemErro}">
+                                ng-class="{'has-error': !regra.objeto && regra.obrigatoria && importacaoCsvCtrl.exibirMensagemErro}">
                                 <select id="alt-importacao-csv-rules-select-{{campo.chave}}-{{$index}}"
                                   class="alt-importacao-csv-rules-select form-control"
                                   style="width: 100%;"
@@ -593,18 +593,10 @@
         const ID_COMUM_SELECTS_REGRAS = '#alt-importacao-csv-rules-select';
         const CLASS_SELECT_CAMPOS = '.alt-importacao-csv-select-field';
         const CLASS_PLANILHA_MAPEAMENTO = '.alt-importacao-csv-planilha-mapeamento';
-        const QTD_MAXIMA_VINCULO_REGRAS_MANUAIS = 20;
+        const QTD_MAXIMA_VINCULO_REGRAS_MANUAIS = 10;
 
         self.itensNaoImportados = [];
         self.itensImportadosComAviso = [];
-
-        // var _ativarEstacaoMenu = function(idMenu, posicao) {
-        //   var btns = $(idMenu).find('input[type="radio"]');
-        //   btns.removeAttr('checked');
-        //   btns.parent('label').removeClass('active');
-        //   $(btns[posicao]).attr('checked', 'checked');
-        //   $(btns[posicao]).parent('label').addClass('active');
-        // };
 
         var _inicializarMapeamento = function() {
 
@@ -633,36 +625,44 @@
         };
 
         var _inicializarRegras = function() {
-          self.resumoRegrasDeValor = self.importacao.aplicarRegrasDeValor(self.arquivo.linhas);
+          self.importacao.aplicarRegrasDeValor(self.arquivo.linhas).then((resumo) => {
+            self.resumoRegrasDeValor = resumo;
 
-          var camposRegrasRequisitadas = _.filter(self.importacao.campos, (campo) => 
-            campo.tipo === Object &&
-            campo.quantidadeRegrasSemVinculo > 0 &&
-            campo.obrigatorio);
-
-          if (camposRegrasRequisitadas.length === 0) {
-            return self.salvarImportacao();
-          }
-
-          for (var i=0; i< camposRegrasRequisitadas.length; i++) {
-            var campo = camposRegrasRequisitadas[i];
-
-            if (campo.quantidadeRegrasSemVinculo > QTD_MAXIMA_VINCULO_REGRAS_MANUAIS) {
-              self.prevStep();
-              self._exibeMensagemExcessoRegras(campo);
-              break;
+            var camposRegrasRequisitadas = _.filter(self.importacao.campos, (campo) => 
+              campo.tipo === Object &&
+              campo.quantidadeRegrasSemVinculo > 0 &&
+              campo.obrigatorio);
+  
+            if (camposRegrasRequisitadas.length === 0) {
+              return self.salvarImportacao();
             }
+  
+            for (var i=0; i< camposRegrasRequisitadas.length; i++) {
+              var campo = camposRegrasRequisitadas[i];
+  
+              if (campo.quantidadeRegrasSemVinculo > QTD_MAXIMA_VINCULO_REGRAS_MANUAIS) {
+                self.prevStep();
+                self._exibeMensagemExcessoRegras(campo);
+                break;
+              }
 
-            campo.regrasDeValor.forEach((regra, index) => {
-              var id = ID_COMUM_SELECTS_REGRAS + '-' + campo.chave + '-' + index;
-              if (!!campo.objetoCriarNovo) {
-                self.inicializarComboComOpcaoCriarNovo(id, campo.chave, index);
-              }
-              else {
-                selectService.inicializar(id);
-              }
-            });
-          }
+              var indexPendente = 0;
+              campo.regrasDeValor.forEach((regra, index) => {
+                if (regra.autoVinculoAplicado) {
+                  return;
+                }
+
+                var id = ID_COMUM_SELECTS_REGRAS + '-' + campo.chave + '-' + indexPendente;
+                if (!!campo.objetoCriarNovo) {
+                  self.inicializarComboComOpcaoCriarNovo(id, campo.chave, index);
+                }
+                else {
+                  selectService.inicializar(id);
+                }
+                indexPendente++;
+              });
+            }
+          });
         };
 
         var _focoInicialAbasDetalhes = function() {
@@ -919,11 +919,13 @@
         };
 
         self.resumirRegrasDeValor = function() {
-          ng.extend(self.resumoRegrasDeValor, self.importacao.resumirRegrasDeValor());
+          self.importacao.resumirRegrasDeValor().then((resumo) => {
+            ng.extend(self.resumoRegrasDeValor, resumo);
 
-          if (self.resumoRegrasDeValor.nulosInvalidos === 0) {
-            self.removerMensagemErro();
-          }
+            if (self.resumoRegrasDeValor.nulosInvalidos === 0) {
+              self.removerMensagemErro();
+            }
+          });
         };
 
         self.permiteAlteracaoArquivo = function() {
@@ -972,13 +974,14 @@
           self.reloadStep(index);
         };
 
-        self.criarNovoObjetoDeRegra = function(chaveCampo, indexRegra) {
+        self.criarNovoObjetoDeRegra = function(chaveCampo, idRegra, indexRegra) {
           modalService.close(ID_MODAL);
           $timeout(() => {
             var campo = _.find(self.importacao.campos, {chave: chaveCampo});
             if (!!campo.objetoCriarNovo && !!campo.objetoCriarNovo.funcao) {
               campo.objetoCriarNovo.funcao();
               campo.atribuirNovoARegra = indexRegra;
+              campo.atribuirNovoARegraId = idRegra;
 
               $scope.$on(campo.objetoCriarNovo.eventoAtualizacao, (ev, objNovo) => {
                 if (campo.atribuirNovoARegra !== undefined) {
@@ -986,9 +989,9 @@
 
                   $timeout(() => {
                     campo.regrasDeValor[campo.atribuirNovoARegra].objeto = objNovo;
-                    var id = ID_COMUM_SELECTS_REGRAS + '-' + campo.chave + '-' + campo.atribuirNovoARegra;
-                    self.inicializarComboComOpcaoCriarNovo(id, campo.chave, campo.atribuirNovoARegra);
+                    self.inicializarComboComOpcaoCriarNovo(campo.atribuirNovoARegraId, campo.chave, campo.atribuirNovoARegra);
                     campo.atribuirNovoARegra = undefined;
+                    campo.atribuirNovoARegraId = undefined;
                     self.resumirRegrasDeValor();
                   }, 200);
                 }
@@ -1019,7 +1022,7 @@
           $timeout(() => {
             selectService.inicializarComOpcaoCriarNovo(id, {
               escopo: $scope,
-              strMetodo: `importacaoCsvCtrl.criarNovoObjetoDeRegra('${chaveCampo}', ${indexRegra})`
+              strMetodo: `importacaoCsvCtrl.criarNovoObjetoDeRegra('${chaveCampo}', '${id}', ${indexRegra})`
             }, {});
           });
         };
