@@ -20,7 +20,7 @@
             importação - <span>{{importacaoCsvCtrl.labelTipo}}</span></h3>
         </div>
         <div class="alt-importacao-csv-wizard-menu">
-          <div class="modal-body" ng-hide="importacaoCsvCtrl.visualizacao">
+          <div class="modal-body alt-importacao-csv-wizard-menu-importacao" ng-hide="importacaoCsvCtrl.visualizacao">
             <div class="row">
               <div ng-repeat="step in importacaoCsvCtrl.steps"
                       class="text-center alt-importacao-csv-step-title-wrap"
@@ -56,6 +56,19 @@
             </div>
           </div>
 
+          <div class="modal-body alt-importacao-csv-wizard-menu-detalhes" ng-show="importacaoCsvCtrl.visualizacao">
+            <div class="row alt-importacao-csv-menu-detalhes">
+              <div class="col-md-4 bold">
+                <span title="{{importacaoCsvCtrl.lote.nomeArquivo}}">{{importacaoCsvCtrl.lote.nomeArquivo | LimitadorTexto:28}}</span>
+              </div>
+              <div class="col-md-4">
+                <b alt-importacao-csv-contador count-to="importacaoCsvCtrl.lote.quantidadeRegistros" duration="1" count-from="0"></b> registros
+              </div>
+              <div class="col-md-4">
+                <b>{{((importacaoCsvCtrl.lote.quantidadeProcessados/importacaoCsvCtrl.lote.quantidadeRegistros)*100).toFixed(0)}}%</b> processado
+              </div>
+            </div>
+          </div>
         </div>
         <div class="alt-importacao-csv-wrapper">
           <div ng-show="importacaoCsvCtrl.steps[0].active"
@@ -304,23 +317,7 @@
 
           <div ng-show="importacaoCsvCtrl.steps[3].active"
             class="alt-importacao-csv-wizard-step">
-            <div class="modal-body alt-importacao-modal-body-detalhes">
-              
-              <div class="row alt-importacao-csv-menu-detalhes">
-                <div class="col-md-4 bold">
-                  <span title="{{importacaoCsvCtrl.lote.nomeArquivo}}">{{importacaoCsvCtrl.lote.nomeArquivo | LimitadorTexto:35}}</span>
-                </div>
-                <div class="col-md-4">
-                  <b alt-importacao-csv-contador count-to="importacaoCsvCtrl.lote.quantidadeRegistros" duration="1" count-from="0"></b> registros
-                </div>
-                <div class="col-md-4">
-                  <b>{{((importacaoCsvCtrl.lote.quantidadeProcessados/importacaoCsvCtrl.lote.quantidadeRegistros)*100).toFixed(0)}}%</b> processado
-                </div>
-              </div>
-
-              <div class="row">
-                <hr style="margin: 12px 0;"/>
-              </div>
+            <div class="modal-body">
 
               <div class="row" ng-show="importacaoCsvCtrl.lote.quantidadeProcessados !== importacaoCsvCtrl.lote.quantidadeRegistros">
                 <div class="col-xs-12 alt-importacao-csv-progress-details" ng-show="importacaoCsvCtrl.lote.quantidadeProcessados != 0">
@@ -372,7 +369,7 @@
                 </div>
               </div>
 
-              <div class="row alt-importacao-tab-scroll">
+              <div class="row">
 
                 <div class="col-md-12 alt-espacamento-top alt-espacamento-bottom">
                   <div class="tab-content alt-espacamento-top alt-espacamento-bottom" ng-show="importacaoCsvCtrl.lote.status == 2">
@@ -628,7 +625,7 @@
           self.importacao.aplicarRegrasDeValor(self.arquivo.linhas).then((resumo) => {
             self.resumoRegrasDeValor = resumo;
 
-            var camposRegrasRequisitadas = _.filter(self.importacao.campos, (campo) => 
+            var camposRegrasRequisitadas = _.filter(self.importacao.campos, (campo) =>
               campo.tipo === Object &&
               campo.quantidadeRegrasSemVinculo > 0 &&
               campo.obrigatorio);
@@ -808,7 +805,7 @@
         };
 
         var _ajustaAlturaModal = function() {
-          $('.alt-importacao-csv-wrapper').css('max-height', `${($(window).height() - 170)}px`)
+          $('.alt-importacao-csv-wrapper').css('max-height', `${($(window).height() - 270)}px`);
         };
 
         self.obterMaisItensNaoImportados = function () {

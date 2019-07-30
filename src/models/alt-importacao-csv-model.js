@@ -183,7 +183,6 @@
                   });
                   if (!regra.autoVinculoAplicado) {
                     campo.quantidadeRegrasSemVinculo++;
-                    console.log('regra pendente', regra, 'EXCLAMATION?', !regra.objeto && regra.obrigatoria);
                   }
                   return regra;
                 });
@@ -212,7 +211,7 @@
             var nulosInvalidos = 0;
 
             for (var c = 0; c < this.campos.length; c++) {
-              var campo = this.campos[0];
+              var campo = this.campos[c];
               if (campo.tipo !== Object) {
                 continue;
               }

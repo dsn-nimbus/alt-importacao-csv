@@ -167,10 +167,6 @@
   white-space: nowrap;
 }
 
-.alt-importacao-csv-wizard-menu .modal-body {
-  padding: 7px 15px 0 15px;
-}
-
 .alt-importacao-csv-wizard-step{
   background-color: #fff;
 }
@@ -487,6 +483,12 @@
   font-size: 40px;
 }
 
+.alt-importacao-csv-wizard-menu-importacao {
+  padding: 7px 15px 0 15px;
+}
+.alt-importacao-csv-wizard-menu-detalhes {
+  border-bottom: 1px solid #eee;
+}
 .alt-importacao-csv-menu-detalhes {
   font-size: 17px;
 }
