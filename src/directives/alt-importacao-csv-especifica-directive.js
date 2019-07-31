@@ -1141,10 +1141,9 @@
 
         self._exibeMensagemExcessoRegras = function(campo) {
           alertaService.exibe({
-            tipo: 'info',
+            tipo: 'warning',
             titulo: 'Atenção',
-            msg: `O arquivo possui mais de ${QTD_MAXIMA_VINCULO_REGRAS_MANUAIS} itens sem registro
-              compatível de <b>${campo.nome}</b> no ERP for Me. </br>${campo.mensagemExcessoRegras}`
+            msg: campo.mensagemExcessoRegras(QTD_MAXIMA_VINCULO_REGRAS_MANUAIS)
           });
         };
 
