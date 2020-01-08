@@ -128,7 +128,9 @@
             case Date:
               return this.formataData(valor);
             case String:
-              return this.formataTexto(valor);
+              if (!campo.tamanhoCompleto) {
+                return this.formataTexto(valor);
+              }
             default:
               return valor;
           }

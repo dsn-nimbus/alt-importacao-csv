@@ -148,6 +148,7 @@ importacaoEspecificaService.exibe(self.opcoesImportacao); // AltImportacaoCsvEsp
 | obrigatorio          | _Boolean_  | Não                    | Informa se campo é obrigatório para importação ou não.                    |
 | tipo                 | _Function_ | Não                    | Enum da função que representa o tipo do campo.¹                           |
 | monetario            | _Boolean_  | Não                    | Indica que se trata de um monetário quando o tipo é _Number_.             |
+| tamanhoCompleto      | _Boolean_  | Não                    | Não limita a String em 255 caracteres.                                    |
 | objetoChave          | _String_   | Quando tipo é _Object_ | Propriedade única do objeto.                                              |
 | objetoReferencia     | _String_   | Quando tipo é _Object_ | Propriedade label do objeto (nome, descrição ou equivalente).             |
 | objetoListagem       | _Function_ | Quando tipo é _Object_ | Retorna a lista de objetos do tipo em questão para seleção no componente. |
