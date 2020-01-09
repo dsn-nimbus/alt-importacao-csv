@@ -24,7 +24,7 @@
             var result = {};
             workbook.SheetNames.forEach((sheetName) => {
               var row = XLS.utils.sheet_to_row_object_array(workbook.Sheets[sheetName], sheetToJsonOptions);
-
+              
               if (row.length > 0) {
                 result[sheetName] = row;
               }
@@ -70,6 +70,8 @@
 
                 if (cell && cell.t) {
                   hdr = XLSX.utils.format_cell(cell);
+                } else {
+                  hdr = 'coluna ' + (C + 1);
                 }
               } else {
                 hdr = 'coluna ' + (C + 1);
@@ -82,11 +84,13 @@
 
           function obterLinhas (workbook, colunas) {
             let sheetToJsonOptions = {
-              raw: true
+              raw: true,
+              range: 1,
+              header: colunas
             };
 
             if (!!scope.opts && !scope.opts.colunasPossuemTitulos && !!colunas && colunas.length) {
-              sheetToJsonOptions.header = colunas;
+              sheetToJsonOptions.range = 0;
             }
 
             var fileObject = workbookToJson(workbook, sheetToJsonOptions);

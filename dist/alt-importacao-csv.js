@@ -23,43 +23,6 @@
 
 }(angular));
 
-;(function(ng) {
-    'use strict';
-
-    ng.module('alt.importacao-csv')
-    /**
-    * @description Filtro que retorna o texto limitado
-    * @class alt.importacao-csv.LimitadorTexto
-    * @memberof alt.importacao-csv
-    */
-    .filter('LimitadorTexto', ['_', function (_) {
-      /**
-       * @description Retorna o texto limitado
-       * @memberof alt.importacao-csv.LimitadorTexto
-       * @function limitadorTexto
-       * @param {string} o texto a ser filtrado
-       * @param {number} o número do limite
-       * @returns {string} retorna a string limitada
-       * @inner
-       */
-      return function (input, val) {
-          if (!input) {
-              return;
-          }
-
-          var _tamanho = val || 53;
-
-          if (input.length > _tamanho) {
-              input = _.truncate(input, {
-                  length: _tamanho
-              });
-          }
-
-          return typeof input === "string" ? input.trim() : input;
-      };
-    }]);
-}(angular));
-
 ;
 (function (ng) {
   'use strict';
@@ -1338,7 +1301,7 @@
             var result = {};
             workbook.SheetNames.forEach((sheetName) => {
               var row = XLS.utils.sheet_to_row_object_array(workbook.Sheets[sheetName], sheetToJsonOptions);
-
+              
               if (row.length > 0) {
                 result[sheetName] = row;
               }
@@ -1384,6 +1347,8 @@
 
                 if (cell && cell.t) {
                   hdr = XLSX.utils.format_cell(cell);
+                } else {
+                  hdr = 'coluna ' + (C + 1);
                 }
               } else {
                 hdr = 'coluna ' + (C + 1);
@@ -1396,11 +1361,13 @@
 
           function obterLinhas (workbook, colunas) {
             let sheetToJsonOptions = {
-              raw: true
+              raw: true,
+              range: 1,
+              header: colunas
             };
 
             if (!!scope.opts && !scope.opts.colunasPossuemTitulos && !!colunas && colunas.length) {
-              sheetToJsonOptions.header = colunas;
+              sheetToJsonOptions.range = 0;
             }
 
             var fileObject = workbookToJson(workbook, sheetToJsonOptions);
@@ -1504,6 +1471,43 @@
       };
     }
   ]);
+}(angular));
+
+;(function(ng) {
+    'use strict';
+
+    ng.module('alt.importacao-csv')
+    /**
+    * @description Filtro que retorna o texto limitado
+    * @class alt.importacao-csv.LimitadorTexto
+    * @memberof alt.importacao-csv
+    */
+    .filter('LimitadorTexto', ['_', function (_) {
+      /**
+       * @description Retorna o texto limitado
+       * @memberof alt.importacao-csv.LimitadorTexto
+       * @function limitadorTexto
+       * @param {string} o texto a ser filtrado
+       * @param {number} o número do limite
+       * @returns {string} retorna a string limitada
+       * @inner
+       */
+      return function (input, val) {
+          if (!input) {
+              return;
+          }
+
+          var _tamanho = val || 53;
+
+          if (input.length > _tamanho) {
+              input = _.truncate(input, {
+                  length: _tamanho
+              });
+          }
+
+          return typeof input === "string" ? input.trim() : input;
+      };
+    }]);
 }(angular));
 
 ;(function(ng) {
