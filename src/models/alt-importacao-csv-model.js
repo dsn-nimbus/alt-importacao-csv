@@ -169,7 +169,9 @@
   
               // Força obrigatoriedade de colunas que tenham linhas mapeadas para vínculo e remove dos
               // que não tem linhas quando a coluna do arquivo não foi mapeada.
-              campo.obrigatorio = linhasMapeadas.length > 0;
+              if (campo.obrigatorio) {
+                campo.obrigatorio = linhasMapeadas.length > 0;
+              }
               campo.quantidadeRegrasSemVinculo = 0;
   
               if (!!campo.coluna) {
