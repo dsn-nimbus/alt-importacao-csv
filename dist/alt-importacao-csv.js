@@ -1375,6 +1375,26 @@
             return fileObject[Object.keys(fileObject)[0]];
           }
 
+          function ajustarCaracteresInvalidos(celula) {
+            if (typeof celula !== 'string') {
+              return celula;
+            }
+            celula = celula.replace('\u00A0', ' '); // trocando NO-BREAK SPACE por espaço
+            celula = celula.trim();
+            return celula;
+          }
+
+          function ajustarLinhas (linhas) {
+            var copiaLinhas = [];
+            for (let indexLinha = 0; indexLinha < linhas.length; indexLinha++) {
+              (copiaLinhas[indexLinha]) = {};
+              for (let chave in (linhas[indexLinha])) {
+                (copiaLinhas[indexLinha])[chave] = ajustarCaracteresInvalidos(ng.copy((linhas[indexLinha])[chave]));
+              }
+            }
+            return copiaLinhas;
+          }
+
           function fileReaderHandler (file) {
             var reader = new FileReader();
 
@@ -1412,7 +1432,7 @@
                 bstr = e.target.result;
                 workbook = XLSX.read(bstr, {type: 'binary', cellDates: true});
                 colunas = obterColunas(workbook.Sheets[workbook.SheetNames[0]]);
-                linhas = obterLinhas(workbook, colunas);
+                linhas = ajustarLinhas(obterLinhas(workbook, colunas));
               }
 
               // valida quantidade de registros
@@ -1440,7 +1460,7 @@
               });
             };
 
-            reader.readAsBinaryString(file);
+            reader.readAsText(file);
           }
 
           function onChangeHandler (changeEvent) {
