@@ -1283,7 +1283,9 @@
     'XLS',
     'XLSX',
     'AltCarregandoInfoService',
-    function(XLS, XLSX, carregandoService) {
+    'ARRAY_CARACTERES_ACENTUACAO_ISO',
+    'ARRAY_CARACTERES_ACENTUACAO_UTF8',
+    function(XLS, XLSX, carregandoService, ARRAY_CARACTERES_ACENTUACAO_ISO, ARRAY_CARACTERES_ACENTUACAO_UTF8) {
       return {
         require: 'ngModel',
         scope: {opts: '='},
@@ -1375,12 +1377,26 @@
             return fileObject[Object.keys(fileObject)[0]];
           }
 
+          function caracteresIsoParaUtf8(str){
+            var string_corrigida = str;
+
+            for (var indexFix = 0; indexFix < ARRAY_CARACTERES_ACENTUACAO_ISO.length; indexFix++) {
+              string_corrigida = string_corrigida.replace(ARRAY_CARACTERES_ACENTUACAO_ISO[indexFix], ARRAY_CARACTERES_ACENTUACAO_UTF8[indexFix]);
+            }
+
+            string_corrigida = string_corrigida.replace(new RegExp(`${String.fromCharCode(194)}${String.fromCharCode(160)}`,"g")," ");
+
+            return string_corrigida;
+          }
+
           function ajustarCaracteresInvalidos(celula) {
             if (typeof celula !== 'string') {
               return celula;
             }
-            celula = celula.replace('\u00A0', ' '); // trocando NO-BREAK SPACE por espaço
+
+            celula = caracteresIsoParaUtf8(celula);
             celula = celula.trim();
+
             return celula;
           }
 
@@ -1460,7 +1476,7 @@
               });
             };
 
-            reader.readAsText(file);
+            reader.readAsBinaryString(file);
           }
 
           function onChangeHandler (changeEvent) {
