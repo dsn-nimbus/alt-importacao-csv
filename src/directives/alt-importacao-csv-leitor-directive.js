@@ -100,7 +100,7 @@
             return fileObject[Object.keys(fileObject)[0]];
           }
 
-          function caracteresIsoParaUtf8(str){
+          function caracteresIsoParaUtf8(str) {
             var string_corrigida = str;
 
             for (var indexFix = 0; indexFix < ARRAY_CARACTERES_ACENTUACAO_ISO.length; indexFix++) {
