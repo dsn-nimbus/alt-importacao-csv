@@ -6,9 +6,7 @@
     'XLS',
     'XLSX',
     'AltCarregandoInfoService',
-    'ARRAY_CARACTERES_ACENTUACAO_ISO',
-    'ARRAY_CARACTERES_ACENTUACAO_UTF8',
-    function(XLS, XLSX, carregandoService, ARRAY_CARACTERES_ACENTUACAO_ISO, ARRAY_CARACTERES_ACENTUACAO_UTF8) {
+    function(XLS, XLSX, carregandoService) {
       return {
         require: 'ngModel',
         scope: {opts: '='},
@@ -100,38 +98,14 @@
             return fileObject[Object.keys(fileObject)[0]];
           }
 
-          function caracteresIsoParaUtf8(str) {
-            var string_corrigida = str;
-
-            for (var indexFix = 0; indexFix < ARRAY_CARACTERES_ACENTUACAO_ISO.length; indexFix++) {
-              string_corrigida = string_corrigida.replace(ARRAY_CARACTERES_ACENTUACAO_ISO[indexFix], ARRAY_CARACTERES_ACENTUACAO_UTF8[indexFix]);
+          function parseBinariosParaUtf8(binarios) {
+            try {
+              // Se a string (binary, no caso) do arquivo NÃO estiver em utf8 NÃO dará erro
+              return decodeURIComponent(escape(binarios));
+            } catch(e) {
+              // Caso dê erro significa que já está em utf8 e apenas retornaremos o arquivo
+              return binarios;
             }
-
-            string_corrigida = string_corrigida.replace(new RegExp(`${String.fromCharCode(194)}${String.fromCharCode(160)}`,"g")," ");
-
-            return string_corrigida;
-          }
-
-          function ajustarCaracteresInvalidos(celula) {
-            if (typeof celula !== 'string') {
-              return celula;
-            }
-
-            celula = caracteresIsoParaUtf8(celula);
-            celula = celula.trim();
-
-            return celula;
-          }
-
-          function ajustarLinhas (linhas) {
-            var copiaLinhas = [];
-            for (let indexLinha = 0; indexLinha < linhas.length; indexLinha++) {
-              (copiaLinhas[indexLinha]) = {};
-              for (let chave in (linhas[indexLinha])) {
-                (copiaLinhas[indexLinha])[chave] = ajustarCaracteresInvalidos(ng.copy((linhas[indexLinha])[chave]));
-              }
-            }
-            return copiaLinhas;
           }
 
           function fileReaderHandler (file) {
@@ -169,9 +143,13 @@
               else {
                 // le o arquivo e monta colunas e linhas
                 bstr = e.target.result;
+
+                // Primeiro, verificar e faz o parser (quando necessário) para UTF-8
+                bstr = parseBinariosParaUtf8(e.target.result);
+
                 workbook = XLSX.read(bstr, {type: 'binary', cellDates: true});
                 colunas = obterColunas(workbook.Sheets[workbook.SheetNames[0]]);
-                linhas = ajustarLinhas(obterLinhas(workbook, colunas));
+                linhas = obterLinhas(workbook, colunas);
               }
 
               // valida quantidade de registros
