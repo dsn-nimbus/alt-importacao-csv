@@ -1222,7 +1222,10 @@
 
         self.formatarLinhaValor = function (valor) {
           if (valor instanceof Date) {
-            let m = moment(valor).add(1, 'days').format('DD/MM/YYYY');
+            /*
+              Adicionamos 3 horas para compensar posíveis problemas com fuso horário (GMT-3)
+            */
+            let m = moment(valor).add(3, 'hours').format('DD/MM/YYYY');
             return m;
           }
 
@@ -1424,7 +1427,7 @@
                 // Primeiro, verificar e faz o parser (quando necessário) para UTF-8
                 bstr = parseBinariosParaUtf8(e.target.result);
 
-                workbook = XLSX.read(bstr, {type: 'binary', cellDates: true});
+                workbook = XLSX.read(bstr, {type: 'binary', dateNF: 'dd/mm/yyyy', cellDates: true});
                 colunas = obterColunas(workbook.Sheets[workbook.SheetNames[0]]);
                 linhas = obterLinhas(workbook, colunas);
               }
@@ -1485,43 +1488,6 @@
       };
     }
   ]);
-}(angular));
-
-;(function(ng) {
-    'use strict';
-
-    ng.module('alt.importacao-csv')
-    /**
-    * @description Filtro que retorna o texto limitado
-    * @class alt.importacao-csv.LimitadorTexto
-    * @memberof alt.importacao-csv
-    */
-    .filter('LimitadorTexto', ['_', function (_) {
-      /**
-       * @description Retorna o texto limitado
-       * @memberof alt.importacao-csv.LimitadorTexto
-       * @function limitadorTexto
-       * @param {string} o texto a ser filtrado
-       * @param {number} o número do limite
-       * @returns {string} retorna a string limitada
-       * @inner
-       */
-      return function (input, val) {
-          if (!input) {
-              return;
-          }
-
-          var _tamanho = val || 53;
-
-          if (input.length > _tamanho) {
-              input = _.truncate(input, {
-                  length: _tamanho
-              });
-          }
-
-          return typeof input === "string" ? input.trim() : input;
-      };
-    }]);
 }(angular));
 
 ;(function(ng) {
@@ -2128,5 +2094,42 @@
       }
 
       return ResumoItemImportacao;
+    }]);
+}(angular));
+
+;(function(ng) {
+    'use strict';
+
+    ng.module('alt.importacao-csv')
+    /**
+    * @description Filtro que retorna o texto limitado
+    * @class alt.importacao-csv.LimitadorTexto
+    * @memberof alt.importacao-csv
+    */
+    .filter('LimitadorTexto', ['_', function (_) {
+      /**
+       * @description Retorna o texto limitado
+       * @memberof alt.importacao-csv.LimitadorTexto
+       * @function limitadorTexto
+       * @param {string} o texto a ser filtrado
+       * @param {number} o número do limite
+       * @returns {string} retorna a string limitada
+       * @inner
+       */
+      return function (input, val) {
+          if (!input) {
+              return;
+          }
+
+          var _tamanho = val || 53;
+
+          if (input.length > _tamanho) {
+              input = _.truncate(input, {
+                  length: _tamanho
+              });
+          }
+
+          return typeof input === "string" ? input.trim() : input;
+      };
     }]);
 }(angular));
