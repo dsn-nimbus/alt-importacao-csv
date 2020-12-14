@@ -98,6 +98,26 @@
             return fileObject[Object.keys(fileObject)[0]];
           }
 
+          function ajustaEspacosString(celula) {
+            if (typeof celula !== 'string') {
+              return celula;
+            }
+            celula = celula.replace(/\s/g,' '); // Substituindo non-breaking space por espaço
+            celula = celula.trim();
+            return celula;
+          }
+
+          function ajustarLinhas (linhas) {
+            var copiaLinhas = [];
+            for (let indexLinha = 0; indexLinha < linhas.length; indexLinha++) {
+              (copiaLinhas[indexLinha]) = {};
+              for (let chave in (linhas[indexLinha])) {
+                (copiaLinhas[indexLinha])[chave] = ajustaEspacosString(ng.copy((linhas[indexLinha])[chave]));
+              }
+            }
+            return copiaLinhas;
+          }
+
           function parseBinariosParaUtf8(binarios) {
             try {
               // Se a string (binary, no caso) do arquivo NÃO estiver em utf8 NÃO dará erro
@@ -150,6 +170,7 @@
                 workbook = XLSX.read(bstr, {type: 'binary', dateNF: 'dd/mm/yyyy', cellDates: true});
                 colunas = obterColunas(workbook.Sheets[workbook.SheetNames[0]]);
                 linhas = obterLinhas(workbook, colunas);
+                linhas = ajustarLinhas(linhas);
               }
 
               // valida quantidade de registros
