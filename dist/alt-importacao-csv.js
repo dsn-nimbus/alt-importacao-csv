@@ -1222,7 +1222,10 @@
 
         self.formatarLinhaValor = function (valor) {
           if (valor instanceof Date) {
-            let m = moment(valor).add(1, 'days').format('DD/MM/YYYY');
+            /*
+              Adicionamos 3 horas para compensar posíveis problemas com fuso horário (GMT-3)
+            */
+            let m = moment(valor).add(3, 'hours').format('DD/MM/YYYY');
             return m;
           }
 
@@ -1424,7 +1427,7 @@
                 // Primeiro, verificar e faz o parser (quando necessário) para UTF-8
                 bstr = parseBinariosParaUtf8(e.target.result);
 
-                workbook = XLSX.read(bstr, {type: 'binary', cellDates: true});
+                workbook = XLSX.read(bstr, {type: 'binary', dateNF: 'ddmmyyyy', cellDates: true});
                 colunas = obterColunas(workbook.Sheets[workbook.SheetNames[0]]);
                 linhas = obterLinhas(workbook, colunas);
               }
