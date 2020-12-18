@@ -101,6 +101,7 @@ importacaoEspecificaService.exibe(opcoesImportacao); // opcoesImportacao - objet
 | campos            | Array    | Sim                 | Lista de campos da entidade.                                                              |
 | validarLote       | Function | Quando importação   | Submete lote as regras externas ao componente. Deve retornar _promise_ da funcionalidade. |
 | gravarLote        | Function | Quando importação   | Grava o lote de objetos. Deve retornar _promise_ da funcionalidade.                       |
+| exibeInfo         | Function | Não                 | Função do clique do "Veja as regras" adicionado ao passo 2 quando setada a variável.      |
 | eventoCriacao     | String   | Quando importação   | Evento que será transmitido na conclusão com resposta da gravação.                        |
 | visualizacao      | Boolean  | Não                 | Define se componente irá detalhar um lote já processado ou criar nova importação.          |
 | labelTipoSingular | String   | Quando visualização | Label da entidade no singular.                                                            |
@@ -149,10 +150,10 @@ importacaoEspecificaService.exibe(self.opcoesImportacao); // AltImportacaoCsvEsp
 | tipo                 | _Function_ | Não                    | Enum da função que representa o tipo do campo.¹                           |
 | monetario            | _Boolean_  | Não                    | Indica que se trata de um monetário quando o tipo é _Number_.             |
 | tamanhoCompleto      | _Boolean_  | Não                    | Não limita a String em 255 caracteres.                                    |
-| objetoChave          | _String_   | Quando tipo é _Object_ | Propriedade única do objeto.                                              |
+| objetoChave          | _String_   | Quando tipo é _Object_ | Propriedade única do objeto.²                                              |
 | objetoReferencia     | _String_   | Quando tipo é _Object_ | Propriedade label do objeto (nome, descrição ou equivalente).             |
 | objetoListagem       | _Function_ | Quando tipo é _Object_ | Retorna a lista de objetos do tipo em questão para seleção no componente. |
-| objetoAutoVinculo    | _Function_ | Não                    | Personaliza o vinculo automático da estapa de regras de valor.²           |
+| objetoAutoVinculo    | _Function_ | Não                    | Personaliza o vinculo automático da estapa de regras de valor.³           |
 | objetoOpcoesListagem | _Object_   | Não                    | Opções select2.                                                           |
 | ↳ groupBy            | _String_   | Não                    | Nome da propriedade de agrupamento no select2.                            |
 | ↳ orderBy            | _Array_    | Não                    | Lista de propriedades com prioridade de ordenação no select2.             |
@@ -165,7 +166,37 @@ importacaoEspecificaService.exibe(self.opcoesImportacao); // AltImportacaoCsvEsp
 
 ¹ tipo - Tipos atualmente tratados são _Number_, _String_, _Date_, _Boolean_ e _Object_. Na ausência do parametro o campo é considerado _String_.
 
-² objetoAutoVinculo - Esta função por default aplica a regra de valor de campos de objeto, sem que o usuário precise selecionar o objeto manualmente. Ou seja, regras do tipo "onde há valor 'x' use {nome: 'x', id: 1}" são aplicadas automaticamente, o componente traz a função padrão que aplica a regra quando o __valor__ do campo e a prpriedade __objetoReferencia__ do objeto forem "iguais" desconsiderando letras maiúsculas, minúsculas e acentos. Esse método pode ser personalizado por qualquer função que receba um valor (String) e retorne um objeto da lista (mesma lista fornecida em __objetoListagem__). Por exemplo, no caso de produto pode-se decidir por vincular automaticamente quando valor for igual também ao código de barras, etc.
+² objetoChave - Usada também para identificar a propriedade a ser exibida quando o retorno é um Array de objetos. 
+
+Exemplo com o campo _anotacoes_, setando _objetoChave_ como _texto_:
+
+```json
+
+  {
+   "anotacoes":[
+      {
+         "texto":"Comentário 1",
+         "data":"2020-12-18T12:01:51.126Z",
+         "nomeUsuarioPassaporte":"Nimbus",
+         "idUsuarioPassaporte":1234
+      },
+      {
+         "texto":"Comentário 2",
+         "data":"2020-12-18T12:01:51.126Z",
+         "nomeUsuarioPassaporte":"Nimbus",
+         "idUsuarioPassaporte":1234
+      },
+      {
+         "texto":"Comentário 3",
+         "data":"2020-12-18T12:01:51.126Z",
+         "nomeUsuarioPassaporte":"Nimbus",
+         "idUsuarioPassaporte":1234
+      }
+   ]
+  }
+```
+
+³ objetoAutoVinculo - Esta função por default aplica a regra de valor de campos de objeto, sem que o usuário precise selecionar o objeto manualmente. Ou seja, regras do tipo "onde há valor 'x' use {nome: 'x', id: 1}" são aplicadas automaticamente, o componente traz a função padrão que aplica a regra quando o __valor__ do campo e a prpriedade __objetoReferencia__ do objeto forem "iguais" desconsiderando letras maiúsculas, minúsculas e acentos. Esse método pode ser personalizado por qualquer função que receba um valor (String) e retorne um objeto da lista (mesma lista fornecida em __objetoListagem__). Por exemplo, no caso de produto pode-se decidir por vincular automaticamente quando valor for igual também ao código de barras, etc.
 
 Mantendo entidade _Venda_ como exemplo:
 

@@ -11,6 +11,7 @@
           this.campos = undefined;
           this.validarLote = undefined;
           this.gravarLote = undefined;
+          this.exibeInfo = undefined;
           this.visualizacao = false;
           this.loteProcessado = undefined;
           this.titulosMensagensCustomizadas = [];

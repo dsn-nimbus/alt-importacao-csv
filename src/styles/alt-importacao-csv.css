@@ -138,6 +138,11 @@
   color: #666;
 }
 
+.alt-importacao-csv-wizard-title-info {
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .alt-importacao-csv-input-file {
   padding: 12px;
   outline: none !important;

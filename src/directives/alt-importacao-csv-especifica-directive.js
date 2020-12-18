@@ -136,7 +136,10 @@
               <div class="row">
                 <div class="col-xs-12">
                   <div class="alt-importacao-csv-wizard-title" ng-bind="importacaoCsvCtrl.getTitle()"></div>
-                  <div class="alt-espacamento-bottom" ng-bind-html="importacaoCsvCtrl.getMessage()"></div>
+                  <div class="alt-espacamento-bottom">
+                    <span ng-bind-html="importacaoCsvCtrl.getMessage()"></span>
+                    <span class="alt-importacao-csv-wizard-title-info" ng-if="!!importacaoCsvCtrl.exibeInfo" ng-click="importacaoCsvCtrl.exibeInfo()">Veja as regras</span>
+                  </div>
                 </div>
               </div>
  
@@ -720,6 +723,7 @@
           self.labelTipoSingular = opcoes.labelTipoSingular;
           self.validarLote = opcoes.validarLote;
           self.gravarLote = opcoes.gravarLote;
+          self.exibeInfo = opcoes.exibeInfo;
           self.validarMapa = opcoes.validarMapa;
           self.eventoCriacao = opcoes.eventoCriacao;
           self.campos = ng.copy(opcoes.campos);
@@ -771,7 +775,7 @@
               progress: self.exibeEtapaRegras ? 49.95 : 75,
               init: _inicializarMapeamento,
               title:  _step2 ? _step2.title : 'Configurar importação',
-              message: _step2 ? $sce.trustAsHtml(_step2.message) : $sce.trustAsHtml('Selecione o(s) campo(s) do ERP4ME correspondente(s) a cada coluna do arquivo para realizar a importação')
+              message: _step2 ? $sce.trustAsHtml(_step2.message) : $sce.trustAsHtml('Selecione o(s) campo(s) do ERP4ME correspondente(s) a cada coluna do arquivo para realizar a importação.')
             },
             {
               name: 'Passo 3',
@@ -1111,6 +1115,19 @@
             var campoExibicao = angular.copy(campo);
             campoExibicao.property = campo.template.property.substr(_index + 1);
             return self.obterPropriedadeTemplate(obj[campo.template.property.substring(0, _index)], campoExibicao);
+          }
+
+          if(angular.isArray(obj[campo.template.property]) && campo.objetoChave) {
+            let valores = '';
+            let iterations = obj[campo.template.property].length;
+            for (const valor of obj[campo.template.property]) {
+              valores += '["' + valor[campo.objetoChave] + '"]';
+              if (--iterations){
+                valores += ', ';
+              }
+              
+            }
+            return valores;
           }
 
           if (campo.tipo === Date) {

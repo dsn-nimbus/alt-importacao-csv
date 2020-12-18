@@ -1,6 +1,6 @@
 'use strict';
 
-describe('OpcoesImportacao', function() {
+fdescribe('OpcoesImportacao', function() {
   var OpcoesImportacao;
   beforeEach(module('alt.importacao-csv'));
 
@@ -59,6 +59,7 @@ describe('OpcoesImportacao', function() {
           campos: [{nome: 'Prop1', chave: 'prop1', tipo: Number}],
           validarLote: () => {return new Promise((lote) => {return lote});},
           gravarLote: () => {return new Promise((lote) => {return {}});},
+          exibeInfo: () => {return new Promise(() => {return {}});},
           titulosMensagensCustomizadas: [{step: 1, title: 'a', message: 'abc'}]
         };
         var obj = new OpcoesImportacao(params);
@@ -67,6 +68,7 @@ describe('OpcoesImportacao', function() {
         expect(obj.campos).toEqual(params.campos);
         expect(obj.validarLote).toEqual(params.validarLote);
         expect(obj.gravarLote).toEqual(params.gravarLote);
+        expect(obj.exibeInfo).toEqual(params.exibeInfo);
         expect(obj.titulosMensagensCustomizadas).toEqual(params.titulosMensagensCustomizadas);
       });
     });
